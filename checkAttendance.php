@@ -101,20 +101,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
 <html>
 <head>
     <title>Attendance Checker</title>
-    <style>
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .absent { background-color: #ffcccc; }
-        .late { background-color: #ffffcc; }
-        .early { background-color: #ccffff; }
-    </style>
+    <link rel="stylesheet" href="CSS/checkAttendance.css">
 </head>
 <body>
     <h1>Attendance Checker</h1>
-    <form method="post" enctype="multipart/form-data">
+    <form class="uploadcsv"  method="post" enctype="multipart/form-data">
         <input type="file" name="csv_file" accept=".csv" required>
-        <button type="submit">Process File</button>
+        <button class="btndl1"  type="submit">Process File</button>
     </form>
 
     <?php if (!empty($results)): ?>

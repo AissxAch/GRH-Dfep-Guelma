@@ -1,0 +1,163 @@
+/* chkatt.css */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 20px;
+    background-color: #f5f7fa;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2.5em;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.upload-section {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 2px dashed #ddd;
+}
+
+input[type="file"] {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin: 10px;
+    width: 300px;
+    transition: all 0.3s ease;
+}
+
+
+
+button[type="submit"]:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    box-shadow: 0 1px 12px rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+th, td {
+    padding: 15px 20px;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+th {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+tr:hover {
+    background-color: #f8f9fa;
+}
+
+tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.uploadcsv{
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.btndl1{
+    width: 105px;
+    height: 50px;
+    background-color: #4CAF50;
+    color: white;
+    margin: 8px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.absent td {
+    background-color: #ffebee;
+}
+
+.late td {
+    background-color: #fff3e0;
+}
+
+.early td {
+    background-color: #e3f2fd;
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
+.absent .status-badge {
+    background-color: #ff5252;
+    color: white;
+}
+
+.late .status-badge {
+    background-color: #ffa726;
+    color: white;
+}
+
+.early .status-badge {
+    background-color: #42a5f5;
+    color: white;
+}
+
+.date-header {
+    text-align: center;
+    color: #666;
+    margin: 20px 0;
+    font-size: 1.1em;
+}
+
+@media screen and (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    
+    table {
+        display: block;
+        overflow-x: auto;
+    }
+    
+    input[type="file"] {
+        width: 100%;
+        max-width: 300px;
+    }
+}
