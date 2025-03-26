@@ -1,6 +1,4 @@
 <?php
-session_start(); // Start session at the very beginning
-
 // Function to parse time entries and determine status
 function checkAttendance($timeEntries) {
     if (empty($timeEntries)) {
@@ -8,7 +6,7 @@ function checkAttendance($timeEntries) {
     }
 
     $times = preg_split('/\s+/', trim($timeEntries));
-    $times = array_filter($times);
+    $times = array_filter($times); // Remove empty entries
     
     if (empty($times)) {
         return 'Absent';
@@ -51,71 +49,50 @@ function checkAttendance($timeEntries) {
     return $status ? implode(', ', $status) : 'Present';
 }
 
-// Process uploaded file and handle download
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['download_csv'])) {
-        // Download CSV file
-        header('Content-Type: text/csv');
-        header('Content-Disposition: attachment; filename="attendance_report.csv"');
+// Process uploaded file
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
+    $file = $_FILES['csv_file']['tmp_name'];
+    
+    if (($handle = fopen($file, "r")) !== FALSE) {
+        // Skip header row
+        fgetcsv($handle);
         
-        $output = fopen('php://output', 'w');
-        fputcsv($output, ['Name', 'Entry Time', 'Exit Time', 'Status']);
+        $results = [];
+        $date = ''; // Initialize date variable
         
-        foreach ($_SESSION['results'] as $row) {
-            fputcsv($output, $row);
-        }
-        
-        fclose($output);
-        exit();
-    }
-    elseif (isset($_FILES['csv_file'])) {
-        $file = $_FILES['csv_file']['tmp_name'];
-        
-        if (($handle = fopen($file, "r")) !== FALSE) {
-            // Skip header row
-            fgetcsv($handle);
-            
-            $results = [];
-            $date = '';
-            
-            while (($data = fgetcsv($handle)) !== FALSE) {
-                $name = $data[1];
-                $date = $data[3];
-                $timeEntries = $data[4];
+        while (($data = fgetcsv($handle)) !== FALSE) {
+            $name = $data[1];
+            $date = $data[3]; // Store date from each row
+            $timeEntries = $data[4];
 
-                $times = preg_split('/\s+/', trim($timeEntries));
-                $times = array_filter($times);
-                
-                // Remove consecutive duplicates
-                $uniqueTimes = [];
-                $prevTime = null;
-                foreach ($times as $time) {
-                    if ($time !== $prevTime) {
-                        $uniqueTimes[] = $time;
-                        $prevTime = $time;
-                    }
-                }
-                
-                $entryTime = isset($uniqueTimes[0]) ? $uniqueTimes[0] : 'No entry';
-                $exitTime = (count($uniqueTimes) > 1) ? end($uniqueTimes) : 'No exit time'; // Fixed syntax
-                
-                $status = checkAttendance($timeEntries);
-                
-                if ($status !== 'Present') {
-                    $results[] = [
-                        'Name' => $name,
-                        'Entry Time' => $entryTime,
-                        'Exit Time' => $exitTime,
-                        'Status' => $status
-                    ];
+            $times = preg_split('/\s+/', trim($timeEntries));
+            $times = array_filter($times);
+            
+            // Remove consecutive duplicates
+            $uniqueTimes = [];
+            $prevTime = null;
+            foreach ($times as $time) {
+                if ($time !== $prevTime) {
+                    $uniqueTimes[] = $time;
+                    $prevTime = $time;
                 }
             }
-            fclose($handle);
             
-            // Store results in session
-            $_SESSION['results'] = $results;
-            $_SESSION['date'] = $date;
+            $entryTime = isset($uniqueTimes[0]) ? $uniqueTimes[0] : 'No entry';
+            $exitTime = isset($uniqueTimes[1]) ? end($uniqueTimes) : 'No exit time';
+            
+            $status = checkAttendance($timeEntries);
+            
+            if ($status !== 'Present') {
+                $results[] = [
+                    'Name' => $name,
+                    'Entry Time' => $entryTime,
+                    'Exit Time' => $exitTime,
+                    'Status' => $status
+                ];
+            }
         }
+        fclose($handle);
     }
 }
 ?>
@@ -125,25 +102,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <title>Attendance Checker</title>
     <style>
-        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+        table { border-collapse: collapse; width: 100%; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         th { background-color: #f2f2f2; }
         .absent { background-color: #ffcccc; }
         .late { background-color: #ffffcc; }
         .early { background-color: #ccffff; }
-        .button-container { margin: 20px 0; }
-        .download-btn {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .download-btn:hover {
-            background-color: #45a049;
-        }
     </style>
 </head>
 <body>
@@ -153,15 +117,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <button type="submit">Process File</button>
     </form>
 
-    <?php if (!empty($_SESSION['results'])): ?>
-    <div class="button-container">
-        <form method="post">
-            <button type="submit" name="download_csv" class="download-btn">Download as Excel (CSV)</button>
-        </form>
-    </div>
-    
+    <?php if (!empty($results)): ?>
     <h2>Attendance Issues</h2>
-    <h3>Date: <?php echo htmlspecialchars($_SESSION['date']) ?></h3>
+    <h3>Date: <?php echo htmlspecialchars($date) ?></h3>
     <table>
         <tr>
             <th>Name</th>
@@ -169,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <th>Exit Time</th>
             <th>Status</th>
         </tr>
-        <?php foreach ($_SESSION['results'] as $row): ?>
+        <?php foreach ($results as $row): ?>
         <tr class="<?php 
             if (strpos($row['Status'], 'Absent') !== false) echo 'absent';
             elseif (strpos($row['Status'], 'Late') !== false) echo 'late';
