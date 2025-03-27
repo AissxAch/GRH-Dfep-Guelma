@@ -95,5 +95,4 @@ if (!isset($_SESSION['user_id'])) {
         </footer>
     </div>
 </body>
-
 </html>
