@@ -33,20 +33,20 @@ function checkAttendance($timeEntries) {
     $status = [];
     
     // التحقق من التأخر
-    $eightAM = strtotime('08:00');
+    $entretime = strtotime($_POST['start_time']);
     $firstEntryTime = strtotime($firstEntry);
-    if ($firstEntryTime > $eightAM) {
-        $minutesLate = round(($firstEntryTime - $eightAM) / 60);
+    if ($firstEntryTime > $entretime) {
+        $minutesLate = round(($firstEntryTime - $entretime) / 60);
         $status[] = "تأخر ($minutesLate دقيقة)";
     }
 
     // التحقق من الخروج المبكر
-    $fourPM = strtotime('16:00');
+    $leavetime = strtotime($_POST['end_time']);
     $lastExitTime = strtotime($lastExit);
     if ($lastExit === $firstEntry) {
         $status[] = "لا يوجد وقت خروج";
-    } elseif ($lastExitTime < $fourPM) {
-        $minutesEarly = round(($fourPM - $lastExitTime) / 60);
+    } elseif ($lastExitTime < $leavetime) {
+        $minutesEarly = round(($leavetime - $lastExitTime) / 60);
         $status[] = "خروج مبكر ($minutesEarly دقيقة)";
     }
 
@@ -146,13 +146,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
                 <div class="time-selection">
                     <label for="start_time"><i class="fas fa-clock"></i> وقت بداية الدوام:</label>
                     <div class="input-time-group">
-                        <input type="time" id="start_time" name="start_time" 
+                        <input class="times" type="time" id="start_time" name="start_time" 
                             value="<?= $_POST['start_time'] ?? '08:00' ?>" required>
                     </div>
                     
                     <label for="end_time"><i class="fas fa-clock"></i> وقت نهاية الدوام:</label>
                     <div class="input-time-group">
-                        <input type="time" id="end_time" name="end_time" 
+                        <input class="times" type="time" id="end_time" name="end_time" 
                             value="<?= $_POST['end_time'] ?? '16:00' ?>" required>
                     </div>
                 </div>

@@ -66,7 +66,9 @@
     opacity: 0.8;
 }
 
-.time-selection{
+.times{
+    border: none;
+    font-size: 25px;
 }
 
 .input-time-group {
@@ -119,18 +121,18 @@
 
 /* Status Colors with Gradient */
 tr.absent {
-    background: linear-gradient(90deg, #ffebee 0%, #fff5f5 100%);
-    border-left: 4px solid #ff4444;
+    background: linear-gradient(90deg, #ff8b9c 0%, #ff0000 100%);
+    border-right: 4px solid #ff4444;
 }
 
 tr.late {
-    background: linear-gradient(90deg, #fff3e0 0%, #fff8e1 100%);
-    border-left: 4px solid #ffc107;
+    background: linear-gradient(90deg, #f7d7a5 0%, #debe52 100%);
+    border-right: 4px solid #ffc107;
 }
 
 tr.early {
-    background: linear-gradient(90deg, #fffde7 0%, #fffee6 100%);
-    border-left: 4px solid #ffd54f;
+    background: linear-gradient(90deg, #ede7aa 0%, #969466 100%);
+    border-right: 4px solid #ffd54f;
 }
 
 /* Status Icons */
@@ -157,7 +159,6 @@ tr.early .status-icon {
 .table tr:hover {
     transform: translateX(5px);
     box-shadow: 0 3px 15px rgba(0,0,0,0.1);
-    background: #f8f9fa !important;
 }
 
 /* Zebra Striping */
