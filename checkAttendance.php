@@ -1,18 +1,23 @@
 <?php
-// Function to parse time entries and determine status
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit();
+}
+
 function checkAttendance($timeEntries) {
     if (empty($timeEntries)) {
-        return 'Absent';
+        return 'غائب';
     }
 
     $times = preg_split('/\s+/', trim($timeEntries));
-    $times = array_filter($times); // Remove empty entries
+    $times = array_filter($times);
     
     if (empty($times)) {
-        return 'Absent';
+        return 'غائب';
     }
 
-    // Remove consecutive duplicates
+    // إزالة التكرارات المتتالية
     $uniqueTimes = [];
     $prevTime = null;
     foreach ($times as $time) {
@@ -22,53 +27,49 @@ function checkAttendance($timeEntries) {
         }
     }
 
-    // Get first and last unique time entries
     $firstEntry = reset($uniqueTimes);
     $lastExit = end($uniqueTimes);
 
     $status = [];
     
-    // Check if late (first entry after 8:00)
+    // التحقق من التأخر
     $eightAM = strtotime('08:00');
     $firstEntryTime = strtotime($firstEntry);
     if ($firstEntryTime > $eightAM) {
         $minutesLate = round(($firstEntryTime - $eightAM) / 60);
-        $status[] = "Late ($minutesLate minutes)";
+        $status[] = "تأخر ($minutesLate دقيقة)";
     }
 
-    // Check if left early (last exit before 16:00)
+    // التحقق من الخروج المبكر
     $fourPM = strtotime('16:00');
     $lastExitTime = strtotime($lastExit);
     if ($lastExit === $firstEntry) {
-        $status[] = "No exit time";
+        $status[] = "لا يوجد وقت خروج";
     } elseif ($lastExitTime < $fourPM) {
         $minutesEarly = round(($fourPM - $lastExitTime) / 60);
-        $status[] = "Left early ($minutesEarly minutes)";
+        $status[] = "خروج مبكر ($minutesEarly دقيقة)";
     }
 
-    return $status ? implode(', ', $status) : 'Present';
+    return $status ? implode('، ', $status) : 'حاضر';
 }
 
-// Process uploaded file
+// معالجة الملف
+$results = [];
+$date = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
     $file = $_FILES['csv_file']['tmp_name'];
     
-    if (($handle = fopen($file, "r")) !== FALSE) {
-        // Skip header row
-        fgetcsv($handle);
-        
-        $results = [];
-        $date = ''; // Initialize date variable
+    if (($handle = fopen($file, "r"))) {
+        fgetcsv($handle); // تخطي العناوين
         
         while (($data = fgetcsv($handle)) !== FALSE) {
             $name = $data[1];
-            $date = $data[3]; // Store date from each row
-            $timeEntries = $data[4];
+            $date = $data[3] ?? date('Y-m-d');
+            $timeEntries = $data[4] ?? '';
 
             $times = preg_split('/\s+/', trim($timeEntries));
             $times = array_filter($times);
             
-            // Remove consecutive duplicates
             $uniqueTimes = [];
             $prevTime = null;
             foreach ($times as $time) {
@@ -78,12 +79,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
                 }
             }
             
-            $entryTime = isset($uniqueTimes[0]) ? $uniqueTimes[0] : 'No entry';
-            $exitTime = isset($uniqueTimes[1]) ? end($uniqueTimes) : 'No exit time';
+            $entryTime = $uniqueTimes[0] ?? "لا يوجد وقت دخول";
+            $exitTime = (count($uniqueTimes) > 1) ? end($uniqueTimes) : "لا يوجد وقت خروج";
             
             $status = checkAttendance($timeEntries);
             
-            if ($status !== 'Present') {
+            if ($status !== 'حاضر') {
                 $results[] = [
                     'Name' => $name,
                     'Entry Time' => $entryTime,
@@ -98,41 +99,120 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="ar" dir="rtl">
 <head>
-    <title>Attendance Checker</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام متابعة الحضور - GRH Depf</title>
+    <link rel="stylesheet" href="CSS/login.css">
     <link rel="stylesheet" href="CSS/checkAttendance.css">
 </head>
 <body>
-    <h1>Attendance Checker</h1>
-    <form class="uploadcsv"  method="post" enctype="multipart/form-data">
-        <input type="file" name="csv_file" accept=".csv" required>
-        <button class="btndl1"  type="submit">Process File</button>
-    </form>
+    <div class="dashboard-container">
+    <header class="dashboard-header">
+    <div class="header-content">
+        <div class="header-brand">
+            <div class="brand-text">
+                <h1>نظام إدارة الموارد البشرية</h1>
+                <p>م.ت.ت.م قالمة</p>
+            </div>
+        </div>
+        
+        <div class="header-actions">
+            <div class="user-profile">
+                <i class="fas fa-user-circle"></i>
+                <div class="profile-info">
+                    <span class="username"><?php echo htmlspecialchars($_SESSION['fullname']); ?></span>
+                    <span class="role">مستخدم نظام</span>
+                </div>
+            </div>
+            <a href="logout.php" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>تسجيل الخروج</span>
+            </a>
+        </div>
+    </div>
+    
+    <nav class="header-nav">
+        <a href="index.php" class="nav-link"><i class="fas fa-home"></i> الرئيسية</a>
+    </nav>
+</header>
 
-    <?php if (!empty($results)): ?>
-    <h2>Attendance Issues</h2>
-    <h3>Date: <?php echo htmlspecialchars($date) ?></h3>
-    <table>
-        <tr>
-            <th>Name</th>
-            <th>Entry Time</th>
-            <th>Exit Time</th>
-            <th>Status</th>
-        </tr>
-        <?php foreach ($results as $row): ?>
-        <tr class="<?php 
-            if (strpos($row['Status'], 'Absent') !== false) echo 'absent';
-            elseif (strpos($row['Status'], 'Late') !== false) echo 'late';
-            elseif (strpos($row['Status'], 'early') !== false) echo 'early';
-        ?>">
-            <td><?= htmlspecialchars($row['Name']) ?></td>
-            <td><?= htmlspecialchars($row['Entry Time']) ?></td>
-            <td><?= htmlspecialchars($row['Exit Time']) ?></td>
-            <td><?= htmlspecialchars($row['Status']) ?></td>
-        </tr>
-        <?php endforeach; ?>
-    </table>
-    <?php endif; ?>
+        <main class="dashboard-main">
+            <h1 class="dashboard-title">نظام متابعة الحضور</h1>
+            
+            <form class="upload-form" method="post" enctype="multipart/form-data">
+                <!-- Add this inside the <form> section -->
+                <div class="time-selection">
+                    <label for="start_time"><i class="fas fa-clock"></i> وقت بداية الدوام:</label>
+                    <div class="input-time-group">
+                        <input type="time" id="start_time" name="start_time" 
+                            value="<?= $_POST['start_time'] ?? '08:00' ?>" required>
+                    </div>
+                    
+                    <label for="end_time"><i class="fas fa-clock"></i> وقت نهاية الدوام:</label>
+                    <div class="input-time-group">
+                        <input type="time" id="end_time" name="end_time" 
+                            value="<?= $_POST['end_time'] ?? '16:00' ?>" required>
+                    </div>
+                </div>
+                <div class="input-group file-input">
+                    <label for="csv_file">
+                        <i class="fas fa-file-upload"></i>
+                        اختر ملف CSV
+                    </label>
+                    <input type="file" name="csv_file" id="csv_file" accept=".csv" required>
+                    <button type="submit" class="login-button">
+                        <i class="fas fa-chart-bar"></i>
+                        عرض النتائج
+                    </button>
+                </div>
+            </form>
+
+            <?php if (!empty($results)): ?>
+            <div class="attendance-report">
+                <h2>تقرير الحضور اليومي</h2>
+                <div class="report-date">
+                    <i class="fas fa-calendar-alt"></i>
+                    تاريخ التقرير: <?php echo htmlspecialchars($date) ?>
+                </div>
+
+                <div class="attendance-table">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>الموظف</th>
+                                <th>وقت الدخول</th>
+                                <th>وقت الخروج</th>
+                                <th>الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($results as $row): ?>
+                                <tr class="<?php
+                                    if (strpos($row['Status'], 'غائب') !== false) echo 'absent';
+                                    elseif (strpos($row['Status'], 'تأخر') !== false) echo 'late';
+                                    elseif (strpos($row['Status'], 'مبكر') !== false) echo 'early';
+                                ?>">
+                                <td><?= htmlspecialchars($row['Name']) ?></td>
+                                <td><?= htmlspecialchars($row['Entry Time']) ?></td>
+                                <td><?= htmlspecialchars($row['Exit Time']) ?></td>
+                                <td>
+                                    <i class="status-icon <?php
+                                        if (strpos($row['Status'], 'غائب') !== false) echo 'fas fa-times-circle';
+                                        elseif (strpos($row['Status'], 'تأخر') !== false) echo 'fas fa-clock';
+                                        else echo 'fas fa-check-circle';
+                                    ?>"></i>
+                                    <?= htmlspecialchars($row['Status']) ?>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <?php endif; ?>
+        </main>
+    </div>
 </body>
 </html>
