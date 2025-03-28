@@ -17,7 +17,7 @@ function checkAttendance($timeEntries) {
         return 'غائب';
     }
 
-    // إزالة التكرارات المتتالية
+    // Remove consecutive duplicates
     $uniqueTimes = [];
     $prevTime = null;
     foreach ($times as $time) {
@@ -32,7 +32,7 @@ function checkAttendance($timeEntries) {
 
     $status = [];
     
-    // التحقق من التأخر
+    // Check for lateness
     $entretime = strtotime($_POST['start_time']);
     $firstEntryTime = strtotime($firstEntry);
     if ($firstEntryTime > $entretime) {
@@ -40,7 +40,7 @@ function checkAttendance($timeEntries) {
         $status[] = "تأخر ($minutesLate دقيقة)";
     }
 
-    // التحقق من الخروج المبكر
+    // Check for early departure
     $leavetime = strtotime($_POST['end_time']);
     $lastExitTime = strtotime($lastExit);
     if ($lastExit === $firstEntry) {
@@ -53,14 +53,14 @@ function checkAttendance($timeEntries) {
     return $status ? implode('، ', $status) : 'حاضر';
 }
 
-// معالجة الملف
+// Process file
 $results = [];
 $date = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
     $file = $_FILES['csv_file']['tmp_name'];
     
     if (($handle = fopen($file, "r"))) {
-        fgetcsv($handle); // تخطي العناوين
+        fgetcsv($handle); // Skip headers
         
         while (($data = fgetcsv($handle)) !== FALSE) {
             $name = $data[1];
@@ -104,45 +104,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام متابعة الحضور - GRH Depf</title>
-    <link rel="stylesheet" href="CSS/login.css">
     <link rel="stylesheet" href="CSS/checkAttendance.css">
+    <link rel="stylesheet" href="CSS/icons.css">
 </head>
 <body>
     <div class="dashboard-container">
-    <header class="dashboard-header">
-    <div class="header-content">
-        <div class="header-brand">
-            <div class="brand-text">
-                <h1>نظام إدارة الموارد البشرية</h1>
-                <p>م.ت.ت.م قالمة</p>
-            </div>
-        </div>
-        
-        <div class="header-actions">
-            <div class="user-profile">
-                <i class="fas fa-user-circle"></i>
-                <div class="profile-info">
-                    <span class="username"><?php echo htmlspecialchars($_SESSION['fullname']); ?></span>
-                    <span class="role">مستخدم نظام</span>
-                </div>
-            </div>
-            <a href="logout.php" class="logout-btn">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>تسجيل الخروج</span>
-            </a>
-        </div>
-    </div>
-    
-    <nav class="header-nav">
-        <a href="index.php" class="nav-link"><i class="fas fa-home"></i> الرئيسية</a>
-    </nav>
-</header>
+        <?php include 'header.php'; ?>
 
         <main class="dashboard-main">
             <h1 class="dashboard-title">نظام متابعة الحضور</h1>
             
             <form class="upload-form" method="post" enctype="multipart/form-data">
-                <!-- Add this inside the <form> section -->
                 <div class="time-selection">
                     <label for="start_time"><i class="fas fa-clock"></i> وقت بداية الدوام:</label>
                     <div class="input-time-group">
@@ -194,18 +166,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
                                     elseif (strpos($row['Status'], 'تأخر') !== false) echo 'late';
                                     elseif (strpos($row['Status'], 'مبكر') !== false) echo 'early';
                                 ?>">
-                                <td><?= htmlspecialchars($row['Name']) ?></td>
-                                <td><?= htmlspecialchars($row['Entry Time']) ?></td>
-                                <td><?= htmlspecialchars($row['Exit Time']) ?></td>
-                                <td>
-                                    <i class="status-icon <?php
-                                        if (strpos($row['Status'], 'غائب') !== false) echo 'fas fa-times-circle';
-                                        elseif (strpos($row['Status'], 'تأخر') !== false) echo 'fas fa-clock';
-                                        else echo 'fas fa-check-circle';
-                                    ?>"></i>
-                                    <?= htmlspecialchars($row['Status']) ?>
-                                </td>
-                            </tr>
+                                    <td><?= htmlspecialchars($row['Name']) ?></td>
+                                    <td><?= htmlspecialchars($row['Entry Time']) ?></td>
+                                    <td><?= htmlspecialchars($row['Exit Time']) ?></td>
+                                    <td>
+                                        <i class="status-icon <?php
+                                            if (strpos($row['Status'], 'غائب') !== false) echo 'fas fa-times-circle';
+                                            elseif (strpos($row['Status'], 'تأخر') !== false) echo 'fas fa-clock';
+                                            else echo 'fas fa-check-circle';
+                                        ?>"></i>
+                                        <?= htmlspecialchars($row['Status']) ?>
+                                    </td>
+                                </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>

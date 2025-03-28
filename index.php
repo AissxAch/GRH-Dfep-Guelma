@@ -11,17 +11,12 @@ if (!isset($_SESSION['user_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم - GRH Depf</title>
-    <link rel="stylesheet" href="CSS/login.css">
     <link rel="stylesheet" href="CSS/index.css">
+    <link rel="stylesheet" href="CSS/icons.css">
 </head>
 <body>
     <div class="dashboard-container">
-        <header class="dashboard-header">
-            <div class="user-info">
-                <span class="welcome">مرحبا، <?php echo htmlspecialchars($_SESSION['fullname']); ?></span>
-                <a href="logout.php" class="logout-btn"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</a>
-            </div>
-        </header>
+    <?php include 'header.php'; ?>
 
         <main class="dashboard-main">
             <h1 class="dashboard-title">نظام إدارة الموارد البشرية</h1>
@@ -36,17 +31,10 @@ if (!isset($_SESSION['user_id'])) {
                     <p>إضافة سجل موظف جديد إلى النظام</p>
                 </a>
 
-                <a href="modify_employee.php" class="card btn-warning">
-                    <i class="fas fa-user-edit"></i>
-                    <h3>تعديل بيانات</h3>
-                    <p>تحديث معلومات الموظفين</p>
-                </a>
-
-                <a href="remove_employee.php" class="card btn-danger">
-                    <i class="fas fa-user-times"></i>
-                    <h3>حذف موظف</h3>
-                    <p>إزالة موظف من النظام</p>
-                </a>
+                <a href="list_employees.php" class="card btn-info">
+                    <i class="fas fa-users"></i>
+                    <h3>قائمة الموظفين</h3>
+                    <p>عرض قائمة بجميع الموظفين</p>
 
                 <a href="checkAttendance.php" class="card btn-primary">
                     <i class="fas fa-user-check"></i>
@@ -55,13 +43,13 @@ if (!isset($_SESSION['user_id'])) {
                 </a>
 
                 <div class="card search-card">
-                    <form action="search.php" method="GET">
+                    <form action="employee.php" method="GET">
                         <div class="search-container">
-                            <input type="text" name="query" placeholder="ابحث عن موظف..." required>
+                            <input type="text" name="id" placeholder="ابحث عن موظف..." required>
                             <button type="submit" class="search-btn"><i class="fas fa-search"></i></button>
                         </div>
                     </form>
-                    <p>ابحث بالاسم أو الرقم الوظيفي</p>
+                    <p>ابحث بالاسم أو الرقم الوطني</p>
                 </div>
 
                 <!-- المستندات Section -->

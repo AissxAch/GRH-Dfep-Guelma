@@ -1,78 +1,5 @@
 
-@font-face {
-    font-family: 'Font Awesome';
-    src: url('fonts/fontawesome/webfonts/fa-solid-900.woff2') format('woff2'),
-         url('fonts/fontawesome/webfonts/fa-solid-900.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-}
 
-.fas {
-    font-family: 'Font Awesome';
-    -moz-osx-font-smoothing: grayscale;
-    -webkit-font-smoothing: antialiased;
-    display: inline-block;
-    font-style: normal;
-    font-variant: normal;
-    text-rendering: auto;
-    line-height: 1;
-}
-
-.fa-sign-out-alt::before { content: "\f2f5"; }
-.fa-user-plus::before { content: "\f234"; }
-.fa-user-edit::before { content: "\f4ff"; }
-.fa-user-check::before { content: "\f4fc";}
-.fa-user-times::before { content: "\f235"; }
-.fa-search::before { content: "\f002"; }
-.fa-upload::before { content: "\f093"; }
-.fa-file-download::before { content: "\f56d"; }
-
-/* Rest of your existing dashboard CSS remains the same */
-.dashboard-container {
-    background: #f5f6fa;
-    min-height: 100vh;
-    border-radius: 24px;
-}
-
-.dashboard-header {
-    border-radius: 20px 20px 0 0;
-    background: #2c3e50;
-    padding: 1rem 2rem;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-}
-
-.user-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: white;
-}
-
-.welcome {
-    font-size: 1.2rem;
-}
-
-.logout-btn {
-    color: white;
-    text-decoration: none;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-}
-
-.logout-btn:hover {
-    background: rgba(255,255,255,0.1);
-}
-
-.dashboard-main {
-    padding: 2rem;
-}
-
-.dashboard-title {
-    color: #2c3e50;
-    text-align: center;
-    margin-bottom: 2rem;
-}
 
 .grid-container {
     display: grid;
@@ -103,7 +30,6 @@
 
 .card i {
     font-size: 2.5rem;
-    margin-bottom: 1rem;
 }
 
 .btn-primary { border-bottom: 4px solid #3498db; }
