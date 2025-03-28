@@ -252,6 +252,7 @@
 .fa-eye::before { content: "\f06e"; }
 .fa-edit::before { content: "\f044"; }
 .fa-file-alt::before { content: "\f15c"; }
+.fa-magnifying-glass::before{ content: "\f002"; }
 .fa-sign-out-alt::before { content: "\f2f5"; }
 .fa-user-plus::before { content: "\f234"; }
 .fa-user-edit::before { content: "\f4ff"; }

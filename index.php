@@ -25,41 +25,37 @@ if (!isset($_SESSION['user_id'])) {
                 <!-- الموظفين Section -->
                 <div class="section-title">إدارة الموظفين</div>
                 
-                <a href="add_employee.php" class="card btn-primary">
-                    <i class="fas fa-user-plus"></i>
-                    <h3>إضافة موظف</h3>
-                    <p>إضافة سجل موظف جديد إلى النظام</p>
-                </a>
+                    <a href="add_employee.php" class="card btn-primary">
+                        <i class="fas fa-user-plus"></i>
+                        <h3>إضافة موظف</h3>
+                        <p>إضافة سجل موظف جديد إلى النظام</p>
+                    </a>
 
-                <a href="list_employees.php" class="card btn-info">
-                    <i class="fas fa-users"></i>
-                    <h3>قائمة الموظفين</h3>
-                    <p>عرض قائمة بجميع الموظفين</p>
+                    <a href="list_employees.php" class="card btn-info">
+                        <i class="fas fa-users"></i>
+                        <h3>قائمة الموظفين</h3>
+                        <p>عرض قائمة بجميع الموظفين</p>
 
-                <a href="checkAttendance.php" class="card btn-primary">
-                    <i class="fas fa-user-check"></i>
-                    <h3>فحص سجل الحضور</h3>
-                    <p>فحص المتاخرين و الغأبين</p>
-                </a>
+                    <a href="checkAttendance.php" class="card btn-primary">
+                        <i class="fas fa-user-check"></i>
+                        <h3>فحص سجل الحضور</h3>
+                        <p>فحص المتاخرين و الغأبين</p>
+                    </a>
 
-                <div class="card search-card">
-                    <form action="employee.php" method="GET">
-                        <div class="search-container">
-                            <input type="text" name="id" placeholder="ابحث عن موظف..." required>
-                            <button type="submit" class="search-btn"><i class="fas fa-search"></i></button>
-                        </div>
-                    </form>
-                    <p>ابحث بالاسم أو الرقم الوطني</p>
-                </div>
+                    <div class="card search-card">
+                        <i class="fas fa-search"></i>
+                        <br>
+                        <form action="employee.php" method="GET">
+                            <div class="search-container">
+                                <input type="text" name="id" placeholder="ابحث عن موظف..." required>
+                                <button type="submit" class="search-btn"><i class="fas fa-magnifying-glass"></i></button>
+                            </div>
+                        </form>
+                        <p>ابحث بالرقم الوظيفي أو الرقم الوطني</p>
+                    </div>
 
                 <!-- المستندات Section -->
                 <div class="section-title">إدارة المستندات</div>
-                
-                <a href="upload.php" class="card btn-info">
-                    <i class="fas fa-upload"></i>
-                    <h3>رفع المستندات</h3>
-                    <p>تحميل الوثائق والملفات</p>
-                </a>
 
                 <a href="extract.php" class="card btn-success">
                     <i class="fas fa-file-download"></i>
@@ -68,13 +64,13 @@ if (!isset($_SESSION['user_id'])) {
                 </a>
 
                 <!-- التقارير Section -->
-                <div class="section-title">التقارير</div>
+                <!-- <div class="section-title">التقارير</div>
                 
                 <a href="reports.php" class="card btn-secondary">
                     <i class="fas fa-chart-bar"></i>
                     <h3>تقارير الموظفين</h3>
                     <p>عرض الإحصائيات والتحليلات</p>
-                </a>
+                </a> -->
             </div>
         </main>
 

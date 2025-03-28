@@ -308,5 +308,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         document.getElementById('docNum').focus();
     </script>
 </body>
-
 </html>
