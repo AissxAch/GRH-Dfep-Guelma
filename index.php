@@ -48,20 +48,27 @@ if (!isset($_SESSION['user_id'])) {
                         <form action="employee.php" method="GET">
                             <div class="search-container">
                                 <input type="text" name="id" placeholder="ابحث عن موظف..." required>
-                                <button type="submit" class="search-btn"><i class="fas fa-magnifying-glass"></i></button>
+                                <button type="submit" class="search-btn" aria-label="بحث"><i class="fas fa-magnifying-glass"></i></button>
                             </div>
                         </form>
                         <p>ابحث بالرقم الوظيفي أو الرقم الوطني</p>
                     </div>
 
-                <!-- المستندات Section -->
-                <div class="section-title">إدارة المستندات</div>
+                
+                <div class="section-title">إدارة المصالح</div>
+                
+                    <a href="add_department.php" class="card btn-primary">
+                        <i class="fas fa-plus"></i>
+                        <h3>إضافة قسم</h3>
+                        <p>إضافة قسم جديد إلى النظام</p>
+                    </a>
 
-                <a href="extract.php" class="card btn-success">
-                    <i class="fas fa-file-download"></i>
-                    <h3>استخراج مستندات</h3>
-                    <p>تنزيل وثائق الموظفين</p>
-                </a>
+                    <a href="list_departments.php" class="card btn-info">
+                        <i class="fas fa-list"></i>
+                        <h3>قائمة الأقسام</h3>
+                        <p>عرض قائمة بجميع الأقسام</p>
+                    </a>
+                </div>
 
                 <!-- التقارير Section -->
                 <!-- <div class="section-title">التقارير</div>

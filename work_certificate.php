@@ -34,6 +34,11 @@ try {
     if (!$employee) {
         $error = "الموظف غير موجود في النظام";
     } else {
+        // Fetch existing previous positions
+        $prevPosStmt = $pdo->prepare("SELECT * FROM employee_previous_positions WHERE employee_id = ? ORDER BY start_date");
+        $prevPosStmt->execute([$employee['employee_id']]);
+        $existingPrevPositions = $prevPosStmt->fetchAll(PDO::FETCH_ASSOC);
+
         // Auto-fill employee data
         $fullname = $employee['full_name_ar'];
         $bornPlace = $employee['birth_place'];
@@ -42,6 +47,15 @@ try {
             'position' => $employee['position'],
             'start' => date('d/m/Y', strtotime($employee['hire_date']))
         ];
+
+        // Prepare existing previous positions for the form
+        $prevPostes = array_map(function($pos) {
+            return [
+                'position' => $pos['position'],
+                'start' => date('d/m/Y', strtotime($pos['start_date'])),
+                'end' => date('d/m/Y', strtotime($pos['end_date']))
+            ];
+        }, $existingPrevPositions);
     }
 } catch (PDOException $e) {
     $error = "خطأ في قاعدة البيانات: " . $e->getMessage();
@@ -52,21 +66,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error) {
     $docNum = $_POST['docNum'] ?? '';
     $docDate = $_POST['docDate'] ?? date('d/m/Y');
     
-    // Process previous positions
-    if (isset($_POST['prevPostes']) && is_array($_POST['prevPostes'])) {
-        foreach ($_POST['prevPostes'] as $poste) {
-            if (!empty($poste['position']) && !empty($poste['start']) && !empty($poste['end'])) {
-                $prevPostes[] = [
-                    'position' => $poste['position'],
-                    'start' => $poste['start'],
-                    'end' => $poste['end']
-                ];
+    // Start a transaction
+    $pdo->beginTransaction();
+
+    try {
+        // Remove existing previous positions for this employee
+        $delStmt = $pdo->prepare("DELETE FROM employee_previous_positions WHERE employee_id = ?");
+        $delStmt->execute([$employee['employee_id']]);
+
+        // Process and insert new previous positions
+        if (isset($_POST['prevPostes']) && is_array($_POST['prevPostes'])) {
+            $insertStmt = $pdo->prepare("INSERT INTO employee_previous_positions 
+                (employee_id, position, start_date, end_date) 
+                VALUES (?, ?, STR_TO_DATE(?, '%d/%m/%Y'), STR_TO_DATE(?, '%d/%m/%Y'))");
+
+            $prevPostes = []; // Reset and rebuild prevPostes
+            foreach ($_POST['prevPostes'] as $poste) {
+                if (!empty($poste['position']) && !empty($poste['start']) && !empty($poste['end'])) {
+                    // Validate date format
+                    $start = DateTime::createFromFormat('d/m/Y', $poste['start']);
+                    $end = DateTime::createFromFormat('d/m/Y', $poste['end']);
+
+                    if ($start && $end && $start < $end) {
+                        $insertStmt->execute([
+                            $employee['employee_id'], 
+                            $poste['position'], 
+                            $poste['start'], 
+                            $poste['end']
+                        ]);
+                        
+                        $prevPostes[] = [
+                            'position' => $poste['position'],
+                            'start' => $poste['start'],
+                            'end' => $poste['end']
+                        ];
+                    } else {
+                        throw new Exception("تواريخ غير صالحة: " . $poste['position']);
+                    }
+                }
             }
         }
+
+        // Commit the transaction
+        $pdo->commit();
+    } catch (Exception $e) {
+        // Rollback the transaction if something went wrong
+        $pdo->rollBack();
+        $error = "خطأ في حفظ المناصب السابقة: " . $e->getMessage();
     }
 }
 ?>
 
+<!-- Rest of the existing HTML remains the same -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -75,69 +126,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error) {
     <title>شهادة عمل - GRH Depf</title>
     <link rel="stylesheet" href="CSS/work_certificate.css">
     <link rel="stylesheet" href="CSS/icons.css">
-    <style>
-        /* Print-specific styles */
-        @media print {
-            @page {
-                size: A4;
-                margin: 0;
-            }
-            body {
-                font-family: 'Amiri', 'Traditional Arabic', serif;
-                direction: rtl;
-                text-align: center;
-                margin: 0;
-                padding: 0;
-                background: none;
-            }
-            .certificate {
-                padding: 2cm;
-                width: 21cm;
-                min-height: 29.7cm;
-                margin: 0 auto;
-                line-height: 2;
-                box-sizing: border-box;
-                background: white;
-            }
-            .header {
-                font-weight: bold;
-                font-size: 22px;
-            }
-            .content {
-                font-size: 20px;
-                text-align: right;
-                margin-right: 50px;
-            }
-            h1 {
-                font-size: 26px;
-                font-weight: bold;
-                margin: 30px 0;
-            }
-            .signature {
-                text-align: left;
-                margin-top: 50px;
-            }
-            .docnum {
-                text-align: right;
-                font-size: 18px;
-                font-weight: bold;
-                margin-bottom: 30px;
-            }
-            .position-item {
-                margin-right: 20px;
-            }
-            .no-print {
-                display: none !important;
-            }
-        }
-        
-        /* Screen styles */
-        @media screen {
-            .certificate {
-                display: none;
-            }
-        }
-    </style>
 </head>
 <body>
     <div class="dashboard-container no-print">
@@ -145,16 +133,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error) {
 
         <main class="dashboard-main">
             <?php if ($error): ?>
-                <div class="error-message">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <?= $error ?>
-                    <div class="error-actions">
-                        <a href="list_employees.php" class="back-button">
-                            <i class="fas fa-arrow-right"></i> العودة إلى قائمة الموظفين
-                        </a>
+                    <div class="error-container">
+                        <div class="error-card">
+                            <div class="error-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <h2 class="error-title">حدث خطأ</h2>
+                            <p class="error-message"><?= $error ?></p>
+                            <div class="error-actions">
+                                <a href="list_employees.php" class="error-button">
+                                    <i class="fas fa-arrow-right"></i>
+                                    العودة إلى قائمة الموظفين
+                                </a>
+                                <a href="javascript:history.back()" class="error-button secondary">
+                                    <i class="fas fa-undo"></i>
+                                    العودة للخلف
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            <?php else: ?>
+                <?php else: ?>
                 <h1 class="dashboard-title">إنشاء شهادة عمل</h1>
 
                 <!-- Data Entry Form -->
@@ -268,6 +266,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error) {
     </div>
     <?php endif; ?>
 
-    <script src="workcertificate.js"></script>
+    <script src="JS/workcertificate.js"></script>
 </body>
 </html>

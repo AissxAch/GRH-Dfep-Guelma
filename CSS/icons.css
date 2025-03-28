@@ -1,7 +1,9 @@
 @font-face {
     font-family: 'Font Awesome';
     src: url('fonts/fontawesome/webfonts/fa-solid-900.woff2') format('woff2'),
-         url('fonts/fontawesome/webfonts/fa-solid-900.woff') format('woff');
+         url('fonts/fontawesome/webfonts/fa-solid-900.woff') format('woff'),
+         url('fonts/fontawesome/webfonts/fa-solid-900.ttf') format('truetype');
+
     font-weight: normal;
     font-style: normal;
 }
@@ -85,7 +87,7 @@
     text-rendering: auto;
     line-height: 1;
 }
-*{
+body{
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -268,6 +270,20 @@
 .fa-phone::before { content: "\f095"; }
 .fa-save::before { content: "\f0c7"; }
 .fa-times::before { content: "\f00d"; }
+.fa-exclamation-triangle::before { content: "\f071"; }
+.fa-undo::before { content: "\f2ea"; }
+.fa-save::before { content: "\f0c7"; }
+.fa-print::before { content: "\f02f"; }
+.fa-file-export::before { content: "\f56e"; }
+.fa-check::before { 
+    content: "\f058";
+    font-size: 40px;
+}
+.fa-plus::before { content: "\f067"; }
+.fa-list::before { content: "\f03a"; }
+.fa-building::before { content: "\f1ad"; }
+.fa-info-circle::before { content: "\f05a"; }
+.fa-calendar-check::before { content: "\f274"; }
 
 /* Responsive Styles */
 @media (max-width: 768px) {

@@ -48,13 +48,10 @@ if (!isset($_SESSION['user_id'])) {
             <i class="fas fa-calendar-check"></i>
             الحضور
         </a>
-        <a href="reports.php" class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'reports.php' ? 'active' : ''); ?>">
-            <i class="fas fa-chart-bar"></i>
-            التقارير
+        <a href="list_departments.php" class="nav-link <?= (basename($_SERVER['PHP_SELF']) == 'list_departments.php' ? 'active' : '') ?>">
+            <i class="fas fa-building"></i>
+            الأقسام
         </a>
-        <a href="settings.php" class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'settings.php' ? 'active' : ''); ?>">
-            <i class="fas fa-cog"></i>
-            الإعدادات
         </a>
     </nav>
 </header>

@@ -388,3 +388,18 @@ body {
     background: #2c3e50;
     color: white;
 }
+
+.success-message{
+    background: #ff0000;
+    color: white;
+    padding: 1rem;
+    margin: 20px 500px;
+    border-radius: 15px;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+.documents-btn:hover{
+    background: #3498db;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+}

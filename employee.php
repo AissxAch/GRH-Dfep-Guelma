@@ -12,12 +12,8 @@ if (!isset($_SESSION['user_id'])) {
 $employee_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 try {
     if(isset($employee_id)){
-    $stmt = $pdo->prepare("SELECT * FROM employees WHERE employee_id = :employee_id");
-    $stmt->execute(['employee_id'=>$employee_id]);
-    $employee = $stmt->fetch(PDO::FETCH_ASSOC);
-    }if(!$employee){
-        $stmt = $pdo->prepare("SELECT * FROM employees WHERE national_id = :national_id");
-        $stmt->execute(['national_id'=>$employee_id]);
+        $stmt = $pdo->prepare("SELECT * FROM employees WHERE employee_id = :employee_id OR national_id = :national_id");
+        $stmt->execute(['employee_id' => $employee_id, 'national_id' => $employee_id]);
         $employee = $stmt->fetch(PDO::FETCH_ASSOC);
     }
     if (!$employee) {
@@ -46,6 +42,14 @@ try {
             
             <div class="employee-profile">
                 <div class="profile-section">
+                    <div class="profile-actions">
+                        <a href="document.php?id=<?= $employee['employee_id'] ?>" class="action-button documents-button">
+                            <i class="fas fa-file-alt"></i> عرض المستندات
+                        </a>
+                        <a href="extract.php?id=<?= $employee['employee_id'] ?>" class="action-button documents-button">
+                            <i class="fas fa-file-export"></i> استخراج ملفات
+                        </a>
+                    </div>
                     <h2><i class="fas fa-user"></i> المعلومات الشخصية</h2>
                     <div class="info-row">
                         <span class="label">الاسم الكامل (عربي):</span>
@@ -74,11 +78,6 @@ try {
                 </div>
 
                 <!-- Add this after the last profile-section div -->
-                <div class="profile-actions">
-                    <a href="document.php?id=<?= $employee['employee_id'] ?>" class="action-button documents-button">
-                        <i class="fas fa-file-alt"></i> عرض المستندات
-                    </a>
-                </div>
 
                 <div class="profile-section">
                     <h2><i class="fas fa-address-card"></i> المعلومات الوظيفية</h2>
@@ -98,6 +97,12 @@ try {
                         <span class="label">المنصب:</span>
                         <span class="value"><?= htmlspecialchars($employee['position']) ?></span>
                     </div>
+                    <?php if (isset($success)): ?>
+                        <div class="info-row">
+                            <span>المناصب السابقة:
+
+                        </div>
+                    <?php endif; ?>
                 </div>
 
                 <div class="profile-section">

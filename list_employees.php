@@ -66,7 +66,10 @@ try {
             <?php endif; ?>
             
             <?php if (isset($success)): ?>
-                <div class="success-message"><?= $success ?></div>
+                <div class="success-message">
+                    <i class="fas fa-check"></i>
+                    <p><?= $success ?></p>
+                </div>
             <?php endif; ?>
 
             <div class="employee-actions">
@@ -89,7 +92,7 @@ try {
                 <?php if (empty($employees)): ?>
                     <div class="no-results">
                         <i class="fas fa-user-slash"></i>
-                        <p>لا توجد نتائج مطابقة للبحث</p>
+                        <p>لا توجد نتائج</p>
                     </div>
                 <?php else: ?>
                     <div class="responsive-table">
@@ -123,6 +126,9 @@ try {
                                                class="edit-btn" title="تعديل">
                                                 <i class="fas fa-edit"></i>
                                             </a>
+                                            <a href="extract.php?id=<?= $employee['employee_id'] ?>" 
+                                               class="documents-btn" title="إستخراج الملف">
+                                                <i class="fas fa-file-export"></i>
                                             <a href="document.php?id=<?= $employee['employee_id'] ?>" 
                                                class="documents-btn" title="عرض المستندات">
                                                 <i class="fas fa-file-alt"></i>

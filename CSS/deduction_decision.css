@@ -1,0 +1,341 @@
+@font-face {
+    font-family: 'Amiri';
+    src: url('fonts/amiri/Amiri-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+body {
+    font-family: 'Amiri', serif;
+    direction: rtl;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+}
+/* Enhanced Error Styles */
+.error-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    padding: 2rem;
+}
+
+.error-card {
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    padding: 3rem;
+    max-width: 600px;
+    width: 100%;
+    text-align: center;
+    border-left: 6px solid #e74c3c;
+}
+
+.error-icon {
+    font-size: 4rem;
+    color: #e74c3c;
+    margin-bottom: 1.5rem;
+}
+
+.error-title {
+    color: #2c3e50;
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+}
+
+.error-message {
+    color: #555;
+    font-size: 1.2rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.error-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.error-button {
+    background: #3498db;
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.error-button.secondary {
+    background: #95a5a6;
+}
+
+.error-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.error-button i {
+    font-size: 1.2rem;
+}
+/* Add to deduction_decision.css */
+.form-container {
+    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    padding: 2.5rem;
+    max-width: 800px;
+    margin: 2rem auto;
+    border: 1px solid #e0e0e0;
+}
+
+.form-container h1.dashboard-title {
+    color: #2c3e50;
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #3498db;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 1.1rem;
+    text-align: left;
+}
+
+.form-group input,
+.form-group select {
+    padding: 0.8rem 1.2rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #fff;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 8px rgba(52, 152, 219, 0.2);
+    outline: none;
+}
+
+.form-group input[readonly] {
+    background: #f8f9fa;
+    cursor: not-allowed;
+}
+
+/* Form Sections */
+.form-section {
+    margin-bottom: 2.5rem;
+    padding: 1.5rem;
+    background: rgba(52, 152, 219, 0.05);
+    border-radius: 10px;
+    border-left: 4px solid #3498db;
+}
+
+.form-section h3 {
+    color: #2c3e50;
+    margin: 0 0 1.5rem 0;
+    font-size: 1.3rem;
+}
+
+/* Form Buttons Container */
+.form-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+button[type="submit"],
+button.print-button {
+    padding: 0.8rem 2rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+button[type="submit"] {
+    background: #3498db;
+    color: white;
+}
+
+button[type="submit"]:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+}
+
+button.print-button {
+    background: #27ae60;
+    color: white;
+}
+
+button.print-button:hover {
+    background: #219a52;
+    transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .form-group {
+        grid-template-columns: 1fr;
+        gap: 0.8rem;
+    }
+    
+    .form-group label {
+        text-align: right;
+    }
+    
+    .form-container {
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+    
+    .form-buttons {
+        flex-direction: column;
+    }
+}
+/* Form Section Icons */
+.form-section h3 i {
+    margin-left: 10px;
+    color: #3498db;
+}
+
+/* Date Input Placeholder */
+input[type="text"]::placeholder {
+    color: #95a5a6;
+    opacity: 1;
+}
+
+/* Select Dropdown Styling */
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232c3e50'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: left 1rem center;
+    background-size: 1em;
+    padding-right: 1rem;
+}
+
+/* Input Validation */
+input:invalid, select:invalid {
+    border-color: #e74c3c;
+}
+
+input:valid, select:valid {
+    border-color: #2ecc71;
+}
+
+/* Loading State */
+button[disabled] {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Print Button Specific Styles */
+.print-button {
+    position: relative;
+    overflow: hidden;
+}
+
+.print-button::after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: rgba(255,255,255,0.1);
+    transform: rotate(45deg);
+    transition: all 0.3s ease;
+}
+
+.print-button:hover::after {
+    left: 100%;
+}
+.deduction-decision {
+    font-family: 'Amiri', serif;
+    padding: 30px;
+    width: 21cm;
+    min-height: 29.7cm;
+    margin: 20px auto;
+    line-height: 30px;
+    box-sizing: border-box;
+    background: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+.header {
+    font-weight: bold;
+    font-size: 22px;
+}
+.content {
+    font-size: 20px;
+    text-align: right;
+}
+.content p{
+    margin: 5px;
+}
+.signature{
+    margin-top: 50px;
+    text-align: left;
+}
+h1 {
+    font-size: 26px;
+    font-weight: bold;
+    margin: 60px 0;
+}
+.docnum {
+    text-align: right;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+@media print {
+    @page {
+        size: A4;
+        margin: 0;
+    }
+    body {
+        background: none;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    .deduction-decision {
+        box-shadow: none;
+        margin: 0 !important;
+        padding: 2cm !important;
+        width: auto !important;
+        height: auto !important;
+        page-break-after: always;
+    }
+    .no-print,
+    .dashboard-container,
+    .dashboard-header,
+    header {
+        display: none !important;
+    }
+    .deduction-decision {
+        display: block !important;
+    }
+}
