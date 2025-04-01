@@ -181,10 +181,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error) {
         <div class="content">
             <p>-إن مديــر التكوين والتعليم المهنيين،</p>
             <p>-بمقتضى الأمر رقم 06-03 المؤرخ في 15/07/2006، المتضمن القانون الأساسي العام للوظيفة العمومية، المتمم،</p>
-            <p>بمقتضى المرسوم التنفيذي رقم 90-99 المؤرخ في 27/03/1990، المتعلق بسلطة التعيين والتسيير الإداري إزاء موظفي وأعوان الإدارات المركزية، الولايات، البلديات وكذا المؤسسات العمومية ذات الطابع الإداري التابعة لها،</p>
+            <p>-بمقتضى المرسوم التنفيذي رقم 90-99 المؤرخ في 27/03/1990، المتعلق بسلطة التعيين والتسيير الإداري إزاء موظفي وأعوان الإدارات المركزية، الولايات، البلديات وكذا المؤسسات العمومية ذات الطابع الإداري التابعة لها،</p>
             <p><?= htmlspecialchars($law) ?></p>
             <p>-نظرا للغياب <?= htmlspecialchars($absenceType)?> للسيد(ة) <strong><?= htmlspecialchars($employee['full_name_ar']) ?></strong> <?= htmlspecialchars($employee['position']) ?> بتاريخ <strong><?= htmlspecialchars($absenceDate) ?></strong> في الفترة المسائية أو الصباحية،</p>
-            <p>-باقتراح مـن <?= htmlspecialchars($suggest)?> يقـــــرر:</p>
+            <p><br>-باقتراح مـن <?= htmlspecialchars($suggest)?></p>
+            <h1 class="ttt">يقـــــرر:</h1>
             <p>-<strong>المادة الأولى:</strong> يخصم <strong><?= htmlspecialchars($daysDeducted) ?></strong> يوم من الراتب الشهري للسيد(ة) <strong><?= htmlspecialchars($employee['full_name_ar']) ?></strong> <?= htmlspecialchars($employee['position']) ?>، بسبب الغياب بتاريخ <strong><?= htmlspecialchars($absenceDate) ?></strong>.</p>
             <p>-<strong>المـــــادة 02:</strong> يكلف رئيس مكتب الميزانية والمحاسبة والوسائل العامة والأرشيف بتنفيذ هذا المقرر.</p>
             <div class="signature">
