@@ -43,6 +43,8 @@ try {
             <div class="employee-profile">
                 <div class="profile-section">
                     <div class="profile-actions">
+                        <a href="edit_employee.php?id=<?= $employee['employee_id'] ?>" class="action-button edit-button">
+                            <i class="fas fa-edit"></i> تعديل المعلومات
                         <a href="document.php?id=<?= $employee['employee_id'] ?>" class="action-button documents-button">
                             <i class="fas fa-file-alt"></i> عرض المستندات
                         </a>

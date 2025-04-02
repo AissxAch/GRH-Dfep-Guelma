@@ -28,13 +28,7 @@ if (isset($_GET['delete'])) {
     }
 }
 
-// Search functionality
-$search = '';
-if (isset($_GET['search'])) {
-    $search = '%' . trim($_GET['search']) . '%';
-}
-
-// Fetch employees with search filter
+// Fetch all employees initially
 try {
     $sql = "SELECT * FROM employees ORDER BY employee_id ASC";
     $stmt = $pdo->prepare($sql);
@@ -42,6 +36,11 @@ try {
     $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     die("خطأ في جلب البيانات: " . $e->getMessage());
+}
+
+// Function to format date in DD/MM/YYYY format
+function formatDate($date) {
+    return date('d/m/Y', strtotime($date));
 }
 ?>
 
@@ -53,6 +52,14 @@ try {
     <title>قائمة الموظفين - GRH Depf</title>
     <link rel="stylesheet" href="CSS/employee.css">
     <link rel="stylesheet" href="CSS/icons.css">
+    <style>
+        /* Ensure numbers display consistently */
+        body {
+            font-feature-settings: "lnum";
+            -moz-font-feature-settings: "lnum";
+            -webkit-font-feature-settings: "lnum";
+        }
+    </style>
 </head>
 <body>
     <div class="dashboard-container">
@@ -76,16 +83,15 @@ try {
                 <a href="add_employee.php" class="action-button edit-button">
                     <i class="fas fa-user-plus"></i> إضافة موظف جديد
                 </a>
-                <form action="employee.php" method="GET" class="search-form">
+                <div class="search-form">
                     <div class="input-group">
-                        <input type="text" name="id" placeholder="ابحث بالاسم أو الرقم الوطني" 
-                               value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
-                        <button type="submit" class="search-button">
+                        <input type="text" id="searchInput" placeholder="ابحث بالاسم أو الرقم الوطني" 
+                               onkeyup="searchEmployees()">
+                        <button class="search-button">
                             <i class="fas fa-search"></i>
                         </button>
                     </div>
-                </form>
-                
+                </div>
             </div>
 
             <div class="employees-list">
@@ -96,7 +102,7 @@ try {
                     </div>
                 <?php else: ?>
                     <div class="responsive-table">
-                        <table class="employees-table">
+                        <table class="employees-table" id="employeesTable">
                             <thead>
                                 <tr>
                                     <th>الرقم الوظيفي</th>
@@ -107,7 +113,7 @@ try {
                                     <th>الإجراءات</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="employeesTableBody">
                                 <?php foreach ($employees as $employee): ?>
                                     <tr>
                                         <td data-label="الرقم الوظيفي"><?= $employee['employee_id'] ?></td>
@@ -115,7 +121,7 @@ try {
                                         <td data-label="الوظيفة"><?= htmlspecialchars($employee['position']) ?></td>
                                         <td data-label="الرقم الوطني"><?= $employee['national_id'] ?></td>
                                         <td data-label="تاريخ التعيين">
-                                            <?= date('d/m/Y', strtotime($employee['hire_date'])) ?>
+                                            <?= formatDate($employee['hire_date']) ?>
                                         </td>
                                         <td data-label="الإجراءات" class="actions-cell">
                                             <a href="employee.php?id=<?= $employee['employee_id'] ?>" 
@@ -148,5 +154,104 @@ try {
             </div>
         </main>
     </div>
+
+    <script>
+        // Store all employees data for client-side filtering
+        const allEmployees = <?= json_encode($employees) ?>;
+        
+        function searchEmployees() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toUpperCase();
+            const tableBody = document.getElementById('employeesTableBody');
+            
+            // Clear existing table rows
+            tableBody.innerHTML = '';
+            
+            // Filter employees based on search input
+            const filteredEmployees = allEmployees.filter(employee => {
+                return (
+                    employee.full_name_ar.toUpperCase().includes(filter) ||
+                    employee.full_name_en.toUpperCase().includes(filter) ||
+                    employee.national_id.includes(filter) ||
+                    employee.position.toUpperCase().includes(filter) ||
+                    employee.employee_id.toString().includes(filter)
+                );
+            });
+            
+            // Display filtered results
+            if (filteredEmployees.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center;">
+                            <div class="no-results">
+                                <i class="fas fa-user-slash"></i>
+                                <p>لا توجد نتائج مطابقة</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                filteredEmployees.forEach(employee => {
+                    const row = document.createElement('tr');
+                    
+                    // Format hire date in DD/MM/YYYY format
+                    const hireDate = new Date(employee.hire_date);
+                    const day = String(hireDate.getDate()).padStart(2, '0');
+                    const month = String(hireDate.getMonth() + 1).padStart(2, '0');
+                    const year = hireDate.getFullYear();
+                    const formattedDate = `${day}/${month}/${year}`;
+                    
+                    row.innerHTML = `
+                        <td data-label="الرقم الوظيفي">${employee.employee_id}</td>
+                        <td data-label="الاسم">${escapeHtml(employee.full_name_ar)}</td>
+                        <td data-label="الوظيفة">${escapeHtml(employee.position)}</td>
+                        <td data-label="الرقم الوطني">${employee.national_id}</td>
+                        <td data-label="تاريخ التعيين">${formattedDate}</td>
+                        <td data-label="الإجراءات" class="actions-cell">
+                            <a href="employee.php?id=${employee.employee_id}" 
+                               class="view-btn" title="عرض الملف">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="edit_employee.php?id=${employee.employee_id}" 
+                               class="edit-btn" title="تعديل">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="extract.php?id=${employee.employee_id}" 
+                               class="documents-btn" title="إستخراج الملف">
+                                <i class="fas fa-file-export"></i>
+                            <a href="document.php?id=${employee.employee_id}" 
+                               class="documents-btn" title="عرض المستندات">
+                                <i class="fas fa-file-alt"></i>
+                            </a>
+                            <a href="list_employees.php?delete=${employee.employee_id}" 
+                               class="delete-btn" title="حذف"
+                               onclick="return confirm('هل أنت متأكد من حذف هذا الموظف؟');">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    `;
+                    
+                    tableBody.appendChild(row);
+                });
+            }
+        }
+        
+        // Helper function to escape HTML
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+        
+        // Search when Enter key is pressed
+        document.getElementById('searchInput').addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                searchEmployees();
+            }
+        });
+    </script>
 </body>
 </html>
