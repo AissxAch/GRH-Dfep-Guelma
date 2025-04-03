@@ -77,6 +77,9 @@ try {
                         <span class="label">فصيلة الدم:</span>
                         <span class="value"><?= htmlspecialchars($employee['bloodtype']) ?></span>
                     </div>
+                    <div class="info-row">
+                        <span class="label">الأيام المتبقية للإجازة:</span>
+                        <span class="value"><?= htmlspecialchars($employee['vacances_remain_days'])?><?= htmlspecialchars(" يوم")?></span>
                 </div>
 
                 <!-- Add this after the last profile-section div -->

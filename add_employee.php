@@ -19,6 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $birth_place = trim($_POST['birth_place'] ?? '');
     $gender = trim($_POST['gender'] ?? '');
     $bloodtype = trim($_POST['bloodtype'] ?? '');
+    $vacances_remain_days = trim($_POST['vacances_remain_days'] ?? 0);
     $national_id = trim($_POST['national_id'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
@@ -80,12 +81,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             // Insert main employee data
             $stmt = $pdo->prepare("INSERT INTO employees 
-                (full_name_ar, full_name_en, birth_date, birth_place, gender, bloodtype, 
+                (full_name_ar, full_name_en, birth_date, birth_place, gender, bloodtype,vacances_remain_days, 
                 national_id, email, phone, address, position, department, hire_date) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             
             $stmt->execute([
-                $full_name_ar, $full_name_en, $birth_date_db, $birth_place, $gender, $bloodtype,
+                $full_name_ar, $full_name_en, $birth_date_db, $birth_place, $gender, $bloodtype,$vacances_remain_days,
                 $national_id, $email ?: null, $phone, $address ?: null, 
                 $employee_position, // Using corrected variable name
                 $department, 
@@ -208,6 +209,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             </select>
                         </div>
                     </div>
+                    <div class="input-group">
+                        <label>الأيام المتبقية للإجازة</label>
+                        <input type="number" name="vacances_remain_days" value="<?= htmlspecialchars($_POST['vacances_remain_days'] ?? 0) ?>">
                 </div>
 
                 <!-- Previous Positions Section -->

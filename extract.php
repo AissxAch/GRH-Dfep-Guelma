@@ -58,15 +58,15 @@ try {
                 </div>
                 <div class="documnt-card">
                     <i class="fas fa-file-alt"></i>
-                    <h3>إستخراج شهادة توظيف</h3>
-                    <p>إستخراج شهادة توظيف لموظف معين</p>
-                    <a href="employment_certificate.php?id=<?= htmlspecialchars($employee_id) ?>" class="btn-primary">إستخراج</a>
+                    <h3>إستخراج مقرر عطلة سنوية</h3>
+                    <p>إستخراج مقرر عطلة سنوية لموظف معين</p>
+                    <a href="vacances_annuelles.php?id=<?= htmlspecialchars($employee_id) ?>" class="btn-primary">إستخراج</a>
                 </div>
                 <div class="documnt-card">
                     <i class="fas fa-file-alt"></i>
-                    <h3>إستخراج شهادة تأمين</h3>
-                    <p>إستخراج شهادة تأمين لموظف معين</p>
-                    <a href="insurance_certificate.php?id=<?= htmlspecialchars($employee_id) ?>" class="btn-primary">إستخراج</a>
+                    <h3>إستخراج مقرر عطلة مرضية</h3>
+                    <p>إستخراج مقرر عطلة مرضية لموظف معين</p>
+                    <a href="vacances_maladie.php?id=<?= htmlspecialchars($employee_id) ?>" class="btn-primary">إستخراج</a>
                 </div>
             </div>
         </div>

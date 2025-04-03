@@ -43,6 +43,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error) {
     $daysDeducted = $_POST['daysDeducted'] ?? '';
     $absenceType = $_POST['absenceType'] ?? '';
     $law = $_POST['law'] ?? '';
+    if (isset($_POST['lawCustom']) && !empty($_POST['lawCustom'])) {
+        $law = $_POST['lawCustom'];
+    }
     $suggest = $_POST['suggest'] ?? '';
     // Validate inputs
     if (empty($docNum) || empty($absenceDate) || empty($daysDeducted)) {
@@ -134,10 +137,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error) {
                             
                             <div class="form-group">
                                 <label for="law">القانـون المنطبق:</label>
-                                <select name="law" id="law" >
+                                <select name="law" id="lawSelect" class="form-select" onchange="toggleLawInput()">
                                     <option value="">اختر القانون المنطبق</option>
                                     <option value="-بمقتضى المرسوم التنفيذي رقم 08-04 المؤرخ في 09/01/2008، المتضمن القانون الأساسي الخاص بالموظفين المنتمين للأسلاك المشتركة في المؤسسات والإدارات العمومية، المعدل والمتمم">-بمقتضى المرسوم التنفيذي رقم 08-04 المؤرخ في 09/01/2008، المتضمن القانون الأساسي الخاص بالموظفين المنتمين للأسلاك المشتركة في المؤسسات والإدارات العمومية، المعدل والمتمم</option>
-                                    </select>
+                                    <option value="other">أخرى</option>
+                                </select>
+                                <div id="lawCustomContainer" class="custom-law-container" style="display: none;">
+                                    <input type="text" id="lawCustomInput" name="lawCustom" class="form-input" placeholder="أدخل النص القانوني المطلوب">
+                                </div>
                             </div>
 
                             <div class="form-group">
@@ -194,5 +201,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error) {
         </div>
     </div>
     <?php endif; ?>
+    <style>
+        .custom-law-container {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .custom-law-container .form-input {
+            width: 1150px;
+            height: 20px;
+            margin-right: 220px;
+            padding: 0.8rem 1.2rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            /* font-size: 1rem;
+            transition: all 0.3s ease; */
+            background: #fff;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        .custom-law-container .form-input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.2);
+            outline: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        </style>
+    <script>
+        function toggleLawInput() {
+            const lawSelect = document.getElementById('lawSelect');
+            const lawCustomContainer = document.getElementById('lawCustomContainer');
+            const lawCustomInput = document.getElementById('lawCustomInput');
+            
+            if (lawSelect.value === 'other') {
+                lawCustomContainer.style.display = 'block';
+                lawCustomInput.focus(); // Auto-focus the input when shown
+            } else {
+                lawCustomContainer.style.display = 'none';
+                lawCustomInput.value = ''; // Clear the input when hiding
+            }
+        }
+
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const lawSelect = document.getElementById('lawSelect');
+            const lawCustomInput = document.getElementById('lawCustomInput');
+            
+            if (lawSelect.value === 'other') {
+                if (!lawCustomInput.value.trim()) {
+                    e.preventDefault();
+                    alert('الرجاء إدخال النص القانوني المطلوب');
+                    lawCustomInput.focus();
+                    return;
+                }
+                
+                // Create hidden input with the custom value
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'law';
+                hiddenInput.value = lawCustomInput.value;
+                this.appendChild(hiddenInput);
+            }
+        });
+    </script>
 </body>
 </html>

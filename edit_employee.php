@@ -47,6 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
     $birth_place = trim($_POST['birth_place'] ?? '');
     $gender = trim($_POST['gender'] ?? '');
     $bloodtype = trim($_POST['bloodtype'] ?? '');
+    $vacances_remain_days = trim($_POST['vacances_remain_days'] ?? '');
     $national_id = trim($_POST['national_id'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
@@ -86,14 +87,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
             // Update main employee data
             $stmt = $pdo->prepare("UPDATE employees SET 
                 full_name_ar = ?, full_name_en = ?, birth_date = ?, birth_place = ?, 
-                gender = ?, bloodtype = ?, national_id = ?, email = ?, phone = ?, 
+                gender = ?,  bloodtype = ?,vacances_remain_days= ?, national_id = ?, email = ?, phone = ?, 
                 address = ?, position = ?, department = ?, hire_date = ?, is_active = ?,
                 updated_at = CURRENT_TIMESTAMP 
                 WHERE employee_id = ?");
             
             $stmt->execute([
                 $full_name_ar, $full_name_en, $birth_date_db, $birth_place, $gender, 
-                $bloodtype, $national_id, $email ?: null, $phone, $address ?: null, 
+                $bloodtype,$vacances_remain_days, $national_id, $email ?: null, $phone, $address ?: null, 
                 $position, $department, $hire_date_db, $is_active, $employee_id
             ]);
 
@@ -231,8 +232,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                             </select>
                         </div>
                     </div>
-                </div>
-
+                    <div class="input-group">
+                        <label>الأيام المتبقية للإجازة <span class="required">*</span></label>
+                        <input type="text" name="vacances_remain_days" value="<?= htmlspecialchars($employee['vacances_remain_days']) ?>" required>
+                    </div>
                 <!-- Previous Positions Section -->
                 <div class="form-section">
                     <h2><i class="fas fa-history"></i> الوظائف السابقة</h2>
