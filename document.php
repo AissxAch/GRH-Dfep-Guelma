@@ -35,7 +35,6 @@ if (!$error) {
     if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['upload'])) {
         try {
             $title = filter_input(INPUT_POST, 'title', FILTER_SANITIZE_STRING);
-            $description = filter_input(INPUT_POST, 'description', FILTER_SANITIZE_STRING);
             
             if (empty($title)) {
                 throw new Exception("عنوان المستند مطلوب");
@@ -61,15 +60,14 @@ if (!$error) {
             
             // Insert into database
             $sql = "INSERT INTO employee_documents 
-                    (employee_id, title, description, file_name, upload_date) 
+                    (employee_id, title, file_name, upload_date) 
                     VALUES 
-                    (:employee_id, :title, :description, :file_name, NOW())";
+                    (:employee_id, :title, :file_name, NOW())";
             
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 ':employee_id' => $employee_id,
                 ':title' => $title,
-                ':description' => $description,
                 ':file_name' => $file_name
             ]);
             
@@ -172,11 +170,6 @@ if (!$error) {
                         <div class="input-group">
                             <label>عنوان المستند <span class="required">*</span></label>
                             <input type="text" name="title" required>
-                        </div>
-                        
-                        <div class="input-group">
-                            <label>وصف المستند</label>
-                            <textarea name="description" rows="3"></textarea>
                         </div>
                         
                         <div class="input-group">
