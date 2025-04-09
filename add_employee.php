@@ -7,20 +7,34 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+try{
+    $sql1 = "SELECT * FROM departments ";
+    $stmt1 = $pdo->prepare($sql1);
+    $stmt1->execute();
+    $departments = $stmt1->fetch(PDO::FETCH_ASSOC);
+
+    } catch (PDOException $e) {
+    error_log("Database query failed: " . $e->getMessage());
+    die("Database query failed. Please try again later.");
+}
+
 $errors = [];
 $success = '';
 $previous_positions = [];
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Validate main employee data
-    $full_name_ar = trim($_POST['full_name_ar'] ?? '');
-    $full_name_en = trim($_POST['full_name_en'] ?? '');
+    $firstname_ar = trim($_POST['firstname_ar'] ?? '');
+    $lastname_ar = trim($_POST['lastname_ar'] ?? '');
+    $firstname_en = trim($_POST['firstname_en'] ?? '');
+    $lastname_en = trim($_POST['lastname_en'] ?? '');
     $birth_date = trim($_POST['birth_date'] ?? '');
     $birth_place = trim($_POST['birth_place'] ?? '');
     $gender = trim($_POST['gender'] ?? '');
     $bloodtype = trim($_POST['bloodtype'] ?? '');
     $vacances_remain_days = trim($_POST['vacances_remain_days'] ?? 0);
     $national_id = trim($_POST['national_id'] ?? '');
+    $ssn = trim($_POST['ssn']);
     $email = trim($_POST['email'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
     $address = trim($_POST['address'] ?? '');
@@ -29,8 +43,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $hire_date = trim($_POST['hire_date'] ?? '');
 
     // Validate required fields
-    if (empty($full_name_ar)) $errors[] = 'الاسم العربي مطلوب';
-    if (empty($full_name_en)) $errors[] = 'الاسم الإنجليزي مطلوب';
+    if (empty($firstname_ar)) $errors[] = 'اللقب العربي مطلوب';
+    if (empty($lastname_ar)) $errors[] = 'الاسم العربي مطلوب';
+    if (empty($firstname_en)) $errors[] = 'اللقب الفرنسي مطلوب';
+    if (empty($lastname_en)) $errors[] = 'الاسم الفرنسي مطلوب';
     if (empty($birth_date)) $errors[] = 'تاريخ الميلاد مطلوب';
     if (empty($birth_place)) $errors[] = 'مكان الميلاد مطلوب';
     if (empty($national_id)) $errors[] = 'الرقم الوطني مطلوب';
@@ -81,13 +97,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             // Insert main employee data
             $stmt = $pdo->prepare("INSERT INTO employees 
-                (full_name_ar, full_name_en, birth_date, birth_place, gender, bloodtype,vacances_remain_days, 
-                national_id, email, phone, address, position, department, hire_date) 
+                (firstname_ar, lastname_ar, firstname_en, lastname_ar, birth_date, birth_place, gender, bloodtype,vacances_remain_days, 
+                national_id, ssn, email, phone, address, position, department, hire_date) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             
             $stmt->execute([
-                $full_name_ar, $full_name_en, $birth_date_db, $birth_place, $gender, $bloodtype,$vacances_remain_days,
-                $national_id, $email ?: null, $phone, $address ?: null, 
+                $firstname_ar, $lastname_ar, $firstname_en, $lastname_en, $birth_date_db, $birth_place, $gender, $bloodtype,$vacances_remain_days,
+                $national_id, $ssn, $email ?: null, $phone, $address ?: null, 
                 $employee_position, // Using corrected variable name
                 $department, 
                 $hire_date_db
@@ -164,13 +180,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div class="form-section">
                     <h2><i class="fas fa-user"></i> المعلومات الشخصية</h2>
                     <div class="input-group">
-                        <label>الاسم الكامل (عربي) <span class="required">*</span></label>
-                        <input type="text" name="full_name_ar" value="<?= htmlspecialchars($_POST['full_name_ar'] ?? '') ?>" required>
+                        <label>اللقب<span class="required">*</span></label>
+                        <input type="text" name="firstname_ar" value="<?= htmlspecialchars($_POST['firstname_ar'] ?? '') ?>" required>
+                    </div>
+                    <div class="input-group">
+                        <label>الاسم<span class="required">*</span></label>
+                        <input type="text" name="lastname_ar" value="<?= htmlspecialchars($_POST['lastname_ar'] ?? '') ?>" required>
                     </div>
                     
                     <div class="input-group">
-                        <label>الاسم الكامل (إنجليزي) <span class="required">*</span></label>
-                        <input type="text" name="full_name_en" value="<?= htmlspecialchars($_POST['full_name_en'] ?? '') ?>" required>
+                        <label>Nom<span class="required">*</span></label>
+                        <input type="text" name="firstname_en" value="<?= htmlspecialchars($_POST['firstname_en'] ?? '') ?>" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Prenom<span class="required">*</span></label>
+                        <input type="text" name="lastname_en" value="<?= htmlspecialchars($_POST['lastname_en'] ?? '') ?>" required>
                     </div>
 
                     <div class="input-row">
@@ -186,9 +210,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         </div>
                     </div>
 
+                    <div class="input-group">
+                            <label>الرقم الوطني <span class="required">*</span></label>
+                            <input type="text" name="national_id" 
+                                   value="<?= htmlspecialchars($_POST['national_id'] ?? '') ?>" required>
+                    </div>
+
+                    <div class="input-group">
+                            <label>رقم الضمان الاجتماعي<span class="required">*</span></label>
+                            <input type="text" name="ssn" 
+                                   value="<?= htmlspecialchars($_POST['ssn'] ?? '') ?>" required>
+                    </div>
+
                     <div class="input-row">
                         <div class="input-group">
-                            <label>النوع <span class="required">*</span></label>
+                            <label>الجنس <span class="required">*</span></label>
                             <select name="gender" required>
                                 <option value="male" <?= ($_POST['gender'] ?? '') === 'male' ? 'selected' : '' ?>>ذكر</option>
                                 <option value="female" <?= ($_POST['gender'] ?? '') === 'female' ? 'selected' : '' ?>>أنثى</option>
