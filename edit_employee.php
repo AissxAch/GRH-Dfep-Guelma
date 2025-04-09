@@ -12,6 +12,15 @@ $errors = [];
 $success = '';
 $employee = [];
 $previous_positions = [];
+$departments = [];
+
+// Fetch departments
+try {
+    $stmt = $pdo->query("SELECT * FROM departments");
+    $departments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $errors[] = 'خطأ في جلب الأقسام: ' . $e->getMessage();
+}
 
 // Fetch employee data if ID is provided
 if (isset($_GET['id'])) {
@@ -41,31 +50,36 @@ if (isset($_GET['id'])) {
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
     $employee_id = intval($_POST['employee_id']);
-    $full_name_ar = trim($_POST['full_name_ar'] ?? '');
-    $full_name_en = trim($_POST['full_name_en'] ?? '');
+    $firstname_ar = trim($_POST['firstname_ar'] ?? '');
+    $lastname_ar = trim($_POST['lastname_ar'] ?? '');
+    $firstname_en = trim($_POST['firstname_en'] ?? '');
+    $lastname_en = trim($_POST['lastname_en'] ?? '');
     $birth_date = trim($_POST['birth_date'] ?? '');
     $birth_place = trim($_POST['birth_place'] ?? '');
     $gender = trim($_POST['gender'] ?? '');
     $bloodtype = trim($_POST['bloodtype'] ?? '');
     $vacances_remain_days = trim($_POST['vacances_remain_days'] ?? '');
     $national_id = trim($_POST['national_id'] ?? '');
+    $ssn = trim($_POST['ssn'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
     $address = trim($_POST['address'] ?? '');
     $position = trim($_POST['position'] ?? '');
-    $department = trim($_POST['department'] ?? '');
+    $department_id = trim($_POST['department_id'] ?? '');
     $hire_date = trim($_POST['hire_date'] ?? '');
     $is_active = isset($_POST['is_active']) ? 1 : 0;
 
     // Validate required fields
-    if (empty($full_name_ar)) $errors[] = 'الاسم العربي مطلوب';
-    if (empty($full_name_en)) $errors[] = 'الاسم الإنجليزي مطلوب';
+    if (empty($firstname_ar)) $errors[] = 'اللقب العربي مطلوب';
+    if (empty($lastname_ar)) $errors[] = 'الاسم العربي مطلوب';
+    if (empty($firstname_en)) $errors[] = 'اللقب الإنجليزي مطلوب';
+    if (empty($lastname_en)) $errors[] = 'الاسم الإنجليزي مطلوب';
     if (empty($birth_date)) $errors[] = 'تاريخ الميلاد مطلوب';
     if (empty($birth_place)) $errors[] = 'مكان الميلاد مطلوب';
     if (empty($national_id)) $errors[] = 'الرقم الوطني مطلوب';
+    if (empty($ssn)) $errors[] = 'رقم الضمان الاجتماعي مطلوب';
     if (empty($phone)) $errors[] = 'رقم الهاتف مطلوب';
     if (empty($position)) $errors[] = 'المنصب مطلوب';
-    if (empty($department)) $errors[] = 'القسم مطلوب';
     if (empty($hire_date)) $errors[] = 'تاريخ التعيين مطلوب';
 
     // Date validation and conversion
@@ -83,48 +97,53 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
     if (empty($errors)) {
         try {
             $pdo->beginTransaction();
-
             // Update main employee data
             $stmt = $pdo->prepare("UPDATE employees SET 
-                full_name_ar = ?, full_name_en = ?, birth_date = ?, birth_place = ?, 
-                gender = ?,  bloodtype = ?,vacances_remain_days= ?, national_id = ?, email = ?, phone = ?, 
-                address = ?, position = ?, department = ?, hire_date = ?, is_active = ?,
-                updated_at = CURRENT_TIMESTAMP 
+                firstname_ar = ?, lastname_ar = ?, firstname_en = ?, lastname_en = ?, 
+                birth_date = ?, birth_place = ?, gender = ?, bloodtype = ?, 
+                vacances_remain_days = ?, national_id = ?, ssn = ?, email = ?, 
+                phone = ?, address = ?, position = ?, department_id = ?, 
+                hire_date = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP 
                 WHERE employee_id = ?");
-            
             $stmt->execute([
-                $full_name_ar, $full_name_en, $birth_date_db, $birth_place, $gender, 
-                $bloodtype,$vacances_remain_days, $national_id, $email ?: null, $phone, $address ?: null, 
-                $position, $department, $hire_date_db, $is_active, $employee_id
+                $firstname_ar, $lastname_ar, $firstname_en, $lastname_en,
+                $birth_date_db, $birth_place, $gender, $bloodtype,
+                $vacances_remain_days, $national_id, $ssn, $email ?: null,
+                $phone, $address ?: null, $position, $department_id ?: null,
+                $hire_date_db, $is_active, $employee_id
             ]);
-
             // Handle previous positions
             $prev_positions = $_POST['prev_positions'] ?? [];
             $prev_start_dates = $_POST['prev_start_dates'] ?? [];
             $prev_end_dates = $_POST['prev_end_dates'] ?? [];
+            $prev_departments = $_POST['prev_departments'] ?? [];
             $prev_ids = $_POST['prev_ids'] ?? [];
-
             // First delete all existing positions not in the submitted list
-            $delete_stmt = $pdo->prepare("DELETE FROM employee_previous_positions 
-                                        WHERE employee_id = ? AND id NOT IN (" . 
-                                        implode(',', array_filter($prev_ids, 'is_numeric')) . ")");
-            $delete_stmt->execute([$employee_id]);
+            if (!empty(array_filter($prev_ids, 'is_numeric'))) {
+                $delete_stmt = $pdo->prepare("DELETE FROM employee_previous_positions 
+                                            WHERE employee_id = ? AND id NOT IN (" . 
+                                            implode(',', array_filter($prev_ids, 'is_numeric')) . ")");
+                $delete_stmt->execute([$employee_id]);
+            }
 
             // Update or insert positions
             $position_stmt = $pdo->prepare("INSERT INTO employee_previous_positions 
-                (id, employee_id, position, start_date, end_date) 
-                VALUES (?, ?, ?, ?, ?)
+                (id, employee_id, position, department_id, start_date, end_date) 
+                VALUES (?, ?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE 
                 position = VALUES(position), 
+                department_id = VALUES(department_id),
                 start_date = VALUES(start_date), 
                 end_date = VALUES(end_date)");
 
             foreach ($prev_positions as $index => $prev_position) {
                 if (!empty($prev_position)) {
+                    $dept_id = !empty($prev_departments[$index]) ? $prev_departments[$index] : null;
                     $position_stmt->execute([
                         $prev_ids[$index] ?: null,
                         $employee_id,
                         $prev_position,
+                        $dept_id,
                         $prev_start_dates[$index],
                         $prev_end_dates[$index]
                     ]);
@@ -186,14 +205,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                 <!-- Personal Information Section -->
                 <div class="form-section">
                     <h2><i class="fas fa-user"></i> المعلومات الشخصية</h2>
-                    <div class="input-group">
-                        <label>الاسم الكامل (عربي) <span class="required">*</span></label>
-                        <input type="text" name="full_name_ar" value="<?= htmlspecialchars($employee['full_name_ar']) ?>" required>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>اللقب (عربي) <span class="required">*</span></label>
+                            <input type="text" name="firstname_ar" value="<?= htmlspecialchars($employee['firstname_ar']) ?>" required>
+                        </div>
+                        <div class="input-group">
+                            <label>الاسم (عربي) <span class="required">*</span></label>
+                            <input type="text" name="lastname_ar" value="<?= htmlspecialchars($employee['lastname_ar']) ?>" required>
+                        </div>
                     </div>
                     
-                    <div class="input-group">
-                        <label>الاسم الكامل (إنجليزي) <span class="required">*</span></label>
-                        <input type="text" name="full_name_en" value="<?= htmlspecialchars($employee['full_name_en']) ?>" required>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Nom <span class="required">*</span></label>
+                            <input type="text" name="firstname_en" value="<?= htmlspecialchars($employee['firstname_en']) ?>" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Prenom <span class="required">*</span></label>
+                            <input type="text" name="lastname_en" value="<?= htmlspecialchars($employee['lastname_en']) ?>" required>
+                        </div>
                     </div>
 
                     <div class="input-row">
@@ -232,10 +263,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                             </select>
                         </div>
                     </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>الرقم الوطني <span class="required">*</span></label>
+                            <input type="text" name="national_id" value="<?= htmlspecialchars($employee['national_id']) ?>" required>
+                        </div>
+                        <div class="input-group">
+                            <label>رقم الضمان الاجتماعي <span class="required">*</span></label>
+                            <input type="text" name="ssn" value="<?= htmlspecialchars($employee['ssn']) ?>" required>
+                        </div>
+                    </div>
                     <div class="input-group">
                         <label>الأيام المتبقية للإجازة <span class="required">*</span></label>
-                        <input type="text" name="vacances_remain_days" value="<?= htmlspecialchars($employee['vacances_remain_days']) ?>" required>
+                        <input type="number" name="vacances_remain_days" value="<?= htmlspecialchars($employee['vacances_remain_days']) ?>" required>
                     </div>
+                </div>
                 <!-- Previous Positions Section -->
                 <div class="form-section">
                     <h2><i class="fas fa-history"></i> الوظائف السابقة</h2>
@@ -247,6 +289,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                                         <label>الوظيفة السابقة</label>
                                         <input type="text" name="prev_positions[]" placeholder="اسم الوظيفة السابقة">
                                         <input type="hidden" name="prev_ids[]" value="">
+                                    </div>
+                                    <div class="input-group">
+                                        <label>القسم</label>
+                                        <select name="prev_departments[]">
+                                            <option value="">اختر...</option>
+                                            <?php foreach ($departments as $dept): ?>
+                                                <option value="<?= $dept['department_id'] ?>"><?= htmlspecialchars($dept['name']) ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
                                     </div>
                                     <div class="input-group">
                                         <label>تاريخ البدء</label>
@@ -268,6 +319,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                                                    value="<?= htmlspecialchars($pos['position']) ?>"
                                                    placeholder="اسم الوظيفة السابقة">
                                             <input type="hidden" name="prev_ids[]" value="<?= $pos['id'] ?>">
+                                        </div>
+                                        <div class="input-group">
+                                            <label>القسم</label>
+                                            <select name="prev_departments[]">
+                                                <option value="">اختر...</option>
+                                                <?php foreach ($departments as $dept): ?>
+                                                    <option value="<?= $dept['department_id'] ?>" <?= isset($pos['department_id']) && $pos['department_id'] == $dept['department_id'] ? 'selected' : '' ?>>
+                                                        <?= htmlspecialchars($dept['name']) ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
                                         </div>
                                         <div class="input-group">
                                             <label>تاريخ البدء</label>
@@ -299,27 +361,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                     <h2><i class="fas fa-address-card"></i> المعلومات الوظيفية</h2>
                     <div class="input-row">
                         <div class="input-group">
-                            <label>الرقم الوطني <span class="required">*</span></label>
-                            <input type="text" name="national_id" 
-                                   value="<?= htmlspecialchars($employee['national_id']) ?>" required>
-                        </div>
-                        
-                        <div class="input-group">
                             <label>تاريخ التعيين <span class="required">*</span></label>
                             <input type="text" name="hire_date" placeholder="dd/mm/yyyy" 
                                    value="<?= date('d/m/Y', strtotime($employee['hire_date'])) ?>" pattern="\d{2}/\d{2}/\d{4}" required>
+                        </div>
+                        <div class="input-group">
+                            <label>تاريخ أول تعيين</label>
+                            <input type="text" value="<?= date('d/m/Y', strtotime($employee['first_hire_date'])) ?>" readonly>
                         </div>
                     </div>
 
                     <div class="input-row">
                         <div class="input-group">
                             <label>القسم <span class="required">*</span></label>
-                            <select name="department" required>
-                                <option value="الإدارة" <?= $employee['department'] === 'الإدارة' ? 'selected' : '' ?>>الإدارة</option>
-                                <option value="الموارد البشرية" <?= $employee['department'] === 'الموارد البشرية' ? 'selected' : '' ?>>الموارد البشرية</option>
-                                <option value="المبيعات" <?= $employee['department'] === 'المبيعات' ? 'selected' : '' ?>>المبيعات</option>
-                                <option value="التسويق" <?= $employee['department'] === 'التسويق' ? 'selected' : '' ?>>التسويق</option>
-                                <option value="التقنية" <?= $employee['department'] === 'التقنية' ? 'selected' : '' ?>>التقنية</option>
+                            <select name="department_id" required>
+                                <option value="0">اختر...</option>
+                                <?php foreach ($departments as $dept): ?>
+                                    <option value="<?= $dept['department_id'] ?>" <?= $employee['department_id'] == $dept['department_id'] ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($dept['name']) ?>
+                                    </option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                         
@@ -394,7 +455,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                     input.value = '';
                 }
             });
-            
+            newEntry.querySelectorAll('select').forEach(select => {
+                select.selectedIndex = 0;
+            });
             container.appendChild(newEntry);
         });
 

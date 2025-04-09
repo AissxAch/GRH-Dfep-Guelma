@@ -7,15 +7,12 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-try{
-    $sql1 = "SELECT * FROM departments ";
-    $stmt1 = $pdo->prepare($sql1);
-    $stmt1->execute();
-    $departments = $stmt1->fetch(PDO::FETCH_ASSOC);
-
-    } catch (PDOException $e) {
-    error_log("Database query failed: " . $e->getMessage());
-    die("Database query failed. Please try again later.");
+$departments = [];
+try {
+    $stmt = $pdo->query("SELECT * FROM departments ORDER BY created_at DESC");
+    $departments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $error = "خطأ في جلب البيانات: " . $e->getMessage();
 }
 
 $errors = [];
@@ -34,12 +31,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $bloodtype = trim($_POST['bloodtype'] ?? '');
     $vacances_remain_days = trim($_POST['vacances_remain_days'] ?? 0);
     $national_id = trim($_POST['national_id'] ?? '');
-    $ssn = trim($_POST['ssn']);
+    $ssn = trim($_POST['ssn'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
     $address = trim($_POST['address'] ?? '');
-    $employee_position = trim($_POST['position'] ?? ''); // Changed variable name
-    $department = trim($_POST['department'] ?? '');
+    $position = trim($_POST['position'] ?? '');
+    $department_id = trim($_POST['department'] ?? '');
     $hire_date = trim($_POST['hire_date'] ?? '');
 
     // Validate required fields
@@ -51,8 +48,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (empty($birth_place)) $errors[] = 'مكان الميلاد مطلوب';
     if (empty($national_id)) $errors[] = 'الرقم الوطني مطلوب';
     if (empty($phone)) $errors[] = 'رقم الهاتف مطلوب';
-    if (empty($employee_position)) $errors[] = 'المنصب مطلوب'; // Updated validation
-    if (empty($department)) $errors[] = 'القسم مطلوب';
+    if (empty($position)) $errors[] = 'المنصب مطلوب';
+    if (empty($department_id)) $errors[] = 'القسم مطلوب';
     if (empty($hire_date)) $errors[] = 'تاريخ التعيين مطلوب';
 
     // Date validation and conversion
@@ -72,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $prev_start_dates = $_POST['prev_start_dates'] ?? [];
     $prev_end_dates = $_POST['prev_end_dates'] ?? [];
 
-    foreach ($prev_positions as $index => $prev_position) { // Changed variable name
+    foreach ($prev_positions as $index => $prev_position) {
         if (!empty($prev_position)) {
             $start = $prev_start_dates[$index] ?? '';
             $end = $prev_end_dates[$index] ?? '';
@@ -84,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
 
             $previous_positions[] = [
-                'position' => $prev_position, // Using renamed variable
+                'position' => $prev_position,
                 'start_date' => $start,
                 'end_date' => $end
             ];
@@ -97,15 +94,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             // Insert main employee data
             $stmt = $pdo->prepare("INSERT INTO employees 
-                (firstname_ar, lastname_ar, firstname_en, lastname_ar, birth_date, birth_place, gender, bloodtype,vacances_remain_days, 
-                national_id, ssn, email, phone, address, position, department, hire_date) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                (firstname_ar, lastname_ar, firstname_en, lastname_en, birth_date, birth_place, gender, bloodtype, vacances_remain_days, 
+                national_id, ssn, email, phone, address, position, department_id, hire_date) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             
             $stmt->execute([
-                $firstname_ar, $lastname_ar, $firstname_en, $lastname_en, $birth_date_db, $birth_place, $gender, $bloodtype,$vacances_remain_days,
+                $firstname_ar, $lastname_ar, $firstname_en, $lastname_en, $birth_date_db, $birth_place, $gender, $bloodtype, $vacances_remain_days,
                 $national_id, $ssn, $email ?: null, $phone, $address ?: null, 
-                $employee_position, // Using corrected variable name
-                $department, 
+                $position,
+                $department_id, 
                 $hire_date_db
             ]);
 
@@ -290,11 +287,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <h2><i class="fas fa-address-card"></i> المعلومات الوظيفية</h2>
                     <div class="input-row">
                         <div class="input-group">
-                            <label>الرقم الوطني <span class="required">*</span></label>
-                            <input type="text" name="national_id" 
-                                   value="<?= htmlspecialchars($_POST['national_id'] ?? '') ?>" required>
+                            <label>منصب الشغل <span class="required">*</span></label>
+                            <input type="text" name="position" 
+                                value="<?= htmlspecialchars($_POST['position'] ?? '') ?>" required>
                         </div>
-                        
                         <div class="input-group">
                             <label>تاريخ التعيين <span class="required">*</span></label>
                             <input type="text" name="hire_date" placeholder="dd/mm/yyyy" 
@@ -304,20 +300,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                     <div class="input-row">
                         <div class="input-group">
-                            <label>القسم <span class="required">*</span></label>
+                            <label>المصلحة <span class="required">*</span></label>
                             <select name="department" required>
-                                <option value="HR" <?= ($_POST['department'] ?? '') === 'HR' ? 'selected' : '' ?>>الموارد البشرية</option>
-                                <option value="Finance" <?= ($_POST['department'] ?? '') === 'Finance' ? 'selected' : '' ?>>المالية</option>
-                                <option value="IT" <?= ($_POST['department'] ?? '') === 'IT' ? 'selected' : '' ?>>تقنية المعلومات</option>
-                                <option value="Operations" <?= ($_POST['department'] ?? '') === 'Operations' ? 'selected' : '' ?>>العمليات</option>
+                                <option value="0">اختر مصلحة</option>
+                                <?php if ($departments): ?>
+                                    <?php foreach ($departments as $dept): ?>
+                                    <option value="<?= $dept['department_id'] ?>" <?= ($_POST['department'] ?? '') == $dept['department_id'] ? 'selected' : '' ?>><?= htmlspecialchars($dept['name']) ?></option>
+                                    <?php endforeach; ?>
+                                <?php endif;?>
                             </select>
                         </div>
                         
-                        <div class="input-group">
-                            <label>المنصب <span class="required">*</span></label>
-                            <input type="text" name="position" 
-                                value="<?= htmlspecialchars($_POST['position'] ?? '') ?>" required>
-                        </div>
+                        
                     </div>
                 </div>
 

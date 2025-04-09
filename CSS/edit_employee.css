@@ -140,6 +140,7 @@ body {
 .input-group input,
 .input-group select,
 .input-group textarea {
+    direction: rtl;
     width: 100%;
     padding: 0.8rem 1rem;
     border: 2px solid #e0e0e0;

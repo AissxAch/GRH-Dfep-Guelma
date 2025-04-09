@@ -10,15 +10,29 @@ if (!isset($_SESSION['user_id'])) {
 
 // Get employee ID from URL
 $employee_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+
 try {
-    if(isset($employee_id)){
-        $stmt = $pdo->prepare("SELECT * FROM employees WHERE employee_id = :employee_id OR national_id = :national_id");
-        $stmt->execute(['employee_id' => $employee_id, 'national_id' => $employee_id]);
-        $employee = $stmt->fetch(PDO::FETCH_ASSOC);
-    }
+    // Get employee data
+    $stmt = $pdo->prepare("SELECT e.*, d.name as department_name 
+                          FROM employees e 
+                          LEFT JOIN departments d ON e.department_id = d.department_id 
+                          WHERE e.employee_id = ?");
+    $stmt->execute([$employee_id]);
+    $employee = $stmt->fetch(PDO::FETCH_ASSOC);
+
     if (!$employee) {
         die("الموظف غير موجود في النظام");
     }
+
+    // Get previous positions
+    $stmt_prev = $pdo->prepare("SELECT p.*, d.name as department_name 
+                               FROM employee_previous_positions p
+                               LEFT JOIN departments d ON p.department_id = d.department_id
+                               WHERE p.employee_id = ?
+                               ORDER BY p.end_date DESC");
+    $stmt_prev->execute([$employee_id]);
+    $previous_positions = $stmt_prev->fetchAll(PDO::FETCH_ASSOC);
+
 } catch (PDOException $e) {
     die("خطأ في قاعدة البيانات: " . $e->getMessage());
 }
@@ -45,6 +59,7 @@ try {
                     <div class="profile-actions">
                         <a href="edit_employee.php?id=<?= $employee['employee_id'] ?>" class="action-button edit-button">
                             <i class="fas fa-edit"></i> تعديل المعلومات
+                        </a>
                         <a href="document.php?id=<?= $employee['employee_id'] ?>" class="action-button documents-button">
                             <i class="fas fa-file-alt"></i> عرض المستندات
                         </a>
@@ -53,59 +68,84 @@ try {
                         </a>
                     </div>
                     <h2><i class="fas fa-user"></i> المعلومات الشخصية</h2>
-                    <div class="info-row">
-                        <span class="label">الاسم الكامل (عربي):</span>
-                        <span class="value"><?= htmlspecialchars($employee['full_name_ar']) ?></span>
+                    <div class="en">
+                        <div class="info-row">
+                            <span class="label">Nom :</span>
+                            <span class="value"><?= htmlspecialchars($employee['firstname_en'] ?? '') ?></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Prenom :</span>
+                            <span class="value"><?= htmlspecialchars($employee['lastname_en'] ?? '') ?></span>
+                        </div>
                     </div>
                     <div class="info-row">
-                        <span class="label">الاسم الكامل (إنجليزي):</span>
-                        <span class="value"><?= htmlspecialchars($employee['full_name_en']) ?></span>
+                        <span class="label">اللقب :</span>
+                        <span class="value"><?= htmlspecialchars($employee['firstname_ar'] ?? '') ?></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">الاسم :</span>
+                        <span class="value"><?= htmlspecialchars($employee['lastname_ar'] ?? '') ?></span>
                     </div>
                     <div class="info-row">
                         <span class="label">تاريخ الميلاد:</span>
-                        <span class="value"><?= date('d/m/Y', strtotime($employee['birth_date'])) ?></span>
+                        <span class="value"><?= $employee['birth_date'] ? date('d/m/Y', strtotime($employee['birth_date'])) : 'غير محدد' ?></span>
                     </div>
                     <div class="info-row">
                         <span class="label">مكان الميلاد:</span>
-                        <span class="value"><?= htmlspecialchars($employee['birth_place']) ?></span>
+                        <span class="value"><?= htmlspecialchars($employee['birth_place'] ?? 'غير محدد') ?></span>
                     </div>
                     <div class="info-row">
                         <span class="label">النوع:</span>
                         <span class="value"><?= $employee['gender'] == 'male' ? 'ذكر' : 'أنثى' ?></span>
                     </div>
                     <div class="info-row">
+                        <span class="label">الرقم الوطني:</span>
+                        <span class="value"><?= htmlspecialchars($employee['national_id'] ?? '') ?></span>
+                    </div>
+                    <div class="info-row">
                         <span class="label">فصيلة الدم:</span>
-                        <span class="value"><?= htmlspecialchars($employee['bloodtype']) ?></span>
+                        <span class="value"><?= htmlspecialchars($employee['bloodtype'] ?? 'غير محدد') ?></span>
                     </div>
                     <div class="info-row">
                         <span class="label">الأيام المتبقية للإجازة:</span>
-                        <span class="value"><?= htmlspecialchars($employee['vacances_remain_days'])?><?= htmlspecialchars(" يوم")?></span>
+                        <span class="value"><?= htmlspecialchars($employee['vacances_remain_days'] ?? 0) ?> يوم</span>
+                    </div>
                 </div>
-
-                <!-- Add this after the last profile-section div -->
 
                 <div class="profile-section">
                     <h2><i class="fas fa-address-card"></i> المعلومات الوظيفية</h2>
                     <div class="info-row">
-                        <span class="label">الرقم الوطني:</span>
-                        <span class="value"><?= htmlspecialchars($employee['national_id']) ?></span>
+                        <span class="label">رقم الضمان الاجتماعي:</span>
+                        <span class="value"><?= htmlspecialchars($employee['ssn'] ?? 'غير محدد') ?></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">تاريخ التنصيب:</span>
+                        <span class="value"><?= $employee['first_hire_date'] ? date('d/m/Y', strtotime($employee['first_hire_date'])) : 'غير محدد' ?></span>
                     </div>
                     <div class="info-row">
                         <span class="label">تاريخ التعيين:</span>
-                        <span class="value"><?= date('d/m/Y', strtotime($employee['hire_date'])) ?></span>
+                        <span class="value"><?= $employee['hire_date'] ? date('d/m/Y', strtotime($employee['hire_date'])) : 'غير محدد' ?></span>
                     </div>
                     <div class="info-row">
-                        <span class="label">القسم:</span>
-                        <span class="value"><?= htmlspecialchars($employee['department']) ?></span>
+                        <span class="label">منصب الشغل:</span>
+                        <span class="value"><?= htmlspecialchars($employee['position'] ?? 'غير محدد') ?></span>
                     </div>
-                    <div class="info-row">
-                        <span class="label">المنصب:</span>
-                        <span class="value"><?= htmlspecialchars($employee['position']) ?></span>
-                    </div>
-                    <?php if (isset($success)): ?>
+                    
+                    <?php if (!empty($previous_positions)): ?>
                         <div class="info-row">
-                            <span>المناصب السابقة:
-
+                            <span class="label">المناصب السابقة:</span>
+                            <div class="previous-positions">
+                                <?php foreach ($previous_positions as $position): ?>
+                                    <div class="position-entry">
+                                        <span><?= htmlspecialchars($position['position']) ?></span>
+                                        <span class="position-dates">
+                                            (<?= date('d/m/Y', strtotime($position['start_date'])) ?> - 
+                                            <?= date('d/m/Y', strtotime($position['end_date'])) ?>)
+                                        </span>
+                                        
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -114,15 +154,15 @@ try {
                     <h2><i class="fas fa-phone"></i> معلومات الاتصال</h2>
                     <div class="info-row">
                         <span class="label">رقم الهاتف:</span>
-                        <span class="value"><?= htmlspecialchars($employee['phone']) ?></span>
+                        <span class="value"><?= htmlspecialchars($employee['phone'] ?? 'غير متوفر') ?></span>
                     </div>
                     <div class="info-row">
                         <span class="label">البريد الإلكتروني:</span>
-                        <span class="value"><?= htmlspecialchars($employee['email']) ?? 'غير متوفر' ?></span>
+                        <span class="value"><?= htmlspecialchars($employee['email'] ?? 'غير متوفر') ?></span>
                     </div>
                     <div class="info-row">
                         <span class="label">العنوان:</span>
-                        <span class="value"><?= htmlspecialchars($employee['address']) ?? 'غير متوفر' ?></span>
+                        <span class="value"><?= htmlspecialchars($employee['address'] ?? 'غير متوفر') ?></span>
                     </div>
                 </div>
             </div>

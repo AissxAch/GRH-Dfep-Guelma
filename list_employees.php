@@ -42,6 +42,11 @@ try {
 function formatDate($date) {
     return date('d/m/Y', strtotime($date));
 }
+
+// Function to generate full Arabic name
+function getFullNameAr($employee) {
+    return $employee['firstname_ar'] . ' ' . $employee['lastname_ar'];
+}
 ?>
 
 <!DOCTYPE html>
@@ -69,13 +74,13 @@ function formatDate($date) {
             <h1 class="dashboard-title">قائمة الموظفين</h1>
             
             <?php if (isset($error)): ?>
-                <div class="error-message"><?= $error ?></div>
+                <div class="error-message"><?= htmlspecialchars($error) ?></div>
             <?php endif; ?>
             
             <?php if (isset($success)): ?>
                 <div class="success-message">
                     <i class="fas fa-check"></i>
-                    <p><?= $success ?></p>
+                    <p><?= htmlspecialchars($success) ?></p>
                 </div>
             <?php endif; ?>
 
@@ -107,7 +112,7 @@ function formatDate($date) {
                                 <tr>
                                     <th>الرقم الوظيفي</th>
                                     <th>الاسم الكامل</th>
-                                    <th>الوظيفة</th>
+                                    <th>منصب الشغل</th>
                                     <th>الرقم الوطني</th>
                                     <th>تاريخ التعيين</th>
                                     <th>الإجراءات</th>
@@ -116,10 +121,10 @@ function formatDate($date) {
                             <tbody id="employeesTableBody">
                                 <?php foreach ($employees as $employee): ?>
                                     <tr>
-                                        <td data-label="الرقم الوظيفي"><?= $employee['employee_id'] ?></td>
-                                        <td data-label="الاسم"><?= htmlspecialchars($employee['full_name_ar']) ?></td>
+                                        <td data-label="الرقم الوظيفي"><?= htmlspecialchars($employee['employee_id']) ?></td>
+                                        <td data-label="الاسم"><?= htmlspecialchars(getFullNameAr($employee)) ?></td>
                                         <td data-label="الوظيفة"><?= htmlspecialchars($employee['position']) ?></td>
-                                        <td data-label="الرقم الوطني"><?= $employee['national_id'] ?></td>
+                                        <td data-label="الرقم الوطني"><?= htmlspecialchars($employee['national_id']) ?></td>
                                         <td data-label="تاريخ التعيين">
                                             <?= formatDate($employee['hire_date']) ?>
                                         </td>
@@ -135,6 +140,7 @@ function formatDate($date) {
                                             <a href="extract.php?id=<?= $employee['employee_id'] ?>" 
                                                class="documents-btn" title="إستخراج الملف">
                                                 <i class="fas fa-file-export"></i>
+                                            </a>
                                             <a href="document.php?id=<?= $employee['employee_id'] ?>" 
                                                class="documents-btn" title="عرض المستندات">
                                                 <i class="fas fa-file-alt"></i>
@@ -157,7 +163,16 @@ function formatDate($date) {
 
     <script>
         // Store all employees data for client-side filtering
-        const allEmployees = <?= json_encode($employees) ?>;
+        const allEmployees = <?= json_encode(array_map(function($employee) {
+            return [
+                'employee_id' => $employee['employee_id'],
+                'firstname_ar' => $employee['firstname_ar'],
+                'lastname_ar' => $employee['lastname_ar'],
+                'position' => $employee['position'],
+                'national_id' => $employee['national_id'],
+                'hire_date' => $employee['hire_date']
+            ];
+        }, $employees)) ?>;
         
         function searchEmployees() {
             const input = document.getElementById('searchInput');
@@ -169,9 +184,9 @@ function formatDate($date) {
             
             // Filter employees based on search input
             const filteredEmployees = allEmployees.filter(employee => {
+                const fullNameAr = (employee.firstname_ar + ' ' + employee.lastname_ar).toUpperCase();
                 return (
-                    employee.full_name_ar.toUpperCase().includes(filter) ||
-                    employee.full_name_en.toUpperCase().includes(filter) ||
+                    fullNameAr.includes(filter) ||
                     employee.national_id.includes(filter) ||
                     employee.position.toUpperCase().includes(filter) ||
                     employee.employee_id.toString().includes(filter)
@@ -203,7 +218,7 @@ function formatDate($date) {
                     
                     row.innerHTML = `
                         <td data-label="الرقم الوظيفي">${employee.employee_id}</td>
-                        <td data-label="الاسم">${escapeHtml(employee.full_name_ar)}</td>
+                        <td data-label="الاسم">${escapeHtml(employee.firstname_ar + ' ' + employee.lastname_ar)}</td>
                         <td data-label="الوظيفة">${escapeHtml(employee.position)}</td>
                         <td data-label="الرقم الوطني">${employee.national_id}</td>
                         <td data-label="تاريخ التعيين">${formattedDate}</td>
@@ -219,6 +234,7 @@ function formatDate($date) {
                             <a href="extract.php?id=${employee.employee_id}" 
                                class="documents-btn" title="إستخراج الملف">
                                 <i class="fas fa-file-export"></i>
+                            </a>
                             <a href="document.php?id=${employee.employee_id}" 
                                class="documents-btn" title="عرض المستندات">
                                 <i class="fas fa-file-alt"></i>
