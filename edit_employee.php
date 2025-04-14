@@ -279,6 +279,49 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                     </div>
                 </div>
                 <!-- Previous Positions Section -->
+                
+                <!-- Job Information Section -->
+                <div class="form-section">
+                    <h2><i class="fas fa-address-card"></i> المعلومات الوظيفية</h2>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>تاريخ التعيين <span class="required">*</span></label>
+                            <input type="text" name="hire_date" placeholder="dd/mm/yyyy" 
+                            value="<?= date('d/m/Y', strtotime($employee['hire_date'])) ?>" pattern="\d{2}/\d{2}/\d{4}" required>
+                        </div>
+                        <div class="input-group">
+                            <label>تاريخ أول تعيين</label>
+                            <input type="text" value="<?= date('d/m/Y', strtotime($employee['first_hire_date'])) ?>" readonly>
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>القسم <span class="required">*</span></label>
+                            <select name="department_id" required>
+                                <option value="0">اختر...</option>
+                                <?php foreach ($departments as $dept): ?>
+                                    <option value="<?= $dept['department_id'] ?>" <?= $employee['department_id'] == $dept['department_id'] ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($dept['name']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>المنصب <span class="required">*</span></label>
+                            <input type="text" name="position" 
+                                value="<?= htmlspecialchars($employee['position']) ?>" required>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>
+                            <input type="checkbox" name="is_active" <?= $employee['is_active'] ? 'checked' : '' ?>>
+                            الحساب نشط
+                        </label>
+                    </div>
+                </div>
                 <div class="form-section">
                     <h2><i class="fas fa-history"></i> الوظائف السابقة</h2>
                     <div id="previous-positions-container">
@@ -355,50 +398,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                         </button>
                     </div>
                 </div>
-
-                <!-- Job Information Section -->
-                <div class="form-section">
-                    <h2><i class="fas fa-address-card"></i> المعلومات الوظيفية</h2>
-                    <div class="input-row">
-                        <div class="input-group">
-                            <label>تاريخ التعيين <span class="required">*</span></label>
-                            <input type="text" name="hire_date" placeholder="dd/mm/yyyy" 
-                                   value="<?= date('d/m/Y', strtotime($employee['hire_date'])) ?>" pattern="\d{2}/\d{2}/\d{4}" required>
-                        </div>
-                        <div class="input-group">
-                            <label>تاريخ أول تعيين</label>
-                            <input type="text" value="<?= date('d/m/Y', strtotime($employee['first_hire_date'])) ?>" readonly>
-                        </div>
-                    </div>
-
-                    <div class="input-row">
-                        <div class="input-group">
-                            <label>القسم <span class="required">*</span></label>
-                            <select name="department_id" required>
-                                <option value="0">اختر...</option>
-                                <?php foreach ($departments as $dept): ?>
-                                    <option value="<?= $dept['department_id'] ?>" <?= $employee['department_id'] == $dept['department_id'] ? 'selected' : '' ?>>
-                                        <?= htmlspecialchars($dept['name']) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        
-                        <div class="input-group">
-                            <label>المنصب <span class="required">*</span></label>
-                            <input type="text" name="position" 
-                                value="<?= htmlspecialchars($employee['position']) ?>" required>
-                        </div>
-                    </div>
-                    
-                    <div class="input-group">
-                        <label>
-                            <input type="checkbox" name="is_active" <?= $employee['is_active'] ? 'checked' : '' ?>>
-                            الحساب نشط
-                        </label>
-                    </div>
-                </div>
-
+                
                 <!-- Contact Information Section -->
                 <div class="form-section">
                     <h2><i class="fas fa-phone"></i> معلومات الاتصال</h2>
