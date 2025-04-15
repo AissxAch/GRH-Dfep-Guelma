@@ -25,7 +25,7 @@ try {
     die("خطأ في قاعدة البيانات: " . $e->getMessage());
 }
  
-
+$fullname = $employee['firstname_ar'] . ' ' . $employee['lastname_ar'];
 ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -42,7 +42,7 @@ try {
     <?php include 'header.php'; ?>
 
         <div class="documnts-container">
-            <h1 class="dashboard-title">إستخراج الوثائق للموظف <?= htmlspecialchars($employee['full_name_ar']) ?></h1>
+            <h1 class="dashboard-title">إستخراج الوثائق للموظف <?= htmlspecialchars($fullname) ?></h1>
             <div class="documnts-grid">
                 <div class="documnt-card">
                     <i class="fas fa-file-alt"></i>

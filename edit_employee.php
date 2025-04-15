@@ -14,6 +14,15 @@ $employee = [];
 $previous_positions = [];
 $departments = [];
 
+$positions = [];
+try {
+    $stmt = $pdo->query("SELECT * FROM positions ORDER BY name ASC");
+    $positions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $error = "خطأ في جلب المناصب: " . $e->getMessage();
+}
+
+
 // Fetch departments
 try {
     $stmt = $pdo->query("SELECT * FROM departments");
@@ -178,6 +187,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
     <title>تعديل موظف - GRH Depf</title>
     <link rel="stylesheet" href="CSS/edit_employee.css">
     <link rel="stylesheet" href="CSS/icons.css">
+    <style>
+        .delete-position-btn {
+            display: flex;
+            align-items: flex-end;
+            margin-bottom: 10px;
+        }
+        
+        .delete-position-button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .delete-position-button:hover {
+            background-color: #c0392b;
+        }
+    </style>
 </head>
 <body>
     <div class="dashboard-container">
@@ -278,7 +308,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                         <input type="number" name="vacances_remain_days" value="<?= htmlspecialchars($employee['vacances_remain_days']) ?>" required>
                     </div>
                 </div>
-                <!-- Previous Positions Section -->
                 
                 <!-- Job Information Section -->
                 <div class="form-section">
@@ -309,9 +338,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                         </div>
                         
                         <div class="input-group">
-                            <label>المنصب <span class="required">*</span></label>
-                            <input type="text" name="position" 
-                                value="<?= htmlspecialchars($employee['position']) ?>" required>
+                            <label>منصب الشغل <span class="required">*</span></label>
+                            <select name="position" required>
+                                <option value="">اختر منصب الشغل...</option>
+                                <?php foreach ($positions as $pos): ?>
+                                    <option value="<?= $pos['name'] ?>" 
+                                        <?= $employee['position'] == $pos['name'] ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($pos['name']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                     </div>
                     
@@ -322,6 +358,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                         </label>
                     </div>
                 </div>
+                <!-- Previous Positions Section -->
                 <div class="form-section">
                     <h2><i class="fas fa-history"></i> الوظائف السابقة</h2>
                     <div id="previous-positions-container">
@@ -330,7 +367,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                                 <div class="input-row">
                                     <div class="input-group">
                                         <label>الوظيفة السابقة</label>
-                                        <input type="text" name="prev_positions[]" placeholder="اسم الوظيفة السابقة">
+                                        <select name="prev_positions[]">
+                                            <option value="">اختر منصب الشغل السابق</option>
+                                            <?php foreach ($positions as $pos): ?>
+                                                <option value="<?= $pos['name'] ?>">
+                                                    <?= htmlspecialchars($pos['name']) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
                                         <input type="hidden" name="prev_ids[]" value="">
                                     </div>
                                     <div class="input-group">
@@ -350,6 +394,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                                         <label>تاريخ الانتهاء</label>
                                         <input type="date" name="prev_end_dates[]">
                                     </div>
+                                    <div class="input-group delete-position-btn">
+                                        <button type="button" class="delete-position-button">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         <?php else: ?>
@@ -358,9 +407,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                                     <div class="input-row">
                                         <div class="input-group">
                                             <label>الوظيفة السابقة</label>
-                                            <input type="text" name="prev_positions[]" 
-                                                   value="<?= htmlspecialchars($pos['position']) ?>"
-                                                   placeholder="اسم الوظيفة السابقة">
+                                            <select name="prev_positions[]">
+                                                <option value="">اختر منصب الشغل السابق</option>
+                                                <?php foreach ($positions as $position): ?>
+                                                    <option value="<?= $position['name'] ?>" <?= $pos['position'] == $position['name'] ? 'selected' : '' ?>>
+                                                        <?= htmlspecialchars($position['name']) ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
                                             <input type="hidden" name="prev_ids[]" value="<?= $pos['id'] ?>">
                                         </div>
                                         <div class="input-group">
@@ -377,12 +431,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                                         <div class="input-group">
                                             <label>تاريخ البدء</label>
                                             <input type="date" name="prev_start_dates[]" 
-                                                   value="<?= $pos['start_date'] ?>">
+                                                value="<?= $pos['start_date'] ?>">
                                         </div>
                                         <div class="input-group">
                                             <label>تاريخ الانتهاء</label>
                                             <input type="date" name="prev_end_dates[]" 
-                                                   value="<?= $pos['end_date'] ?>">
+                                                value="<?= $pos['end_date'] ?>">
+                                        </div>
+                                        <div class="input-group delete-position-btn">
+                                            <button type="button" class="delete-position-button">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -398,7 +457,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                         </button>
                     </div>
                 </div>
-                
+
                 <!-- Contact Information Section -->
                 <div class="form-section">
                     <h2><i class="fas fa-phone"></i> معلومات الاتصال</h2>
@@ -449,15 +508,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
             const container = document.getElementById('previous-positions-container');
             const newEntry = container.children[0].cloneNode(true);
             
-            // Clear input values
+            // Clear input values and selections
             newEntry.querySelectorAll('input').forEach(input => {
                 if (input.type !== 'hidden') {
                     input.value = '';
+                } else {
+                    input.value = ''; // Clear hidden id as well for new entries
                 }
             });
             newEntry.querySelectorAll('select').forEach(select => {
                 select.selectedIndex = 0;
             });
+            
+            // Make sure the delete button handler is attached
+            attachDeleteHandler(newEntry.querySelector('.delete-position-button'));
+            
             container.appendChild(newEntry);
         });
 
@@ -467,6 +532,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
             if (container.children.length > 1) {
                 container.removeChild(container.lastElementChild);
             }
+        });
+        
+        // Function to attach delete handler to a button
+        function attachDeleteHandler(button) {
+            button.addEventListener('click', function() {
+                const container = document.getElementById('previous-positions-container');
+                const entry = this.closest('.previous-position-entry');
+                
+                // Only delete if there's more than one position entry
+                if (container.children.length > 1) {
+                    entry.remove();
+                } else {
+                    // If it's the last entry, just clear the fields
+                    entry.querySelectorAll('input').forEach(input => {
+                        if (input.type !== 'hidden') {
+                            input.value = '';
+                        } else {
+                            input.value = '';
+                        }
+                    });
+                    entry.querySelectorAll('select').forEach(select => {
+                        select.selectedIndex = 0;
+                    });
+                }
+            });
+        }
+
+        // Attach delete handlers to all existing delete buttons on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.delete-position-button').forEach(button => {
+                attachDeleteHandler(button);
+            });
         });
     </script>
 </body>

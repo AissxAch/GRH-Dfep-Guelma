@@ -35,11 +35,18 @@ if (!isset($_SESSION['user_id'])) {
                         <i class="fas fa-users"></i>
                         <h3>قائمة الموظفين</h3>
                         <p>عرض قائمة بجميع الموظفين</p>
+                    </a>
 
                     <a href="checkAttendance.php" class="card btn-primary">
                         <i class="fas fa-user-check"></i>
                         <h3>فحص سجل الحضور</h3>
                         <p>فحص المتاخرين و الغأبين</p>
+                    </a>
+
+                    <a href="promote_employee.php" class="card btn-primary">
+                        <i class="fas fa-arrow-up"></i>
+                        <h3>ترقية الموظفين</h3>
+                        <p>تغيير رتبة الموظف إلى رتبة جديدة</p>
                     </a>
 
                     <div class="card search-card">
@@ -55,6 +62,7 @@ if (!isset($_SESSION['user_id'])) {
                     </div>
 
                 
+                <!-- المصالح Section -->
                 <div class="section-title">إدارة المصالح</div>
                 
                     <a href="add_department.php" class="card btn-primary">
@@ -67,6 +75,21 @@ if (!isset($_SESSION['user_id'])) {
                         <i class="fas fa-list"></i>
                         <h3>قائمة الأقسام</h3>
                         <p>عرض قائمة بجميع الأقسام</p>
+                    </a>
+                
+                <!-- الرتب Section -->
+                <div class="section-title">إدارة الرتب</div>
+                
+                    <a href="add_position.php" class="card btn-primary">
+                        <i class="fas fa-plus"></i>
+                        <h3>إضافة رتبة</h3>
+                        <p>إضافة رتبة جديدة إلى النظام</p>
+                    </a>
+
+                    <a href="list_positions.php" class="card btn-info">
+                        <i class="fas fa-list"></i>
+                        <h3>قائمة الرتب</h3>
+                        <p>عرض قائمة بجميع الرتب</p>
                     </a>
                 </div>
 

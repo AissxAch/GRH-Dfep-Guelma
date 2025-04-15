@@ -284,6 +284,7 @@ body{
 .fa-building::before { content: "\f1ad"; }
 .fa-info-circle::before { content: "\f05a"; }
 .fa-calendar-check::before { content: "\f274"; }
+.fa-arrow-up::before { content: "\f062"; }
 
 /* Responsive Styles */
 @media (max-width: 768px) {

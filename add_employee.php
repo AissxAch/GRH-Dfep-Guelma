@@ -15,6 +15,14 @@ try {
     $error = "خطأ في جلب البيانات: " . $e->getMessage();
 }
 
+$positions = [];
+try {
+    $stmt = $pdo->query("SELECT * FROM positions ORDER BY name ASC");
+    $positions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $error = "خطأ في جلب البيانات: " . $e->getMessage();
+} 
+
 $errors = [];
 $success = '';
 $previous_positions = [];
@@ -247,57 +255,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <input type="number" name="vacances_remain_days" value="<?= htmlspecialchars($_POST['vacances_remain_days'] ?? 0) ?>">
                 </div>
 
-                <!-- Previous Positions Section -->
-                <div class="form-section">
-                    <h2><i class="fas fa-history"></i> الوظائف السابقة</h2>
-                    <div id="previous-positions-container">
-                        <div class="previous-position-entry">
-                            <div class="input-row">
-                                <div class="input-group">
-                                    <label>الوظيفة السابقة</label>
-                                    <input type="text" name="prev_positions[]" 
-                                           value="<?= htmlspecialchars($_POST['prev_positions'][0] ?? '') ?>"
-                                           placeholder="اسم الوظيفة السابقة">
-                                </div>
-                                <div class="input-group">
-                                    <label>تاريخ البدء</label>
-                                    <input type="date" name="prev_start_dates[]" 
-                                           value="<?= htmlspecialchars($_POST['prev_start_dates'][0] ?? '') ?>">
-                                </div>
-                                <div class="input-group">
-                                    <label>تاريخ الانتهاء</label>
-                                    <input type="date" name="prev_end_dates[]" 
-                                           value="<?= htmlspecialchars($_POST['prev_end_dates'][0] ?? '') ?>">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="actions">
-                        <button type="button" id="add-previous-position" class="login-button">
-                            <i class="fas fa-plus"></i> إضافة وظيفة سابقة
-                        </button>
-                        <button type="button" id="remove-previous-position" class="delete-button">
-                            <i class="fas fa-minus"></i> حذف وظيفة سابقة
-                        </button>
-                    </div>
-                </div>
-
+                
                 <!-- Job Information Section -->
                 <div class="form-section">
                     <h2><i class="fas fa-address-card"></i> المعلومات الوظيفية</h2>
                     <div class="input-row">
-                        <div class="input-group">
-                            <label>منصب الشغل <span class="required">*</span></label>
-                            <input type="text" name="position" 
-                                value="<?= htmlspecialchars($_POST['position'] ?? '') ?>" required>
-                        </div>
+                    <div class="input-group">
+                        <label>منصب الشغل <span class="required">*</span></label>
+                        <select name="position" required>
+                            <option value="">اختر منصب الشغل...</option>
+                            <?php foreach ($positions as $pos): ?>
+                                <option value="<?= $pos['name'] ?>" <?= ($_POST['position'] ?? '') == $pos['name'] ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($pos['name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
                         <div class="input-group">
                             <label>تاريخ التعيين <span class="required">*</span></label>
                             <input type="text" name="hire_date" placeholder="dd/mm/yyyy" 
-                                   value="<?= htmlspecialchars($_POST['hire_date'] ?? '') ?>" pattern="\d{2}/\d{2}/\d{4}" required>
+                            value="<?= htmlspecialchars($_POST['hire_date'] ?? '') ?>" pattern="\d{2}/\d{2}/\d{4}" required>
                         </div>
                     </div>
-
+                    
                     <div class="input-row">
                         <div class="input-group">
                             <label>المصلحة <span class="required">*</span></label>
@@ -305,15 +285,54 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <option value="0">اختر مصلحة</option>
                                 <?php if ($departments): ?>
                                     <?php foreach ($departments as $dept): ?>
-                                    <option value="<?= $dept['department_id'] ?>" <?= ($_POST['department'] ?? '') == $dept['department_id'] ? 'selected' : '' ?>><?= htmlspecialchars($dept['name']) ?></option>
-                                    <?php endforeach; ?>
-                                <?php endif;?>
-                            </select>
+                                        <option value="<?= $dept['department_id'] ?>" <?= ($_POST['department'] ?? '') == $dept['department_id'] ? 'selected' : '' ?>><?= htmlspecialchars($dept['name']) ?></option>
+                                        <?php endforeach; ?>
+                                        <?php endif;?>
+                                    </select>
+                                </div>
+                                
+                                
+                            </div>
                         </div>
-                        
-                        
-                    </div>
-                </div>
+                        <!-- Previous Positions Section -->
+                        <div class="form-section">
+                            <h2><i class="fas fa-history"></i> الوظائف السابقة</h2>
+                            <div id="previous-positions-container">
+                                <div class="previous-position-entry">
+                                    <div class="input-row">
+                                    <div class="input-group">
+                                        <label>مناصب الشغل السابقة <span class="required">*</span></label>
+                                        <select name="position" required>
+                                            <option value="">اختر منصب الشغل السابق</option>
+                                            <?php foreach ($positions as $pos): ?>
+                                                <option value="<?= $pos['name'] ?>" <?= ($_POST['position'] ?? '') == $pos['name'] ? 'selected' : '' ?>>
+                                                    <?= htmlspecialchars($pos['name']) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                        <div class="input-group">
+                                            <label>تاريخ البدء</label>
+                                            <input type="date" name="prev_start_dates[]" 
+                                                   value="<?= htmlspecialchars($_POST['prev_start_dates'][0] ?? '') ?>">
+                                        </div>
+                                        <div class="input-group">
+                                            <label>تاريخ الانتهاء</label>
+                                            <input type="date" name="prev_end_dates[]" 
+                                                   value="<?= htmlspecialchars($_POST['prev_end_dates'][0] ?? '') ?>">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="actions">
+                                <button type="button" id="add-previous-position" class="login-button">
+                                    <i class="fas fa-plus"></i> إضافة وظيفة سابقة
+                                </button>
+                                <button type="button" id="remove-previous-position" class="delete-button">
+                                    <i class="fas fa-minus"></i> حذف وظيفة سابقة
+                                </button>
+                            </div>
+                        </div>
 
                 <!-- Contact Information Section -->
                 <div class="form-section">

@@ -40,7 +40,7 @@ try {
         $existingPrevPositions = $prevPosStmt->fetchAll(PDO::FETCH_ASSOC);
 
         // Auto-fill employee data
-        $fullname = $employee['full_name_ar'];
+        $fullname = $employee['firstname_ar'] . ' ' . $employee['lastname_ar'];
         $bornPlace = $employee['birth_place'];
         $bornDate = date('d/m/Y', strtotime($employee['birth_date']));
         $actualPoste = [

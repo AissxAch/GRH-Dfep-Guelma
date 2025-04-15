@@ -104,7 +104,6 @@ try {
                             <tr>
                                 <th>#</th>
                                 <th>الاسم العربي</th>
-                                <th>الاسم الإنجليزي</th>
                                 <th>تاريخ الإضافة</th>
                                 <th>الإجراءات</th>
                             </tr>
@@ -113,8 +112,7 @@ try {
                             <?php foreach ($departments as $index => $dept): ?>
                             <tr>
                                 <td><?= $index + 1 ?></td>
-                                <td><?= htmlspecialchars($dept['name_ar']) ?></td>
-                                <td><?= htmlspecialchars($dept['name_en']) ?></td>
+                                <td><?= htmlspecialchars($dept['name']) ?></td>
                                 <td><?= date('d/m/Y H:i', strtotime($dept['created_at'])) ?></td>
                                 <td class="actions">
                                     <a href="edit_department.php?id=<?= $dept['department_id'] ?>" class="btn btn-edit">

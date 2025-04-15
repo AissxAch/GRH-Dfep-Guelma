@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 28, 2025 at 07:43 PM
+-- Generation Time: Apr 15, 2025 at 05:16 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -29,8 +29,7 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `departments` (
   `department_id` int(11) NOT NULL,
-  `name_ar` varchar(50) NOT NULL COMMENT 'اسم القسم (عربي)',
-  `name_en` varchar(50) NOT NULL COMMENT 'Department Name (English)',
+  `name` varchar(50) NOT NULL COMMENT 'اسم القسم (عربي)',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -38,12 +37,12 @@ CREATE TABLE `departments` (
 -- Dumping data for table `departments`
 --
 
-INSERT INTO `departments` (`department_id`, `name_ar`, `name_en`, `created_at`) VALUES
-(1, 'الإدارة', 'Management', '2025-03-28 17:26:30'),
-(2, 'الموارد البشرية', 'Human Resources', '2025-03-28 17:26:30'),
-(3, 'المبيعات', 'Sales', '2025-03-28 17:26:30'),
-(4, 'التسويق', 'Marketing', '2025-03-28 17:26:30'),
-(5, 'التقنية', 'IT', '2025-03-28 17:26:30');
+INSERT INTO `departments` (`department_id`, `name`, `created_at`) VALUES
+(1, 'الإدارة', '2025-03-28 17:26:30'),
+(2, 'الموارد البشرية', '2025-03-28 17:26:30'),
+(3, 'المبيعات', '2025-03-28 17:26:30'),
+(4, 'التسويق', '2025-03-28 17:26:30'),
+(5, 'التقنية', '2025-03-28 17:26:30');
 
 -- --------------------------------------------------------
 
@@ -53,20 +52,25 @@ INSERT INTO `departments` (`department_id`, `name_ar`, `name_en`, `created_at`) 
 
 CREATE TABLE `employees` (
   `employee_id` int(11) NOT NULL,
-  `full_name_ar` varchar(100) NOT NULL COMMENT 'الاسم الكامل (عربي)',
-  `full_name_en` varchar(100) NOT NULL COMMENT 'Full Name (English)',
+  `firstname_ar` varchar(100) NOT NULL,
+  `lastname_ar` varchar(100) NOT NULL,
+  `firstname_en` varchar(100) NOT NULL,
+  `lastname_en` varchar(100) NOT NULL,
   `birth_date` date NOT NULL,
   `birth_place` varchar(100) NOT NULL,
   `gender` enum('male','female') NOT NULL COMMENT 'النوع',
   `bloodtype` varchar(20) NOT NULL,
   `national_id` varchar(20) NOT NULL COMMENT 'الرقم الوطني',
+  `ssn` int(20) NOT NULL,
   `email` varchar(100) DEFAULT NULL,
   `phone` varchar(20) NOT NULL,
   `address` text DEFAULT NULL COMMENT 'العنوان',
   `position` varchar(50) NOT NULL COMMENT 'المنصب',
-  `department` varchar(50) NOT NULL COMMENT 'القسم',
+  `department_id` int(10) DEFAULT NULL,
+  `first_hire_date` date NOT NULL,
   `hire_date` date NOT NULL COMMENT 'تاريخ التعيين',
   `is_active` tinyint(1) DEFAULT 1 COMMENT 'الحالة',
+  `vacances_remain_days` int(20) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -75,22 +79,8 @@ CREATE TABLE `employees` (
 -- Dumping data for table `employees`
 --
 
-INSERT INTO `employees` (`employee_id`, `full_name_ar`, `full_name_en`, `birth_date`, `birth_place`, `gender`, `bloodtype`, `national_id`, `email`, `phone`, `address`, `position`, `department`, `hire_date`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, 'علي أحمد', 'Ali Ahmed', '1990-05-15', 'الرياض', 'male', 'O+', '1011111111', 'ali@company.com', '0551111111', 'الرياض - حي النخيل', 'مدير مشاريع', 'الإدارة', '2020-01-01', 1, '2025-03-28 17:27:36', '2025-03-28 17:27:36'),
-(2, 'فاطمة خالد', 'Fatima Khalid', '1992-08-22', 'جدة', 'female', 'A+', '1022222222', 'fatima@company.com', '0552222222', 'جدة - حي الصفا', 'محلل موارد بشرية', 'الموارد البشرية', '2021-03-15', 1, '2025-03-28 17:27:36', '2025-03-28 17:27:36'),
-(3, 'محمد ناصر', 'Mohammed Nasser', '1988-12-10', 'الدمام', 'male', 'B+', '1033333333', 'mohammed@company.com', '0553333333', 'الدمام - حي البحر', 'منسق مبيعات', 'المبيعات', '2019-11-01', 1, '2025-03-28 17:27:36', '2025-03-28 17:27:36'),
-(4, 'لينا عمر', 'Lina Omar', '1995-04-05', 'الرياض', 'female', 'AB+', '1044444444', 'lina@company.com', '0554444444', 'الرياض - حي العليا', 'مسوق رقمي', 'التسويق', '2022-06-01', 1, '2025-03-28 17:27:36', '2025-03-28 17:27:36'),
-(5, 'خالد سعود', 'Khaled Saud', '1993-07-19', 'الطائف', 'male', 'O-', '1055555555', 'khaled@company.com', '0555555555', 'الطائف - حي الورد', 'مبرمج', 'التقنية', '2023-01-10', 1, '2025-03-28 17:27:36', '2025-03-28 17:27:36'),
-(6, 'نورة راشد', 'Noura Rashid', '1991-09-30', 'الخبر', 'female', 'A-', '1066666666', 'noura@company.com', '0556666666', 'الخبر - حي الجوهرة', 'مدير فريق', 'الإدارة', '2020-07-15', 1, '2025-03-28 17:27:36', '2025-03-28 17:27:36'),
-(7, 'عمر حسن', 'Omar Hassan', '1985-03-25', 'الدمام', 'male', 'B-', '1077777777', 'omar@company.com', '0557777777', 'الدمام - حي النور', 'محاسب', 'الموارد البشرية', '2018-05-01', 1, '2025-03-28 17:27:36', '2025-03-28 17:27:36'),
-(8, 'سارة عبدالله', 'Sara Abdullah', '1994-11-12', 'جدة', 'female', 'AB-', '1088888888', 'sara@company.com', '0558888888', 'جدة - حي الروضة', 'مندوبة مبيعات', 'المبيعات', '2021-09-01', 1, '2025-03-28 17:27:36', '2025-03-28 17:27:36'),
-(9, 'فيصل نادر', 'Faisal Nadir', '1996-02-28', 'الرياض', 'male', 'O+', '1099999999', 'faisal@company.com', '0559999999', 'الرياض - حي السلي', 'مصمم جرافيك', 'التسويق', '2022-12-01', 1, '2025-03-28 17:27:36', '2025-03-28 17:27:36'),
-(10, 'هديل محمد', 'Hadeel Mohammed', '1997-06-14', 'الجبيل', 'female', 'A+', '1100000000', 'hadeel@company.com', '0550000000', 'الجبيل - حي البلد', 'مختبر برمجيات', 'التقنية', '2023-03-01', 1, '2025-03-28 17:27:36', '2025-03-28 17:27:36'),
-(11, 'أحمد سعيد', 'Ahmed Saeed', '1990-07-01', 'الرياض', 'male', 'O+', '2011111111', 'ahmed@company.com', '0561111111', 'الرياض - حي العريجاء', 'موظف استقبال', 'الإدارة', '2023-04-01', 1, '2025-03-28 17:27:36', '2025-03-28 17:27:36'),
-(12, 'ريم عبدالعزيز', 'Reem Abdulaziz', '1992-09-15', 'جدة', 'female', 'A+', '2022222222', 'reem@company.com', '0562222222', 'جدة - حي المحمدية', 'مساعد إداري', 'الموارد البشرية', '2022-08-15', 1, '2025-03-28 17:27:36', '2025-03-28 17:27:36'),
-(13, 'تركي فيصل', 'Turki Faisal', '1989-11-20', 'الدمام', 'male', 'B+', '2033333333', 'turki@company.com', '0563333333', 'الدمام - حي الثقبة', 'ممثل مبيعات', 'المبيعات', '2021-12-01', 1, '2025-03-28 17:27:36', '2025-03-28 17:27:36'),
-(14, 'نوف خالد', 'Nouf Khalid', '1993-04-12', 'الرياض', 'female', 'AB+', '2044444444', 'nouf@company.com', '0564444444', 'الرياض - حي الندى', 'منسقة تسويق', 'التسويق', '2023-02-01', 1, '2025-03-28 17:27:36', '2025-03-28 17:27:36'),
-(15, 'بدر ناصر', 'Badr Nasser', '1994-08-25', 'الطائف', 'male', 'O-', '2055555555', 'badr@company.com', '0565555555', 'الطائف - حي الشهداء', 'دعم فني', 'التقنية', '2023-05-15', 1, '2025-03-28 17:27:36', '2025-03-28 17:27:36');
+INSERT INTO `employees` (`employee_id`, `firstname_ar`, `lastname_ar`, `firstname_en`, `lastname_en`, `birth_date`, `birth_place`, `gender`, `bloodtype`, `national_id`, `ssn`, `email`, `phone`, `address`, `position`, `department_id`, `first_hire_date`, `hire_date`, `is_active`, `vacances_remain_days`, `created_at`, `updated_at`) VALUES
+(1, 'محمد', 'بلحاج', 'Mohamed', 'Belhadj', '1985-07-15', 'قالمة', 'male', 'A+', '8507150098765', 123456789, 'mohamed.belhadj@gmail.com', '0550123456', 'حي الأمير عبد القادر، قالمة', 'متصرف', 1, '2015-03-10', '2023-01-01', 1, 28, '2025-04-15 02:00:15', '2025-04-15 03:11:55');
 
 -- --------------------------------------------------------
 
@@ -126,16 +116,61 @@ CREATE TABLE `employee_previous_positions` (
 --
 
 INSERT INTO `employee_previous_positions` (`id`, `employee_id`, `position`, `department_id`, `start_date`, `end_date`) VALUES
-(1, 1, 'مساعد مدير مشاريع', 1, '2018-01-01', '2019-12-31'),
-(2, 2, 'مساعد موارد بشرية', 2, '2019-06-01', '2021-02-28'),
-(3, 3, 'مندوب مبيعات مبتدئ', 3, '2017-03-01', '2019-10-31'),
-(4, 4, 'مساعد تسويق', 4, '2020-01-01', '2022-05-31'),
-(5, 5, 'مبرمج مبتدئ', 5, '2021-07-01', '2022-12-31'),
-(6, 6, 'منسق مشاريع', 1, '2018-09-01', '2020-06-30'),
-(7, 7, 'محاسب مساعد', 2, '2016-01-01', '2018-04-30'),
-(8, 8, 'متدرب مبيعات', 3, '2020-03-01', '2021-08-31'),
-(9, 9, 'مصمم مبتدئ', 4, '2021-01-01', '2022-11-30'),
-(10, 10, 'متدبر تقنية', 5, '2022-06-01', '2023-02-28');
+(25, 1, 'عون إدارة رئيسي', 2, '2015-03-10', '2018-06-30'),
+(26, 1, 'ملحق الإدارة', 1, '2018-07-01', '2022-12-31');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `positions`
+--
+
+CREATE TABLE `positions` (
+  `position_id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `positions`
+--
+
+INSERT INTO `positions` (`position_id`, `name`, `created_at`) VALUES
+(1, 'متصرف', '2025-04-15 00:17:24'),
+(2, 'متصرف رئيسي', '2025-04-15 00:17:24'),
+(3, 'متصرف مستشار', '2025-04-15 00:17:24'),
+(4, 'ملحق الإدارة', '2025-04-15 00:17:24'),
+(5, 'ملحق رئيسي لإدارة', '2025-04-15 00:17:24'),
+(6, 'عون مكتب', '2025-04-15 00:17:24'),
+(7, 'عون إدارة', '2025-04-15 00:17:24'),
+(8, 'عون إدارة رئيسي', '2025-04-15 00:17:24'),
+(9, 'مساعد محاسب إداري', '2025-04-15 00:17:24'),
+(10, 'محاسب إداري', '2025-04-15 00:17:24'),
+(11, 'محاسب إداري رئيسي', '2025-04-15 00:17:24'),
+(12, 'عون حفظ البيانات', '2025-04-15 00:17:24'),
+(13, 'كاتب', '2025-04-15 00:17:24'),
+(14, 'كاتب مديرية', '2025-04-15 00:17:24'),
+(15, 'كاتب مديرية رئيسي', '2025-04-15 00:17:24'),
+(16, 'مترجم', '2025-04-15 00:17:24'),
+(17, 'مترجم رئيسي', '2025-04-15 00:17:24'),
+(18, 'رئيس المترجمين', '2025-04-15 00:17:24'),
+(19, 'مهندس تطبيقي', '2025-04-15 00:17:24'),
+(20, 'مهندس دولة', '2025-04-15 00:17:24'),
+(21, 'مهندس رئيسي', '2025-04-15 00:17:24'),
+(22, 'رئيس المهندسين', '2025-04-15 00:17:24'),
+(24, 'تقني سام', '2025-04-15 00:17:24'),
+(25, 'معاون تقني', '2025-04-15 00:17:24'),
+(26, 'عون تقني', '2025-04-15 00:17:24'),
+(27, 'وثائقي أمين محفوظات', '2025-04-15 00:17:24'),
+(28, 'وثائقي أمين محفوظات رئيسي', '2025-04-15 00:17:24'),
+(29, 'رئيس الوثائقيين أمناء المحفوظات', '2025-04-15 00:17:24'),
+(30, 'مساعد وثائقي أمين محفوظات', '2025-04-15 00:17:24'),
+(31, 'عون تقني في الوثائق والمحفوظات', '2025-04-15 00:17:24'),
+(32, 'عون مخبر', '2025-04-15 00:17:24'),
+(33, 'محلل اقتصادي', '2025-04-15 00:17:24'),
+(34, 'محلل رئيسي', '2025-04-15 00:17:24'),
+(35, 'رئيس المحللين', '2025-04-15 00:17:24'),
+(36, 'تقني', '2025-04-15 00:55:05');
 
 -- --------------------------------------------------------
 
@@ -172,7 +207,8 @@ ALTER TABLE `departments`
 --
 ALTER TABLE `employees`
   ADD PRIMARY KEY (`employee_id`),
-  ADD UNIQUE KEY `national_id` (`national_id`);
+  ADD UNIQUE KEY `national_id` (`national_id`),
+  ADD KEY `department_id` (`department_id`);
 
 --
 -- Indexes for table `employee_documents`
@@ -188,6 +224,12 @@ ALTER TABLE `employee_previous_positions`
   ADD PRIMARY KEY (`id`),
   ADD KEY `employee_id` (`employee_id`),
   ADD KEY `department_id` (`department_id`);
+
+--
+-- Indexes for table `positions`
+--
+ALTER TABLE `positions`
+  ADD PRIMARY KEY (`position_id`);
 
 --
 -- Indexes for table `users`
@@ -209,19 +251,25 @@ ALTER TABLE `departments`
 -- AUTO_INCREMENT for table `employees`
 --
 ALTER TABLE `employees`
-  MODIFY `employee_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `employee_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `employee_documents`
 --
 ALTER TABLE `employee_documents`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `employee_previous_positions`
 --
 ALTER TABLE `employee_previous_positions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
+
+--
+-- AUTO_INCREMENT for table `positions`
+--
+ALTER TABLE `positions`
+  MODIFY `position_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
 -- AUTO_INCREMENT for table `users`

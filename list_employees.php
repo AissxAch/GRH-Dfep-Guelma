@@ -115,6 +115,7 @@ function getFullNameAr($employee) {
                                     <th>منصب الشغل</th>
                                     <th>الرقم الوطني</th>
                                     <th>تاريخ التعيين</th>
+                                    <th>تاريخ التنصيب</th>
                                     <th>الإجراءات</th>
                                 </tr>
                             </thead>
@@ -128,6 +129,9 @@ function getFullNameAr($employee) {
                                         <td data-label="تاريخ التعيين">
                                             <?= formatDate($employee['hire_date']) ?>
                                         </td>
+                                        <td data-label="تاريخ التنصيب">
+                                            <?= $employee['first_hire_date'] ? formatDate($employee['first_hire_date']) : 'غير محدد' ?>
+                                        </td>
                                         <td data-label="الإجراءات" class="actions-cell">
                                             <a href="employee.php?id=<?= $employee['employee_id'] ?>" 
                                                class="view-btn" title="عرض الملف">
@@ -136,6 +140,10 @@ function getFullNameAr($employee) {
                                             <a href="edit_employee.php?id=<?= $employee['employee_id'] ?>" 
                                                class="edit-btn" title="تعديل">
                                                 <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="promote_employee.php?id=<?= $employee['employee_id'] ?>" 
+                                               class="edit-btn" title="ترقية">
+                                                <i class="fas fa-arrow-up"></i>
                                             </a>
                                             <a href="extract.php?id=<?= $employee['employee_id'] ?>" 
                                                class="documents-btn" title="إستخراج الملف">
