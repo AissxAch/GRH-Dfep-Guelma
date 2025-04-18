@@ -52,6 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error) {
         $error = "يرجى ملء جميع الحقول المطلوبة.";
     }
 }
+$fullname = $employee['firstname_ar'].' '.$employee['lastname_ar'];
 ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -101,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error) {
                             
                             <div class="form-group">
                                 <label>اسم الموظف:</label>
-                                <input type="text" value="<?= htmlspecialchars($employee['full_name_ar']) ?>" readonly>
+                                <input type="text" value="<?= htmlspecialchars($fullname) ?>" readonly>
                             </div>
                             
                             <div class="form-group">
@@ -181,8 +182,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error) {
     <div class="deduction-decision">
         <div class="header">الجمهوريـــــة الجزائريـــــة الديمقراطيـــــة الشعبيـــــة</div>
         <div class="header">وزارة التكوين والتعليم المهنيين</div>
-        <div class="header">مديرية التكوين والتعليم المهنيين لولاية قالمة</div>
         <br>
+        <div class="header2">مديرية التكوين والتعليم المهنيين لولاية قالمة</div>
         <div class="docnum">رقم: 2025/<?= htmlspecialchars($docNum) ?></div>
         <h1>مقـــــــرر</h1>
         <div class="content">
@@ -190,10 +191,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error) {
             <p>-بمقتضى الأمر رقم 06-03 المؤرخ في 15/07/2006، المتضمن القانون الأساسي العام للوظيفة العمومية، المتمم،</p>
             <p>-بمقتضى المرسوم التنفيذي رقم 90-99 المؤرخ في 27/03/1990، المتعلق بسلطة التعيين والتسيير الإداري إزاء موظفي وأعوان الإدارات المركزية، الولايات، البلديات وكذا المؤسسات العمومية ذات الطابع الإداري التابعة لها،</p>
             <p><?= htmlspecialchars($law) ?></p>
-            <p>-نظرا للغياب <?= htmlspecialchars($absenceType)?> للسيد(ة) <strong><?= htmlspecialchars($employee['full_name_ar']) ?></strong> <?= htmlspecialchars($employee['position']) ?> بتاريخ <strong><?= htmlspecialchars($absenceDate) ?></strong> في الفترة المسائية أو الصباحية،</p>
+            <p>-نظرا للغياب <?= htmlspecialchars($absenceType)?> للسيد(ة) <strong><?= htmlspecialchars($fullname) ?></strong> <?= htmlspecialchars($employee['position']) ?> بتاريخ <strong><?= htmlspecialchars($absenceDate) ?></strong> في الفترة المسائية أو الصباحية،</p>
             <p><br>-باقتراح مـن <?= htmlspecialchars($suggest)?></p>
             <h1 class="ttt">يقـــــرر:</h1>
-            <p>-<strong>المادة الأولى:</strong> يخصم <strong><?= htmlspecialchars($daysDeducted) ?></strong> يوم من الراتب الشهري للسيد(ة) <strong><?= htmlspecialchars($employee['full_name_ar']) ?></strong> <?= htmlspecialchars($employee['position']) ?>، بسبب الغياب بتاريخ <strong><?= htmlspecialchars($absenceDate) ?></strong>.</p>
+            <p>-<strong>المادة الأولى:</strong> يخصم <strong><?= htmlspecialchars($daysDeducted) ?></strong> يوم من الراتب الشهري للسيد(ة) <strong><?= htmlspecialchars($fullname) ?></strong> <?= htmlspecialchars($employee['position']) ?>، بسبب الغياب بتاريخ <strong><?= htmlspecialchars($absenceDate) ?></strong>.</p>
             <p>-<strong>المـــــادة 02:</strong> يكلف رئيس مكتب الميزانية والمحاسبة والوسائل العامة والأرشيف بتنفيذ هذا المقرر.</p>
             <div class="signature">
                 <p >قالمة في: <strong><?= htmlspecialchars($docDate) ?></strong></p>
