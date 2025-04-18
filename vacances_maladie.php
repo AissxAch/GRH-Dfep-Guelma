@@ -64,6 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error) {
         $error = "يرجى ملء جميع الحقول المطلوبة.";
     }
 }
+$fullname = $employee['firstname_ar'] . ' ' . $employee['lastname_ar'];
 ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -112,7 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error) {
                         
                         <div class="form-group">
                             <label>اسم الموظف:</label>
-                            <input type="text" value="<?= htmlspecialchars($employee['full_name_ar']) ?>" readonly>
+                            <input type="text" value="<?= htmlspecialchars($fullname) ?>" readonly>
                         </div>
                         
                         <div class="form-group">
@@ -209,8 +210,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error) {
     <div class="medical-leave-decision">
         <div class="header">الجمهوريـــــة الجزائريـــــة الديمقراطيـــــة الشعبيـــــة</div>
         <div class="header">وزارة التكوين والتعليم المهنيين</div>
-        <div class="header">مديرية التكوين والتعليم المهنيين لولاية قالمة</div>
         <br>
+        <div class="header2">مديرية التكوين والتعليم المهنيين لولاية قالمة</div>
         <div class="docnum">رقم: 2025/<?= htmlspecialchars($docNum) ?></div>
         <h1>مقــــــرر</h1>
         <div class="content">
@@ -218,10 +219,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error) {
             <p>-بمقتضى الأمر رقم 06-03 المؤرخ في 15/07/2006، المتضمن القانون الأساسي العام للوظيفة العمومية، المتمم،</p>
             <p>-وبمقتضى المرسوم التنفيذي رقم 90-99 المؤرخ في 27/03/1990 والمتعلق بسلطة التعيين، والتسيير الإداري، بالنسبة للموظفين وأعوان الإدارة المركزية والولايات والبلديات والمؤسسات العمومية ذات الطابع الإداري،</p>
             <p><?= htmlspecialchars($law) ?></p>
-            <p>-بناء على الشهادة الطبية رقم <strong><?= htmlspecialchars($medicalCertNum) ?></strong> بتاريخ <strong><?= htmlspecialchars($medicalCertDate) ?></strong> الصادرة عن <strong><?= htmlspecialchars($medicalCertIssuer) ?></strong>، المتضمنة منح السيد(ة) <strong><?= htmlspecialchars($employee['full_name_ar']) ?><strong> توقف عن العمل لمدة (<strong><?= htmlspecialchars($leaveDays) ?></strong>) يوم، ابتداء من <strong><?= htmlspecialchars($startDate) ?></strong>،</p>
+            <p>-بناء على الشهادة الطبية رقم <strong><?= htmlspecialchars($medicalCertNum) ?></strong> بتاريخ <strong><?= htmlspecialchars($medicalCertDate) ?></strong> الصادرة عن <strong><?= htmlspecialchars($medicalCertIssuer) ?></strong>، المتضمنة منح السيد(ة) <strong><?= htmlspecialchars($fullname) ?><strong> توقف عن العمل لمدة (<strong><?= htmlspecialchars($leaveDays) ?></strong>) يوم، ابتداء من <strong><?= htmlspecialchars($startDate) ?></strong>،</p>
             <p>-باقتراح من </strong><?= htmlspecialchars($suggest) ?></strong></p>
             <h1 class="decision-title">يقـــــــرر</h1>
-            <p>-<strong>المـادة الأولى</strong>: تمنح عطلة مرضية لمدة <strong>(<?= htmlspecialchars($leaveDays) ?>) يوم،</strong> ابتداء من <?= htmlspecialchars($startDate) ?> <strong>للسيد(ة) <?= htmlspecialchars($employee['full_name_ar']) ?></strong> <?= htmlspecialchars($employee['position']) ?>.</p>
+            <p>-<strong>المـادة الأولى</strong>: تمنح عطلة مرضية لمدة <strong>(<?= htmlspecialchars($leaveDays) ?>) يوم،</strong> ابتداء من <?= htmlspecialchars($startDate) ?> <strong>للسيد(ة) <?= htmlspecialchars($fullname) ?></strong> <?= htmlspecialchars($employee['position']) ?>.</p>
             <p>-<strong>المــــــادة 02</strong>: يكلف كل من <?= htmlspecialchars($decisionmaker) ?>، بتنفيـذ هـذا المقـرر.</p>
             <div class="signature">
                 <p>قالمة في: <strong><?= htmlspecialchars($docDate) ?></strong></p>
