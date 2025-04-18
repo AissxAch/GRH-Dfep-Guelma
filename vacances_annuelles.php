@@ -60,6 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error) {
         $error = "يرجى ملء جميع الحقول المطلوبة.";
     }
 }
+$fullname = $employee['firstname_ar'].' '.$employee['lastname_ar'];
 ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -108,7 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error) {
                         
                         <div class="form-group">
                             <label>اسم الموظف:</label>
-                            <input type="text" value="<?= htmlspecialchars($employee['full_name_ar']) ?>" readonly>
+                            <input type="text" value="<?= htmlspecialchars($fullname) ?>" readonly>
                         </div>
                         
                         <div class="form-group">
@@ -204,8 +205,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error) {
     <div class="annual-leave-decision">
         <div class="header">الجمهوريـــــة الجزائريـــــة الديمقراطيـــــة الشعبيـــــة</div>
         <div class="header">وزارة التكوين والتعليم المهنيين</div>
-        <div class="header">مديرية التكوين والتعليم المهنيين لولاية قالمة</div>
         <br>
+        <div class="header2">مديرية التكوين والتعليم المهنيين لولاية قالمة</div>
         <div class="docnum">رقم: 2025/<?= htmlspecialchars($docNum) ?></div>
         <h1>مقـرر عطلة سنوية</h1>
         <div class="content">
@@ -217,7 +218,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error) {
             <p>- وبناء على رزنامة العطل السنوية لسنة <?= htmlspecialchars($leaveYear) ?>،</p>
             <p>- وباقتراح مـن <?= htmlspecialchars($suggest) ?>،</p>
             <h1 class="decision-title">يقـــــــرر</h1>
-            <p>- <strong>المـادة الأولى</strong>: تمنح <strong>للسيد(ة) <?= htmlspecialchars($employee['full_name_ar']) ?></strong> <?= htmlspecialchars($employee['position']) ?> عطلة سنوية لمدة <strong><?= htmlspecialchars($leaveDays) ?> يوم</strong> بعنوان سنة <strong><?= htmlspecialchars($leaveYear) ?></strong>، ابتداء من <strong><?= htmlspecialchars($startDate) ?></strong> إلى غاية <strong><?= htmlspecialchars($endDate) ?></strong>.</p>
+            <p>- <strong>المـادة الأولى</strong>: تمنح <strong>للسيد(ة) <?= htmlspecialchars($fullname) ?></strong> <?= htmlspecialchars($employee['position']) ?> عطلة سنوية لمدة <strong><?= htmlspecialchars($leaveDays) ?> يوم</strong> بعنوان سنة <strong><?= htmlspecialchars($leaveYear) ?></strong>، ابتداء من <strong><?= htmlspecialchars($startDate) ?></strong> إلى غاية <strong><?= htmlspecialchars($endDate) ?></strong>.</p>
             <p>- يحتفظ المعني(ة) برصيد عطلة سنوية مدته <strong><?= htmlspecialchars($remainingDays) ?> يوم</strong> بعنوان سنة <strong><?= htmlspecialchars($leaveYear) ?></strong>.</p>
             <p>- <strong>المـــــــــادة 2</strong>: يكلف <?= htmlspecialchars($decisionmaker) ?> بتنفيـذ هـذا المقرر.</p>
             <div class="signature">
