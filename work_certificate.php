@@ -233,8 +233,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error) {
     <div class="certificate">
         <div class="header">الجمهوريـــــة الجزائريـــــة الديمقراطيـــــة الشعبيـــــة</div>
         <div class="header">وزارة التكوين والتعليم المهنيين</div>
-        <div class="header">مديرية التكوين والتعليم المهنيين لولاية قالمة</div>
         <br>
+        <div class="header2">مديرية التكوين والتعليم المهنيين لولاية قالمة</div>
         <div class="docnum">رقم: 2025/<?= htmlspecialchars($docNum) ?></div>
         <h1>شهادة عمل</h1>
         <div class="content">
