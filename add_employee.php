@@ -300,26 +300,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <div id="previous-positions-container">
                                 <div class="previous-position-entry">
                                     <div class="input-row">
-                                    <div class="input-group">
-                                        <label>مناصب الشغل السابقة <span class="required">*</span></label>
-                                        <select name="position" required>
-                                            <option value="">اختر منصب الشغل السابق</option>
-                                            <?php foreach ($positions as $pos): ?>
-                                                <option value="<?= $pos['name'] ?>" <?= ($_POST['position'] ?? '') == $pos['name'] ? 'selected' : '' ?>>
-                                                    <?= htmlspecialchars($pos['name']) ?>
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
+                                        <div class="input-group">
+                                            <label>مناصب الشغل السابقة</label>
+                                            <select name="prev_positions[]">
+                                                <option value="">اختر منصب الشغل السابق</option>
+                                                <?php foreach ($positions as $pos): ?>
+                                                    <option value="<?= $pos['name'] ?>" <?= ($_POST['prev_positions'][0] ?? '') == $pos['name'] ? 'selected' : '' ?>>
+                                                        <?= htmlspecialchars($pos['name']) ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
                                         <div class="input-group">
                                             <label>تاريخ البدء</label>
-                                            <input type="date" name="prev_start_dates[]" 
-                                                   value="<?= htmlspecialchars($_POST['prev_start_dates'][0] ?? '') ?>">
+                                            <input type="text" name="prev_start_dates[]" placeholder="dd/mm/yyyy" 
+                                                value="<?= htmlspecialchars($_POST['prev_start_dates'][0] ?? '') ?>" pattern="\d{2}/\d{2}/\d{4}">
                                         </div>
                                         <div class="input-group">
                                             <label>تاريخ الانتهاء</label>
-                                            <input type="date" name="prev_end_dates[]" 
-                                                   value="<?= htmlspecialchars($_POST['prev_end_dates'][0] ?? '') ?>">
+                                            <input type="text" name="prev_end_dates[]" placeholder="dd/mm/yyyy" 
+                                                value="<?= htmlspecialchars($_POST['prev_end_dates'][0] ?? '') ?>" pattern="\d{2}/\d{2}/\d{4}">
                                         </div>
                                     </div>
                                 </div>

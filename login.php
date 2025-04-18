@@ -1,4 +1,3 @@
-
 <?php
 session_start();
 if (isset($_SESSION['user_id'])) {
@@ -11,24 +10,26 @@ $pdo = getDBConnection();
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = $_POST['username'];
     $password = $_POST['password'];
-try{
-    $sql1 = "SELECT * FROM users WHERE username = :username AND password = :password";
-    $stmt1 = $pdo->prepare($sql1);
-    $stmt1->execute(['username' => $username, 'password' => $password]);
-    $user = $stmt1->fetch(PDO::FETCH_ASSOC);
+    
+    try {
+        $sql = "SELECT * FROM users WHERE username = :username";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(['username' => $username]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($user) {
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['username'] = $user['username'];
-        $_SESSION['fullname'] =$user['FullName'];
-        header('Location: index.php');
-        exit();
-    }
+        if ($user && password_verify($password, $user['password'])) {
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['fullname'] = $user['FullName'];
+            header('Location: index.php');
+            exit();
+        } else {
+            $error = "اسم المستخدم أو كلمة المرور غير صالحة.";
+        }
     } catch (PDOException $e) {
-    error_log("Database query failed: " . $e->getMessage());
-    die("Database query failed. Please try again later.");
+        error_log("Database query failed: " . $e->getMessage());
+        die("Database query failed. Please try again later.");
     }
-    $error = "اسم المستخدم أو كلمة المرور غير صالحة.";
 }
 ?>
 

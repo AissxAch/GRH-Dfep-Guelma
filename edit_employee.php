@@ -388,11 +388,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                                     </div>
                                     <div class="input-group">
                                         <label>تاريخ البدء</label>
-                                        <input type="date" name="prev_start_dates[]">
+                                        <input type="text" name="prev_start_dates[]" placeholder="dd/mm/yyyy" pattern="\d{2}/\d{2}/\d{4}">
                                     </div>
                                     <div class="input-group">
                                         <label>تاريخ الانتهاء</label>
-                                        <input type="date" name="prev_end_dates[]">
+                                        <input type="text" name="prev_end_dates[]" placeholder="dd/mm/yyyy" pattern="\d{2}/\d{2}/\d{4}">
                                     </div>
                                     <div class="input-group delete-position-btn">
                                         <button type="button" class="delete-position-button">
@@ -430,13 +430,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                                         </div>
                                         <div class="input-group">
                                             <label>تاريخ البدء</label>
-                                            <input type="date" name="prev_start_dates[]" 
-                                                value="<?= $pos['start_date'] ?>">
+                                            <input type="text" name="prev_start_dates[]" placeholder="dd/mm/yyyy" 
+                                                value="<?= date('d/m/Y', strtotime($pos['start_date'])) ?>" pattern="\d{2}/\d{2}/\d{4}">
                                         </div>
                                         <div class="input-group">
                                             <label>تاريخ الانتهاء</label>
-                                            <input type="date" name="prev_end_dates[]" 
-                                                value="<?= $pos['end_date'] ?>">
+                                            <input type="text" name="prev_end_dates[]" placeholder="dd/mm/yyyy" 
+                                                value="<?= date('d/m/Y', strtotime($pos['end_date'])) ?>" pattern="\d{2}/\d{2}/\d{4}">
                                         </div>
                                         <div class="input-group delete-position-btn">
                                             <button type="button" class="delete-position-button">
@@ -457,7 +457,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                         </button>
                     </div>
                 </div>
-
                 <!-- Contact Information Section -->
                 <div class="form-section">
                     <h2><i class="fas fa-phone"></i> معلومات الاتصال</h2>
