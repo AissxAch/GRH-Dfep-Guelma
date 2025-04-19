@@ -9,6 +9,19 @@ if (!isset($_SESSION['user_id'])) {
 include 'config/dbconnect.php';
 $pdo = getDBConnection();
 
+// Date validation and conversion
+function convertDate($date) {
+    if (empty($date)) return null;
+    
+    // Handle both formats if needed
+    $dateObj = DateTime::createFromFormat('d/m/Y', $date);
+    if (!$dateObj) {
+        $dateObj = DateTime::createFromFormat('Y-m-d', $date);
+    }
+    
+    return $dateObj ? $dateObj->format('Y-m-d') : null;
+}
+
 $employee = null;
 $error = "";
 $success = "";
@@ -37,12 +50,16 @@ if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['id'])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['employee_id']) && isset($_POST['new_position']) && isset($_POST['end_date']) && isset($_POST['start_date'])) {
     $employee_id = $_POST['employee_id'];
     $new_position = $_POST['new_position'];
-    $end_date = $_POST['end_date'];
-    $start_date = $_POST['start_date'];
+    $end_date = convertDate($_POST['end_date']);
+    $start_date = convertDate($_POST['start_date']);
     
     // Validate inputs
-    if (empty($new_position) || empty($end_date) || empty($start_date)) {
-        $error = "يرجى ملء جميع الحقول المطلوبة.";
+    if (empty($new_position)) {
+        $error = "الرتبة الجديدة مطلوبة.";
+    } elseif (!$end_date) {
+        $error = "صيغة تاريخ انتهاء الرتبة الحالية غير صحيحة (dd/mm/yyyy)";
+    } elseif (!$start_date) {
+        $error = "صيغة تاريخ بدء الرتبة الجديدة غير صحيحة (dd/mm/yyyy)";
     } else {
         try {
             $pdo->beginTransaction();
@@ -100,6 +117,7 @@ $positions = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>ترقية موظف - GRH Depf</title>
     <link rel="stylesheet" href="CSS/promote_employee.css">
     <link rel="stylesheet" href="CSS/icons.css">
+    <link rel="stylesheet" href="CSS/add_employee.css">
 </head>
 <body>
     <div class="dashboard-container">
@@ -138,14 +156,36 @@ $positions = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             </select>
                         </div>
 
-                        <div class="form-group">
-                            <label for="end_date">تاريخ انتهاء الرتبة الحالية:</label>
-                            <input type="date" name="end_date" id="end_date" required>
+                        <div class="form-group date-input-group">
+                        <label for="end_date">تاريخ انتهاء الرتبة الحالية:</label>
+                        <div class="date-input-container">
+                            <input type="text" 
+                                name="end_date" 
+                                id="end_date" 
+                                class="date-input"
+                                placeholder="يوم/شهر/سنة" 
+                                pattern="\d{2}/\d{2}/\d{4}" 
+                                required
+                                value="<?= htmlspecialchars($_POST['end_date'] ?? '') ?>">
+                            <span class="date-icon"><i class="fas fa-calendar-alt"></i></span>
                         </div>
-                        <div class="form-group">
-                            <label for="start_date">تاريخ بدء الرتبة الجديدة:</label>
-                            <input type="date" name="start_date" id="start_date" required>
+                        <small class="date-hint">الصيغة: يوم/شهر/سنة (مثال: 25/12/2023)</small>
+                    </div>
+                    <div class="form-group date-input-group">
+                        <label for="start_date">تاريخ بدء الرتبة الجديدة:</label>
+                        <div class="date-input-container">
+                            <input type="text" 
+                                name="start_date" 
+                                id="start_date" 
+                                class="date-input"
+                                placeholder="يوم/شهر/سنة" 
+                                pattern="\d{2}/\d{2}/\d{4}" 
+                                required
+                                value="<?= htmlspecialchars($_POST['start_date'] ?? '') ?>">
+                            <span class="date-icon"><i class="fas fa-calendar-alt"></i></span>
                         </div>
+                        <small class="date-hint">الصيغة: يوم/شهر/سنة (مثال: 25/12/2023)</small>
+                    </div>
                         
                         <button type="submit" class="btn btn-primary">تأكيد الترقية</button>
                     </form>

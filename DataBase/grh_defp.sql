@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 15, 2025 at 05:16 AM
+-- Generation Time: Apr 19, 2025 at 03:16 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,20 @@ SET time_zone = "+00:00";
 --
 -- Database: `grh_defp`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `activity_log`
+--
+
+CREATE TABLE `activity_log` (
+  `id` int(11) NOT NULL,
+  `employee_id` int(11) DEFAULT NULL,
+  `activity_type` enum('hire','promotion','modification','delete') DEFAULT NULL,
+  `details` text DEFAULT NULL,
+  `activity_date` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -75,13 +89,6 @@ CREATE TABLE `employees` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `employees`
---
-
-INSERT INTO `employees` (`employee_id`, `firstname_ar`, `lastname_ar`, `firstname_en`, `lastname_en`, `birth_date`, `birth_place`, `gender`, `bloodtype`, `national_id`, `ssn`, `email`, `phone`, `address`, `position`, `department_id`, `first_hire_date`, `hire_date`, `is_active`, `vacances_remain_days`, `created_at`, `updated_at`) VALUES
-(1, 'محمد', 'بلحاج', 'Mohamed', 'Belhadj', '1985-07-15', 'قالمة', 'male', 'A+', '8507150098765', 123456789, 'mohamed.belhadj@gmail.com', '0550123456', 'حي الأمير عبد القادر، قالمة', 'متصرف', 1, '2015-03-10', '2023-01-01', 1, 28, '2025-04-15 02:00:15', '2025-04-15 03:11:55');
-
 -- --------------------------------------------------------
 
 --
@@ -99,6 +106,20 @@ CREATE TABLE `employee_documents` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `employee_high_level_history`
+--
+
+CREATE TABLE `employee_high_level_history` (
+  `history_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  `position_id` int(11) NOT NULL,
+  `start_date` date NOT NULL,
+  `end_date` date DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `employee_previous_positions`
 --
 
@@ -111,13 +132,35 @@ CREATE TABLE `employee_previous_positions` (
   `end_date` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `employee_previous_positions`
+-- Table structure for table `high_level_positions`
 --
 
-INSERT INTO `employee_previous_positions` (`id`, `employee_id`, `position`, `department_id`, `start_date`, `end_date`) VALUES
-(25, 1, 'عون إدارة رئيسي', 2, '2015-03-10', '2018-06-30'),
-(26, 1, 'ملحق الإدارة', 1, '2018-07-01', '2022-12-31');
+CREATE TABLE `high_level_positions` (
+  `position_id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL COMMENT 'اسم المنصب العالي',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `high_level_positions`
+--
+
+INSERT INTO `high_level_positions` (`position_id`, `name`, `created_at`) VALUES
+(1, 'مكلف بالدراسات وبمشروع في الإدارة المركزية', '2025-04-18 22:54:09'),
+(2, 'ملحق بالديوان في الإدارة المركزية', '2025-04-18 22:54:09'),
+(3, 'مساعد بالديوان', '2025-04-18 22:54:09'),
+(4, 'مكلف بالاستقبال والتوجيه', '2025-04-18 22:54:09'),
+(5, 'مكلف ببرامج الترجمة - الترجمة الفورية', '2025-04-18 22:54:09'),
+(6, 'مسؤول قواعد المعطيات', '2025-04-18 22:54:09'),
+(7, 'مسؤول الشبكة', '2025-04-18 22:54:09'),
+(8, 'مسؤول النظاميات المعلوماتية', '2025-04-18 22:54:09'),
+(9, 'مكلف بالبرامج الإحصائية', '2025-04-18 22:54:09'),
+(10, 'مكلف بالبرامج الوثائقية', '2025-04-18 22:54:09'),
+(11, 'رئيس مخبر', '2025-04-18 22:54:09'),
+(12, 'رئيس مصلحة الصيانة', '2025-04-18 22:54:09');
 
 -- --------------------------------------------------------
 
@@ -197,6 +240,13 @@ INSERT INTO `users` (`FullName`, `username`, `password`, `id`) VALUES
 --
 
 --
+-- Indexes for table `activity_log`
+--
+ALTER TABLE `activity_log`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `employee_id` (`employee_id`);
+
+--
 -- Indexes for table `departments`
 --
 ALTER TABLE `departments`
@@ -218,12 +268,26 @@ ALTER TABLE `employee_documents`
   ADD KEY `employee_id` (`employee_id`);
 
 --
+-- Indexes for table `employee_high_level_history`
+--
+ALTER TABLE `employee_high_level_history`
+  ADD PRIMARY KEY (`history_id`),
+  ADD KEY `employee_id` (`employee_id`),
+  ADD KEY `position_id` (`position_id`);
+
+--
 -- Indexes for table `employee_previous_positions`
 --
 ALTER TABLE `employee_previous_positions`
   ADD PRIMARY KEY (`id`),
   ADD KEY `employee_id` (`employee_id`),
   ADD KEY `department_id` (`department_id`);
+
+--
+-- Indexes for table `high_level_positions`
+--
+ALTER TABLE `high_level_positions`
+  ADD PRIMARY KEY (`position_id`);
 
 --
 -- Indexes for table `positions`
@@ -242,6 +306,12 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT for table `activity_log`
+--
+ALTER TABLE `activity_log`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `departments`
 --
 ALTER TABLE `departments`
@@ -251,19 +321,31 @@ ALTER TABLE `departments`
 -- AUTO_INCREMENT for table `employees`
 --
 ALTER TABLE `employees`
-  MODIFY `employee_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `employee_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `employee_documents`
 --
 ALTER TABLE `employee_documents`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `employee_high_level_history`
+--
+ALTER TABLE `employee_high_level_history`
+  MODIFY `history_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `employee_previous_positions`
 --
 ALTER TABLE `employee_previous_positions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `high_level_positions`
+--
+ALTER TABLE `high_level_positions`
+  MODIFY `position_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `positions`
@@ -282,10 +364,23 @@ ALTER TABLE `users`
 --
 
 --
+-- Constraints for table `activity_log`
+--
+ALTER TABLE `activity_log`
+  ADD CONSTRAINT `activity_log_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE SET NULL;
+
+--
 -- Constraints for table `employee_documents`
 --
 ALTER TABLE `employee_documents`
   ADD CONSTRAINT `employee_documents_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `employee_high_level_history`
+--
+ALTER TABLE `employee_high_level_history`
+  ADD CONSTRAINT `employee_high_level_history_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`),
+  ADD CONSTRAINT `employee_high_level_history_ibfk_2` FOREIGN KEY (`position_id`) REFERENCES `high_level_positions` (`position_id`);
 
 --
 -- Constraints for table `employee_previous_positions`

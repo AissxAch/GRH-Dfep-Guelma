@@ -13,15 +13,25 @@ $success = '';
 $employee = [];
 $previous_positions = [];
 $departments = [];
+$high_level_positions = [];
+$current_high_level_position = null;
 
+// Fetch positions
 $positions = [];
 try {
     $stmt = $pdo->query("SELECT * FROM positions ORDER BY name ASC");
     $positions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    $error = "خطأ في جلب المناصب: " . $e->getMessage();
+    $errors[] = "خطأ في جلب المناصب: " . $e->getMessage();
 }
 
+// Fetch high level positions
+try {
+    $stmt = $pdo->query("SELECT * FROM high_level_positions ORDER BY name ASC");
+    $high_level_positions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $errors[] = "خطأ في جلب المناصب العليا: " . $e->getMessage();
+}
 
 // Fetch departments
 try {
@@ -48,12 +58,24 @@ if (isset($_GET['id'])) {
             $stmt = $pdo->prepare("SELECT * FROM employee_previous_positions WHERE employee_id = ?");
             $stmt->execute([$employee_id]);
             $previous_positions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Get current high level position
+            $stmt = $pdo->prepare("SELECT * FROM employee_high_level_history WHERE employee_id = ? AND end_date IS NULL");
+            $stmt->execute([$employee_id]);
+            $current_high_level_position = $stmt->fetch(PDO::FETCH_ASSOC);
         }
     } catch (PDOException $e) {
         $errors[] = 'خطأ في قاعدة البيانات: ' . $e->getMessage();
     }
 } else {
     $errors[] = 'معرف الموظف غير محدد';
+}
+
+// Date validation and conversion function
+function convertDate($date) {
+    if (empty($date)) return null;
+    $date = DateTime::createFromFormat('d/m/Y', $date);
+    return $date ? $date->format('Y-m-d') : null;
 }
 
 // Handle form submission
@@ -75,8 +97,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
     $address = trim($_POST['address'] ?? '');
     $position = trim($_POST['position'] ?? '');
     $department_id = trim($_POST['department_id'] ?? '');
+    $first_hire_date = trim($_POST['first_hire_date'] ?? '');
     $hire_date = trim($_POST['hire_date'] ?? '');
     $is_active = isset($_POST['is_active']) ? 1 : 0;
+    $delete_all_prev_positions = isset($_POST['delete_all_prev_positions']);
+    $high_level_position_id = trim($_POST['high_level_position_id'] ?? '');
+    $high_level_start_date = trim($_POST['high_level_start_date'] ?? '');
 
     // Validate required fields
     if (empty($firstname_ar)) $errors[] = 'اللقب العربي مطلوب';
@@ -89,73 +115,123 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
     if (empty($ssn)) $errors[] = 'رقم الضمان الاجتماعي مطلوب';
     if (empty($phone)) $errors[] = 'رقم الهاتف مطلوب';
     if (empty($position)) $errors[] = 'المنصب مطلوب';
+    if (empty($department_id)) $errors[] = 'القسم مطلوب';
     if (empty($hire_date)) $errors[] = 'تاريخ التعيين مطلوب';
+    if (empty($first_hire_date)) $errors[] = 'تاريخ أول تعيين مطلوب';
+    if (empty($vacances_remain_days)) $errors[] = 'الأيام المتبقية للإجازة مطلوبة';
 
-    // Date validation and conversion
-    function convertDate($date) {
-        $date = DateTime::createFromFormat('d/m/Y', $date);
-        return $date ? $date->format('Y-m-d') : null;
-    }
-
+    // Convert dates
     $birth_date_db = convertDate($birth_date);
     $hire_date_db = convertDate($hire_date);
+    $first_hire_date_db = convertDate($first_hire_date);
+    $high_level_start_date_db = convertDate($high_level_start_date);
 
     if (!$birth_date_db) $errors[] = 'صيغة تاريخ الميلاد غير صحيحة (dd/mm/yyyy)';
     if (!$hire_date_db) $errors[] = 'صيغة تاريخ التعيين غير صحيحة (dd/mm/yyyy)';
+    if (!$first_hire_date_db) $errors[] = 'صيغة تاريخ أول تعيين غير صحيحة (dd/mm/yyyy)';
+    if (!empty($high_level_position_id) && !$high_level_start_date_db) $errors[] = 'صيغة تاريخ بداية المنصب العالي غير صحيحة (dd/mm/yyyy)';
 
     if (empty($errors)) {
         try {
             $pdo->beginTransaction();
+            
             // Update main employee data
             $stmt = $pdo->prepare("UPDATE employees SET 
                 firstname_ar = ?, lastname_ar = ?, firstname_en = ?, lastname_en = ?, 
                 birth_date = ?, birth_place = ?, gender = ?, bloodtype = ?, 
                 vacances_remain_days = ?, national_id = ?, ssn = ?, email = ?, 
                 phone = ?, address = ?, position = ?, department_id = ?, 
-                hire_date = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP 
+                first_hire_date = ?, hire_date = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP 
                 WHERE employee_id = ?");
+            
             $stmt->execute([
                 $firstname_ar, $lastname_ar, $firstname_en, $lastname_en,
                 $birth_date_db, $birth_place, $gender, $bloodtype,
                 $vacances_remain_days, $national_id, $ssn, $email ?: null,
-                $phone, $address ?: null, $position, $department_id ?: null,
-                $hire_date_db, $is_active, $employee_id
+                $phone, $address ?: null, $position, $department_id,
+                $first_hire_date_db, $hire_date_db, $is_active, $employee_id
             ]);
-            // Handle previous positions
-            $prev_positions = $_POST['prev_positions'] ?? [];
-            $prev_start_dates = $_POST['prev_start_dates'] ?? [];
-            $prev_end_dates = $_POST['prev_end_dates'] ?? [];
-            $prev_departments = $_POST['prev_departments'] ?? [];
-            $prev_ids = $_POST['prev_ids'] ?? [];
-            // First delete all existing positions not in the submitted list
-            if (!empty(array_filter($prev_ids, 'is_numeric'))) {
-                $delete_stmt = $pdo->prepare("DELETE FROM employee_previous_positions 
-                                            WHERE employee_id = ? AND id NOT IN (" . 
-                                            implode(',', array_filter($prev_ids, 'is_numeric')) . ")");
-                $delete_stmt->execute([$employee_id]);
+
+            // Handle high level position
+            if (!empty($high_level_position_id)) {
+                if ($current_high_level_position) {
+                    // Update existing high level position
+                    $stmt = $pdo->prepare("UPDATE employee_high_level_history 
+                                          SET position_id = ?, start_date = ?
+                                          WHERE history_id = ?");
+                    $stmt->execute([
+                        $high_level_position_id,
+                        $high_level_start_date_db,
+                        $current_high_level_position['history_id']
+                    ]);
+                } else {
+                    // Insert new high level position
+                    $stmt = $pdo->prepare("INSERT INTO employee_high_level_history 
+                                          (employee_id, position_id, start_date)
+                                          VALUES (?, ?, ?)");
+                    $stmt->execute([
+                        $employee_id,
+                        $high_level_position_id,
+                        $high_level_start_date_db
+                    ]);
+                }
+            } else {
+                // If high level position was removed
+                if ($current_high_level_position) {
+                    $stmt = $pdo->prepare("DELETE FROM employee_high_level_history 
+                                          WHERE history_id = ?");
+                    $stmt->execute([$current_high_level_position['history_id']]);
+                }
             }
 
-            // Update or insert positions
-            $position_stmt = $pdo->prepare("INSERT INTO employee_previous_positions 
-                (id, employee_id, position, department_id, start_date, end_date) 
-                VALUES (?, ?, ?, ?, ?, ?)
-                ON DUPLICATE KEY UPDATE 
-                position = VALUES(position), 
-                department_id = VALUES(department_id),
-                start_date = VALUES(start_date), 
-                end_date = VALUES(end_date)");
+            // Handle previous positions
+            if ($delete_all_prev_positions) {
+                // Delete all previous positions
+                $delete_stmt = $pdo->prepare("DELETE FROM employee_previous_positions WHERE employee_id = ?");
+                $delete_stmt->execute([$employee_id]);
+            } else {
+                // Handle individual position updates
+                $prev_positions = $_POST['prev_positions'] ?? [];
+                $prev_start_dates = $_POST['prev_start_dates'] ?? [];
+                $prev_end_dates = $_POST['prev_end_dates'] ?? [];
+                $prev_departments = $_POST['prev_departments'] ?? [];
+                $prev_ids = $_POST['prev_ids'] ?? [];
 
-            foreach ($prev_positions as $index => $prev_position) {
-                if (!empty($prev_position)) {
-                    $dept_id = !empty($prev_departments[$index]) ? $prev_departments[$index] : null;
-                    $position_stmt->execute([
-                        $prev_ids[$index] ?: null,
-                        $employee_id,
-                        $prev_position,
-                        $dept_id,
-                        $prev_start_dates[$index],
-                        $prev_end_dates[$index]
-                    ]);
+                // Delete positions not in the submitted list
+                if (!empty(array_filter($prev_ids, 'is_numeric'))) {
+                    $delete_stmt = $pdo->prepare("DELETE FROM employee_previous_positions 
+                                                WHERE employee_id = ? AND id NOT IN (" . 
+                                                implode(',', array_filter($prev_ids, 'is_numeric')) . ")");
+                    $delete_stmt->execute([$employee_id]);
+                }
+
+                // Update or insert positions
+                $position_stmt = $pdo->prepare("INSERT INTO employee_previous_positions 
+                    (id, employee_id, position, department_id, start_date, end_date) 
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    ON DUPLICATE KEY UPDATE 
+                    position = VALUES(position), 
+                    department_id = VALUES(department_id),
+                    start_date = VALUES(start_date), 
+                    end_date = VALUES(end_date)");
+
+                foreach ($prev_positions as $index => $prev_position) {
+                    if (!empty($prev_position)) {
+                        $start_db = convertDate($prev_start_dates[$index]);
+                        $end_db = convertDate($prev_end_dates[$index]);
+                        $dept_id = $prev_departments[$index] ?? null;
+
+                        if ($start_db && $end_db && $dept_id) {
+                            $position_stmt->execute([
+                                $prev_ids[$index] ?: null,
+                                $employee_id,
+                                $prev_position,
+                                $dept_id,
+                                $start_db,
+                                $end_db
+                            ]);
+                        }
+                    }
                 }
             }
 
@@ -171,6 +247,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
             $stmt = $pdo->prepare("SELECT * FROM employee_previous_positions WHERE employee_id = ?");
             $stmt->execute([$employee_id]);
             $previous_positions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Refresh high level position
+            $stmt = $pdo->prepare("SELECT * FROM employee_high_level_history WHERE employee_id = ? AND end_date IS NULL");
+            $stmt->execute([$employee_id]);
+            $current_high_level_position = $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             $pdo->rollBack();
             $errors[] = 'خطأ في قاعدة البيانات: ' . $e->getMessage();
@@ -207,6 +288,102 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
         .delete-position-button:hover {
             background-color: #c0392b;
         }
+        
+        .error-message {
+            color: #dc3545;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+        }
+        
+        .success-message {
+            color: #28a745;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+        }
+        
+        .required {
+            color: red;
+        }
+        
+        .form-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .input-group {
+            margin-bottom: 1rem;
+        }
+        
+        .input-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .input-row .input-group {
+            flex: 1;
+        }
+        
+        .dashboard-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        .dashboard-main {
+            flex: 1;
+            padding: 20px;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .login-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .cancel-button {
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .delete-all-container {
+            margin: 15px 0;
+            padding: 10px;
+            background: #fff8f8;
+            border: 1px solid #ffdddd;
+            border-radius: 5px;
+        }
+        
+        .delete-all-checkbox {
+            margin-left: 10px;
+        }
+        
+        .disabled-positions {
+            opacity: 0.6;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -224,7 +401,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                 </div>
             <?php endif; ?>
             
-            <?php if (($success)): ?>
+            <?php if ($success): ?>
                 <div class="success-message"><?= htmlspecialchars($success) ?></div>
             <?php endif; ?>
 
@@ -319,8 +496,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                             value="<?= date('d/m/Y', strtotime($employee['hire_date'])) ?>" pattern="\d{2}/\d{2}/\d{4}" required>
                         </div>
                         <div class="input-group">
-                            <label>تاريخ أول تعيين</label>
-                            <input type="text" value="<?= date('d/m/Y', strtotime($employee['first_hire_date'])) ?>" readonly>
+                            <label>تاريخ أول تعيين <span class="required">*</span></label>
+                            <input type="text" name="first_hire_date" placeholder="dd/mm/yyyy" 
+                            value="<?= date('d/m/Y', strtotime($employee['first_hire_date'])) ?>" pattern="\d{2}/\d{2}/\d{4}" required>
                         </div>
                     </div>
 
@@ -328,7 +506,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                         <div class="input-group">
                             <label>القسم <span class="required">*</span></label>
                             <select name="department_id" required>
-                                <option value="0">اختر...</option>
+                                <option value="">اختر قسمًا...</option>
                                 <?php foreach ($departments as $dept): ?>
                                     <option value="<?= $dept['department_id'] ?>" <?= $employee['department_id'] == $dept['department_id'] ? 'selected' : '' ?>>
                                         <?= htmlspecialchars($dept['name']) ?>
@@ -351,6 +529,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                         </div>
                     </div>
                     
+                    <!-- High Level Position Section -->
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>المنصب العالي</label>
+                            <select name="high_level_position_id">
+                                <option value="">اختر منصبًا عاليًا...</option>
+                                <?php foreach ($high_level_positions as $hlp): ?>
+                                    <option value="<?= $hlp['position_id'] ?>" 
+                                        <?= $current_high_level_position && $current_high_level_position['position_id'] == $hlp['position_id'] ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($hlp['name']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>تاريخ بداية المنصب العالي</label>
+                            <input type="text" name="high_level_start_date" placeholder="dd/mm/yyyy" 
+                                value="<?= $current_high_level_position ? date('d/m/Y', strtotime($current_high_level_position['start_date'])) : '' ?>" 
+                                pattern="\d{2}/\d{2}/\d{4}">
+                        </div>
+                    </div>
+                    
                     <div class="input-group">
                         <label>
                             <input type="checkbox" name="is_active" <?= $employee['is_active'] ? 'checked' : '' ?>>
@@ -358,10 +558,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                         </label>
                     </div>
                 </div>
+                
                 <!-- Previous Positions Section -->
                 <div class="form-section">
                     <h2><i class="fas fa-history"></i> الوظائف السابقة</h2>
-                    <div id="previous-positions-container">
+                    
+                    <div class="delete-all-container">
+                        <label>
+                            <input type="checkbox" name="delete_all_prev_positions" id="delete_all_prev_positions" class="delete-all-checkbox">
+                            حذف جميع الوظائف السابقة
+                        </label>
+                        <small style="color: #666;">(سيؤدي تحديد هذا الخيار إلى إزالة جميع الوظائف السابقة للموظف)</small>
+                    </div>
+                    
+                    <div id="previous-positions-container" class="<?= isset($_POST['delete_all_prev_positions']) ? 'disabled-positions' : '' ?>">
                         <?php if (empty($previous_positions)): ?>
                             <div class="previous-position-entry">
                                 <div class="input-row">
@@ -378,21 +588,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                                         <input type="hidden" name="prev_ids[]" value="">
                                     </div>
                                     <div class="input-group">
-                                        <label>القسم</label>
-                                        <select name="prev_departments[]">
-                                            <option value="">اختر...</option>
+                                        <label>القسم <span class="required">*</span></label>
+                                        <select name="prev_departments[]" required>
+                                            <option value="">اختر قسمًا...</option>
                                             <?php foreach ($departments as $dept): ?>
                                                 <option value="<?= $dept['department_id'] ?>"><?= htmlspecialchars($dept['name']) ?></option>
                                             <?php endforeach; ?>
                                         </select>
                                     </div>
                                     <div class="input-group">
-                                        <label>تاريخ البدء</label>
-                                        <input type="text" name="prev_start_dates[]" placeholder="dd/mm/yyyy" pattern="\d{2}/\d{2}/\d{4}">
+                                        <label>تاريخ البدء <span class="required">*</span></label>
+                                        <input type="text" name="prev_start_dates[]" placeholder="dd/mm/yyyy" pattern="\d{2}/\d{2}/\d{4}" required>
                                     </div>
                                     <div class="input-group">
-                                        <label>تاريخ الانتهاء</label>
-                                        <input type="text" name="prev_end_dates[]" placeholder="dd/mm/yyyy" pattern="\d{2}/\d{2}/\d{4}">
+                                        <label>تاريخ الانتهاء <span class="required">*</span></label>
+                                        <input type="text" name="prev_end_dates[]" placeholder="dd/mm/yyyy" pattern="\d{2}/\d{2}/\d{4}" required>
                                     </div>
                                     <div class="input-group delete-position-btn">
                                         <button type="button" class="delete-position-button">
@@ -418,9 +628,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                                             <input type="hidden" name="prev_ids[]" value="<?= $pos['id'] ?>">
                                         </div>
                                         <div class="input-group">
-                                            <label>القسم</label>
-                                            <select name="prev_departments[]">
-                                                <option value="">اختر...</option>
+                                            <label>القسم <span class="required">*</span></label>
+                                            <select name="prev_departments[]" required>
+                                                <option value="">اختر قسمًا...</option>
                                                 <?php foreach ($departments as $dept): ?>
                                                     <option value="<?= $dept['department_id'] ?>" <?= isset($pos['department_id']) && $pos['department_id'] == $dept['department_id'] ? 'selected' : '' ?>>
                                                         <?= htmlspecialchars($dept['name']) ?>
@@ -429,14 +639,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                                             </select>
                                         </div>
                                         <div class="input-group">
-                                            <label>تاريخ البدء</label>
+                                            <label>تاريخ البدء <span class="required">*</span></label>
                                             <input type="text" name="prev_start_dates[]" placeholder="dd/mm/yyyy" 
-                                                value="<?= date('d/m/Y', strtotime($pos['start_date'])) ?>" pattern="\d{2}/\d{2}/\d{4}">
+                                                value="<?= date('d/m/Y', strtotime($pos['start_date'])) ?>" pattern="\d{2}/\d{2}/\d{4}" required>
                                         </div>
                                         <div class="input-group">
-                                            <label>تاريخ الانتهاء</label>
+                                            <label>تاريخ الانتهاء <span class="required">*</span></label>
                                             <input type="text" name="prev_end_dates[]" placeholder="dd/mm/yyyy" 
-                                                value="<?= date('d/m/Y', strtotime($pos['end_date'])) ?>" pattern="\d{2}/\d{2}/\d{4}">
+                                                value="<?= date('d/m/Y', strtotime($pos['end_date'])) ?>" pattern="\d{2}/\d{2}/\d{4}" required>
                                         </div>
                                         <div class="input-group delete-position-btn">
                                             <button type="button" class="delete-position-button">
@@ -452,11 +662,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                         <button type="button" id="add-previous-position" class="login-button">
                             <i class="fas fa-plus"></i> إضافة وظيفة سابقة
                         </button>
-                        <button type="button" id="remove-previous-position" class="delete-button">
+                        <button type="button" id="remove-previous-position" class="cancel-button">
                             <i class="fas fa-minus"></i> حذف وظيفة سابقة
                         </button>
                     </div>
                 </div>
+                
                 <!-- Contact Information Section -->
                 <div class="form-section">
                     <h2><i class="fas fa-phone"></i> معلومات الاتصال</h2>
@@ -493,7 +704,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
             <?php else: ?>
                 <div class="no-employee">
                     <p>لا يوجد موظف بهذا المعرف</p>
-                    <a href="list_employees.php" class="back-button">
+                    <a href="list_employees.php" class="cancel-button">
                         <i class="fas fa-arrow-left"></i> العودة إلى قائمة الموظفين
                     </a>
                 </div>
@@ -558,11 +769,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
             });
         }
 
+        // Handle delete all checkbox
+        document.getElementById('delete_all_prev_positions').addEventListener('change', function() {
+            const container = document.getElementById('previous-positions-container');
+            if (this.checked) {
+                container.classList.add('disabled-positions');
+                container.querySelectorAll('input, select').forEach(el => {
+                    el.disabled = true;
+                });
+            } else {
+                container.classList.remove('disabled-positions');
+                container.querySelectorAll('input, select').forEach(el => {
+                    el.disabled = false;
+                });
+            }
+        });
+
         // Attach delete handlers to all existing delete buttons on page load
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.delete-position-button').forEach(button => {
                 attachDeleteHandler(button);
             });
+            
+            // Initialize disabled state if delete all was checked before form submission
+            const deleteAllCheckbox = document.getElementById('delete_all_prev_positions');
+            if (deleteAllCheckbox.checked) {
+                const container = document.getElementById('previous-positions-container');
+                container.classList.add('disabled-positions');
+                container.querySelectorAll('input, select').forEach(el => {
+                    el.disabled = true;
+                });
+            }
         });
     </script>
 </body>

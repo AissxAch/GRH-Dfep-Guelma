@@ -6,6 +6,18 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit();
 }
+// Date validation and conversion
+function convertDate($date) {
+    if (empty($date)) return null;
+    
+    // Handle both formats if needed
+    $dateObj = DateTime::createFromFormat('d/m/Y', $date);
+    if (!$dateObj) {
+        $dateObj = DateTime::createFromFormat('Y-m-d', $date);
+    }
+    
+    return $dateObj ? $dateObj->format('Y-m-d') : null;
+}
 
 $departments = [];
 try {
@@ -46,6 +58,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $position = trim($_POST['position'] ?? '');
     $department_id = trim($_POST['department'] ?? '');
     $hire_date = trim($_POST['hire_date'] ?? '');
+    $is_high_level = isset($_POST['is_high_level']) ? 1 : 0;
+    $high_level_position = $is_high_level ? trim($_POST['high_level_position'] ?? '') : null;
+    $high_level_start_date = $is_high_level ? convertDate($_POST['high_level_start_date'] ?? '') : null;
 
     // Validate required fields
     if (empty($firstname_ar)) $errors[] = 'اللقب العربي مطلوب';
@@ -59,12 +74,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (empty($position)) $errors[] = 'المنصب مطلوب';
     if (empty($department_id)) $errors[] = 'القسم مطلوب';
     if (empty($hire_date)) $errors[] = 'تاريخ التعيين مطلوب';
-
-    // Date validation and conversion
-    function convertDate($date) {
-        $date = DateTime::createFromFormat('d/m/Y', $date);
-        return $date ? $date->format('Y-m-d') : null;
+    if ($is_high_level) {
+        if (empty($high_level_position)) {
+            $errors[] = 'يجب اختيار المنصب العالي';
+        }
+        if (!$high_level_start_date) {
+            $errors[] = 'صيغة تاريخ بدء المنصب العالي غير صحيحة (dd/mm/yyyy)';
+        }
     }
+
 
     $birth_date_db = convertDate($birth_date);
     $hire_date_db = convertDate($hire_date);
@@ -81,25 +99,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (!empty($prev_position)) {
             $start = $prev_start_dates[$index] ?? '';
             $end = $prev_end_dates[$index] ?? '';
-
+    
             if (empty($start) || empty($end)) {
                 $errors[] = 'يرجى إدخال تواريخ البدء والانتهاء لكل وظيفة سابقة';
-            } elseif (strtotime($start) > strtotime($end)) {
-                $errors[] = 'تاريخ البدء يجب أن يكون قبل تاريخ الانتهاء للوظيفة السابقة';
+            } else {
+                $start_db = convertDate($start);
+                $end_db = convertDate($end);
+                
+                if (!$start_db || !$end_db) {
+                    $errors[] = 'صيغة التاريخ غير صحيحة (يجب أن تكون dd/mm/yyyy)';
+                }
             }
-
+    
             $previous_positions[] = [
                 'position' => $prev_position,
-                'start_date' => $start,
-                'end_date' => $end
+                'start_date' => $start_db,
+                'end_date' => $end_db
             ];
+        }
+    }
+
+    foreach ($previous_positions as $prev_pos) {
+        if (!$prev_pos['start_date'] || !$prev_pos['end_date']) {
+            $errors[] = 'يوجد خطأ في تواريخ الوظائف السابقة';
+            break;
         }
     }
 
     if (empty($errors)) {
         try {
             $pdo->beginTransaction();
-
+    
             // Insert main employee data
             $stmt = $pdo->prepare("INSERT INTO employees 
                 (firstname_ar, lastname_ar, firstname_en, lastname_en, birth_date, birth_place, gender, bloodtype, vacances_remain_days, 
@@ -113,15 +143,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $department_id, 
                 $hire_date_db
             ]);
-
-            $employee_id = $pdo->lastInsertId();
-
+    
+            $employee_id = $pdo->lastInsertId(); // Correct employee ID
+    
             // Insert previous positions
             if (!empty($previous_positions)) {
                 $prev_stmt = $pdo->prepare("INSERT INTO employee_previous_positions 
                     (employee_id, position, start_date, end_date) 
                     VALUES (?, ?, ?, ?)");
-
+    
                 foreach ($previous_positions as $prev_pos) {
                     $prev_stmt->execute([
                         $employee_id, 
@@ -131,7 +161,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     ]);
                 }
             }
-
+            
+            // Remove this line - it's incorrect:
+            // $employee_id = $pdo->lastInsertId();
+            
+            if ($is_high_level && $high_level_position && $high_level_start_date) {
+                $stmt = $pdo->prepare("INSERT INTO employee_high_level_history 
+                                      (employee_id, position_id, start_date) 
+                                      VALUES (?, ?, ?)");
+                $stmt->execute([$employee_id, $high_level_position, $high_level_start_date]);
+            }
+    
             $pdo->commit();
             $success = 'تم إضافة الموظف بنجاح';
         } catch (PDOException $e) {
@@ -333,7 +373,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 </button>
                             </div>
                         </div>
+                <!-- High Level Position Section -->
+                <div class="form-section">
+                    <h2><i class="fas fa-star"></i> المناصب العليا</h2>
+                    
+                    <div class="input-group">
+                        <label>هل يشغل منصب عالي حالياً؟</label>
+                        <input type="checkbox" id="is_high_level" name="is_high_level" value="1" style="width: auto !important;"
+                            <?= isset($_POST['is_high_level']) ? 'checked' : '' ?>>
+                        <label for="is_high_level" style="display: inline; margin-right: 10px;">نعم</label>
+                    </div>
 
+                    <div id="high_level_fields" style="<?= isset($_POST['is_high_level']) ? '' : 'display: none;' ?>">
+                        <div class="input-group">
+                            <label>اختر المنصب العالي <span class="required">*</span></label>
+                            <select name="high_level_position" <?= isset($_POST['is_high_level']) ? 'required' : '' ?>>
+                                <option value="">اختر المنصب العالي...</option>
+                                <?php 
+                                $high_positions = $pdo->query("SELECT * FROM high_level_positions ORDER BY name ASC")->fetchAll();
+                                foreach ($high_positions as $pos): ?>
+                                    <option value="<?= $pos['position_id'] ?>" 
+                                        <?= ($_POST['high_level_position'] ?? '') == $pos['position_id'] ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($pos['name']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>تاريخ بدء المنصب العالي <span class="required">*</span></label>
+                            <input type="text" name="high_level_start_date" placeholder="dd/mm/yyyy" 
+                                value="<?= htmlspecialchars($_POST['high_level_start_date'] ?? '') ?>" 
+                                pattern="\d{2}/\d{2}/\d{4}" 
+                                <?= isset($_POST['is_high_level']) ? 'required' : '' ?>>
+                        </div>
+                    </div>
+                </div>
                 <!-- Contact Information Section -->
                 <div class="form-section">
                     <h2><i class="fas fa-phone"></i> معلومات الاتصال</h2>
@@ -388,6 +463,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if (container.children.length > 1) {
                 container.removeChild(container.lastElementChild);
             }
+        });
+        // Toggle high level position fields
+        document.getElementById('is_high_level').addEventListener('change', function() {
+            const fields = document.getElementById('high_level_fields');
+            fields.style.display = this.checked ? 'block' : 'none';
+            
+            // Toggle required attribute
+            fields.querySelectorAll('[required]').forEach(el => {
+                el.required = this.checked;
+            });
         });
     </script>
 </body>

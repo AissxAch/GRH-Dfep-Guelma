@@ -294,3 +294,63 @@ body {
         font-size: 0.9rem;
     }
 }
+/* Date Input Styles */
+.date-input-group {
+    margin-bottom: 1.8rem;
+    position: relative;
+}
+
+.date-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.date-input {
+    width: 100%;
+    padding: 0.8rem 2.5rem 0.8rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: #fff;
+    transition: all 0.3s ease;
+    text-align: right;
+}
+
+.date-input:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    outline: none;
+}
+
+.date-icon {
+    position: absolute;
+    left: 0.8rem;
+    color: #7f8c8d;
+    pointer-events: none;
+}
+
+.date-hint {
+    display: block;
+    margin-top: 0.4rem;
+    color: #7f8c8d;
+    font-size: 0.85rem;
+    text-align: right;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .date-input {
+        font-size: 0.9rem;
+        padding: 0.7rem 2.2rem 0.7rem 0.8rem;
+    }
+    
+    .date-icon {
+        left: 0.6rem;
+        font-size: 0.9rem;
+    }
+    
+    .date-hint {
+        font-size: 0.8rem;
+    }
+}

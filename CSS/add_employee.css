@@ -177,6 +177,32 @@ body {
     justify-content: center;
 }
 
+
+.check {
+    position: static;
+    width: auto !important;
+    display: flex
+;
+}
+/* Add to your existing styles */
+.high-level-section {
+    background: #fff8e1;
+    border-left: 4px solid #ffc107;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.high-level-section h2 {
+    color: #ff9800;
+}
+
+#high_level_fields {
+    margin-top: 15px;
+    padding: 15px;
+    background: #fffde7;
+    border-radius: 5px;
+}
+
 .login-button {
     padding: 0.8rem 2rem;
     background: #3498db;

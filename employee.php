@@ -33,6 +33,15 @@ try {
     $stmt_prev->execute([$employee_id]);
     $previous_positions = $stmt_prev->fetchAll(PDO::FETCH_ASSOC);
 
+    // Get high level positions history
+    $stmt_high_level = $pdo->prepare("SELECT h.*, p.name as position_name
+                                     FROM employee_high_level_history h
+                                     JOIN high_level_positions p ON h.position_id = p.position_id
+                                     WHERE h.employee_id = ?
+                                     ORDER BY h.start_date DESC");
+    $stmt_high_level->execute([$employee_id]);
+    $high_level_positions = $stmt_high_level->fetchAll(PDO::FETCH_ASSOC);
+
 } catch (PDOException $e) {
     die("خطأ في قاعدة البيانات: " . $e->getMessage());
 }
@@ -46,6 +55,27 @@ try {
     <title>معلومات الموظف - GRH Depf</title>
     <link rel="stylesheet" href="CSS/employee.css">
     <link rel="stylesheet" href="CSS/icons.css">
+    <style>
+        .position-entry {
+            margin-bottom: 8px;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .position-dates {
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-right: 10px;
+        }
+        .current-position {
+            background-color: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+        }
+        .high-level-position {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196F3;
+        }
+    </style>
 </head>
 <body>
     <div class="dashboard-container">
@@ -94,7 +124,7 @@ try {
                     </div>
                     <div class="info-row">
                         <span class="label">تاريخ الميلاد:</span>
-                        <span class="value"><?= $employee['birth_date'] ? date('d/m/Y', strtotime($employee['birth_date'])) : 'غير محدد' ?></span>
+                        <span class="value"><?= $employee['birth_date'] ? date('Y/m/d', strtotime($employee['birth_date'])) : 'غير محدد' ?></span>
                     </div>
                     <div class="info-row">
                         <span class="label">مكان الميلاد:</span>
@@ -126,16 +156,37 @@ try {
                     </div>
                     <div class="info-row">
                         <span class="label">تاريخ التنصيب:</span>
-                        <span class="value"><?= $employee['first_hire_date'] ? date('d/m/Y', strtotime($employee['first_hire_date'])) : 'غير محدد' ?></span>
+                        <span class="value"><?= $employee['first_hire_date'] ? date('Y/m/d', strtotime($employee['first_hire_date'])) : 'غير محدد' ?></span>
                     </div>
                     <div class="info-row">
                         <span class="label">تاريخ التعيين:</span>
-                        <span class="value"><?= $employee['hire_date'] ? date('d/m/Y', strtotime($employee['hire_date'])) : 'غير محدد' ?></span>
+                        <span class="value"><?= $employee['hire_date'] ? date('Y/m/d', strtotime($employee['hire_date'])) : 'غير محدد' ?></span>
                     </div>
                     <div class="info-row">
                         <span class="label">منصب الشغل:</span>
                         <span class="value"><?= htmlspecialchars($employee['position'] ?? 'غير محدد') ?></span>
                     </div>
+                    <div class="info-row">
+                        <span class="label">القسم:</span>
+                        <span class="value"><?= htmlspecialchars($employee['department_name'] ?? 'غير محدد') ?></span>
+                    </div>
+                    
+                    <?php if (!empty($high_level_positions)): ?>
+                        <div class="info-row">
+                            <span class="label">المناصب العليا:</span>
+                            <div class="previous-positions">
+                                <?php foreach ($high_level_positions as $position): ?>
+                                    <div class="position-entry high-level-position <?= empty($position['end_date']) ? 'current-position' : '' ?>">
+                                        <span><?= htmlspecialchars($position['position_name']) ?></span>
+                                        <span class="position-dates">
+                                            (<?= date('Y/m/d', strtotime($position['start_date'])) ?>
+                                            <?= empty($position['end_date']) ? ' - حتى الآن' : ' - ' . date('Y/m/d', strtotime($position['end_date'])) ?>)
+                                        </span>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                     
                     <?php if (!empty($previous_positions)): ?>
                         <div class="info-row">
@@ -145,10 +196,9 @@ try {
                                     <div class="position-entry">
                                         <span><?= htmlspecialchars($position['position']) ?></span>
                                         <span class="position-dates">
-                                            (<?= date('d/m/Y', strtotime($position['start_date'])) ?> - 
-                                            <?= date('d/m/Y', strtotime($position['end_date'])) ?>)
+                                            (<?= date('Y/m/d', strtotime($position['start_date'])) ?> - 
+                                            <?= date('Y/m/d', strtotime($position['end_date'])) ?>)
                                         </span>
-                                        
                                     </div>
                                 <?php endforeach; ?>
                             </div>

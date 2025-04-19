@@ -13,6 +13,7 @@ $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $name = trim($_POST['name'] ?? '');
+    $is_high_level = isset($_POST['is_high_level']) ? 1 : 0;
     
     if (empty($name)) {
         $errors[] = 'اسم الرتبة مطلوب';
@@ -20,9 +21,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
     if (empty($errors)) {
         try {
-            $stmt = $pdo->prepare("INSERT INTO positions (name) VALUES (?)");
+            // Check if position already exists
+            $stmt = $pdo->prepare("SELECT position_id FROM positions WHERE name = ?");
             $stmt->execute([$name]);
-            $success = 'تمت إضافة الرتبة بنجاح';
+            if ($stmt->fetch()) {
+                $errors[] = 'هذه الرتبة مسجلة مسبقاً';
+            } else {
+                // Insert into appropriate table based on checkbox
+                if ($is_high_level) {
+                    $stmt = $pdo->prepare("INSERT INTO high_level_positions (name) VALUES (?)");
+                } else {
+                    $stmt = $pdo->prepare("INSERT INTO positions (name) VALUES (?)");
+                }
+                $stmt->execute([$name]);
+                $success = 'تمت إضافة الرتبة بنجاح';
+            }
         } catch (PDOException $e) {
             $errors[] = 'خطأ في قاعدة البيانات: ' . $e->getMessage();
         }
@@ -43,6 +56,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .success-message { color: #28a745; padding: 10px; margin: 10px 0; border: 1px solid #c3e6cb; border-radius: 5px; }
         .required { color: red; }
         .form-section { margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; }
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+        }
+        .checkbox-container input[type="checkbox"] {
+            width: auto;
+            margin-left: 10px;
+        }
+        .checkbox-label {
+            font-weight: normal;
+            margin: 0;
+        }
+        .high-level-info {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -70,6 +101,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <div class="input-group">
                         <label>اسم الرتبة<span class="required">*</span></label>
                         <input type="text" name="name" value="<?= htmlspecialchars($_POST['name'] ?? '') ?>" required>
+                    </div>
+                    
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="is_high_level" name="is_high_level" <?= isset($_POST['is_high_level']) ? 'checked' : '' ?>>
+                        <label for="is_high_level" class="checkbox-label">منصب عالي</label>
                     </div>
                 </div>
 
