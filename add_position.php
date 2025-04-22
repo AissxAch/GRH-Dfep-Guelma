@@ -51,6 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>إضافة رتبة جديدة - GRH Depf</title>
     <link rel="stylesheet" href="CSS/add_employee.css">
     <link rel="stylesheet" href="CSS/icons.css">
+    <link rel="stylesheet" href="CSS/style.css">
     <style>
         .error-message { color: #dc3545; padding: 10px; margin: 10px 0; border: 1px solid #f5c6cb; border-radius: 5px; }
         .success-message { color: #28a745; padding: 10px; margin: 10px 0; border: 1px solid #c3e6cb; border-radius: 5px; }
