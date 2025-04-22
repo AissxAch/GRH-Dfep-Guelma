@@ -49,12 +49,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إضافة قسم جديد - GRH Depf</title>
     <link rel="stylesheet" href="CSS/icons.css">
+    <link rel="stylesheet" href="CSS/style.css">
     <style>
         /* Reuse existing styles from add_employee.css */
         .dashboard-container {
             background: #f5f6fa;
             min-height: 100vh;
-            padding: 20px;
         }
         
         .form-container {
