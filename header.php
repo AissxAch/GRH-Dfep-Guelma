@@ -31,6 +31,14 @@ if (!isset($_SESSION['user_id'])) {
                     <span class="username"><?php echo htmlspecialchars($_SESSION['fullname']); ?></span>
                     <span class="role"><?php echo htmlspecialchars($_SESSION['role'] ?? 'مستخدم'); ?></span>
                 </div>
+                <div class="profile-dropdown">
+                    <a href="profile.php" class="dropdown-item">
+                        <i class="fas fa-user"></i>الملف الشخصي</a>
+                    <a href="settings.php" class="dropdown-item">
+                        <i class="fas fa-cog"></i>
+                        الإعدادات
+                    </a>
+                </div>
             </div>
             <a href="logout.php" class="logout-btn">
                 <i class="fas fa-sign-out-alt"></i>
@@ -51,7 +59,6 @@ if (!isset($_SESSION['user_id'])) {
         <a href="list_departments.php" class="nav-link <?= (basename($_SERVER['PHP_SELF']) == 'list_departments.php' ? 'active' : '') ?>">
             <i class="fas fa-building"></i>
             الأقسام
-        </a>
         </a>
     </nav>
 </header>

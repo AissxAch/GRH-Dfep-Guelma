@@ -94,7 +94,7 @@ try {
                         <a href="promote_employee.php?id=<?= $employee['employee_id'] ?>" class="action-button edit-button">
                             <i class="fas fa-arrow-up"></i> ترقية الموظف
                         </a>
-                        <a href="delete_employee.php?id=<?= $employee['employee_id'] ?>" class="action-button delete-button" onclick="return confirm('هل أنت متأكد أنك تريد حذف هذا الموظف؟');">
+                        <a href="delete_employee.php?id=<?= $employee['employee_id'] ?>" class="action-button delete-button">
                             <i class="fas fa-trash"></i> حذف الموظف
                         </a>
                         <a href="document.php?id=<?= $employee['employee_id'] ?>" class="action-button documents-button">
