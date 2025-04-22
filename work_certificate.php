@@ -126,6 +126,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error) {
     <title>شهادة عمل - GRH Depf</title>
     <link rel="stylesheet" href="CSS/work_certificate.css">
     <link rel="stylesheet" href="CSS/icons.css">
+    <link rel="stylesheet" href="CSS/style.css">
+
 </head>
 <body>
     <div class="dashboard-container no-print">

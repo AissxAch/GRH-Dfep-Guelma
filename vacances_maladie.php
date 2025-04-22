@@ -73,6 +73,7 @@ $fullname = $employee['firstname_ar'] . ' ' . $employee['lastname_ar'];
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مقرر عطلة مرضية - GRH Depf</title>
     <link rel="stylesheet" href="CSS/deduction_decision.css">
+    <link rel="stylesheet" href="CSS/style.css">
     <link rel="stylesheet" href="CSS/icons.css">
 </head>
 <body>
@@ -232,31 +233,7 @@ $fullname = $employee['firstname_ar'] . ' ' . $employee['lastname_ar'];
     <?php endif; ?>
     
     <style>
-        .custom-law-container {
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        .custom-law-container .form-input {
-            width: 1150px;
-            height: 20px;
-            margin-right: 220px;
-            padding: 0.8rem 1.2rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            background: #fff;
-            font-family: 'Tajawal', sans-serif;
-        }
-
-        .custom-law-container .form-input:focus {
-            border-color: #3498db;
-            box-shadow: 0 0 8px rgba(52, 152, 219, 0.2);
-            outline: none;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        
         
         .medical-leave-decision {
             font-family: 'Amiri', serif;
@@ -334,40 +311,6 @@ $fullname = $employee['firstname_ar'] . ' ' . $employee['lastname_ar'];
             }
         }
     </style>
-    <script>
-        function toggleLawInput() {
-            const lawSelect = document.getElementById('lawSelect');
-            const lawCustomContainer = document.getElementById('lawCustomContainer');
-            const lawCustomInput = document.getElementById('lawCustomInput');
-            
-            if (lawSelect.value === 'other') {
-                lawCustomContainer.style.display = 'block';
-                lawCustomInput.focus();
-            } else {
-                lawCustomContainer.style.display = 'none';
-                lawCustomInput.value = '';
-            }
-        }
-
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const lawSelect = document.getElementById('lawSelect');
-            const lawCustomInput = document.getElementById('lawCustomInput');
-            
-            if (lawSelect.value === 'other') {
-                if (!lawCustomInput.value.trim()) {
-                    e.preventDefault();
-                    alert('الرجاء إدخال النص القانوني المطلوب');
-                    lawCustomInput.focus();
-                    return;
-                }
-                
-                const hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.name = 'law';
-                hiddenInput.value = lawCustomInput.value;
-                this.appendChild(hiddenInput);
-            }
-        });
-    </script>
+    <script src="JS/vacances_maladie.js"></script>
 </body>
 </html>

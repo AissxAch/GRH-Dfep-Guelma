@@ -1,36 +1,17 @@
+/* work_certificate.css - Updated version with Font Awesome definitions removed */
 
-@font-face{
+/* Font Definitions */
+@font-face {
     font-family: 'Amiri';
     src: url('fonts/amiri/Amiri-Regular.ttf') format('truetype');
     font-weight: 400;
     font-style: normal;
 }
-@font-face {
-    font-family: 'Font Awesome';
-    src: url('fonts/fontawesome/webfonts/fa-solid-900.woff2') format('woff2'),
-         url('fonts/fontawesome/webfonts/fa-solid-900.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-}
 
-.fas {
-    font-family: 'Font Awesome';
-    -moz-osx-font-smoothing: grayscale;
-    -webkit-font-smoothing: antialiased;
-    display: inline-block;
-    font-style: normal;
-    font-variant: normal;
-    text-rendering: auto;
-    line-height: 1;
-}
-/* General Font for the Entire Site */
+/* Body Styles (Specific to Certificate) */
 body {
-    font-family: 'Tajawal', sans-serif; /* Use Tajawal for the rest of the site */
-    direction: rtl;
+    font-family: 'Amiri', serif;
     text-align: center;
-    margin: 0;
-    padding: 0;
-    background-color: #f5f5f5;
 }
 
 /* Enhanced Error Styles */
@@ -106,7 +87,7 @@ body {
 
 /* Specific Font for the Certificate */
 .certificate {
-    font-family: 'Amiri', serif; /* Use Amiri for the certificate */
+    font-family: 'Amiri', serif;
     padding: 50px;
     width: 21cm;
     min-height: 29.7cm;
@@ -122,7 +103,7 @@ body {
     font-size: 22px;
 }
 
-.header2{
+.header2 {
     font-size: 20px;
     font-weight: bold;
     text-align: right;
@@ -156,8 +137,79 @@ h1 {
     margin-right: 20px;
 }
 
+/* Form Styling */
+.form-container {
+    width: 80%;
+    margin: 20px auto;
+    padding: 20px;
+    background: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
 
-/* Print-specific styles */
+.form-group {
+    margin-bottom: 15px;
+    text-align: right;
+}
+
+label {
+    display: inline-block;
+    width: 200px;
+}
+
+input, select {
+    padding: 8px;
+    width: 300px;
+}
+
+button {
+    padding: 10px 20px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.prev-poste-container {
+    margin-bottom: 15px;
+    border: 1px dashed #ccc;
+    padding: 10px;
+}
+
+.add-prev-poste {
+    background: #2196F3;
+    margin-bottom: 20px;
+}
+
+.remove-prev-poste {
+    background: #f44336;
+}
+
+/* Font Awesome Icons */
+.fa-download::before { content: "\f019"; }
+.fa-trash::before { content: "\f2ed"; }
+.fa-users::before { content: "\f0c0"; }
+.fa-eye::before { content: "\f06e"; }
+.fa-edit::before { content: "\f044"; }
+.fa-file-alt::before { content: "\f15c"; }
+.fa-magnifying-glass::before { content: "\f002"; }
+.fa-sign-out-alt::before { content: "\f2f5"; }
+.fa-user-plus::before { content: "\f234"; }
+.fa-user-edit::before { content: "\f4ff"; }
+.fa-user-check::before { content: "\f4fc"; }
+.fa-user-times::before { content: "\f235"; }
+.fa-user-group::before { content: "\f0c0"; }
+.fa-search::before { content: "\f002"; }
+.fa-upload::before { content: "\f093"; }
+.fa-file-download::before { content: "\f56d"; }
+.fa-home::before { content: "\f015"; }
+.fa-user::before { content: "\f007"; }
+.fa-address-card::before { content: "\f2bb"; }
+.fa-phone::before { content: "\f095"; }
+.fa-save::before { content: "\f0c7"; }
+.fa-times::before { content: "\f00d"; }
+
+/* Print-specific Styles */
 @media print {
     @page {
         size: A4;
@@ -177,296 +229,6 @@ h1 {
         page-break-after: always;
     }
     .no-print {
-        display: none;
-    }
-}
-
-/* Form styling */
-.form-container {
-    width: 80%;
-    margin: 20px auto;
-    padding: 20px;
-    background: white;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-.form-group {
-    margin-bottom: 15px;
-    text-align: right;
-}
-label {
-    display: inline-block;
-    width: 200px;
-}
-input, select {
-    padding: 8px;
-    width: 300px;
-}
-button {
-    padding: 10px 20px;
-    background: #4CAF50;
-    color: white;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-}
-.prev-poste-container {
-    margin-bottom: 15px;
-    border: 1px dashed #ccc;
-    padding: 10px;
-}
-.add-prev-poste {
-    background: #2196F3;
-    margin-bottom: 20px;
-}
-.remove-prev-poste {
-    background: #f44336;
-}
-.dashboard-container {
-    background: #f5f6fa;
-    min-height: 100vh;
-    border-radius: 24px;
-}
-
-.dashboard-header {
-    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-    padding: 0;
-    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
-    border-radius: 20px 20px 0 0;
-}
-
-.user-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: white;
-}
-
-.welcome {
-    font-size: 1.2rem;
-}
-
-.logout-btn {
-    color: white;
-    text-decoration: none;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-}
-
-.logout-btn:hover {
-    background: rgba(255,255,255,0.1);
-}
-
-.dashboard-main {
-    padding: 2rem;
-}
-
-.dashboard-title {
-    color: #2c3e50;
-    text-align: center;
-    margin-bottom: 2rem;
-}
-.dashboard-container {
-    background: #f5f6fa;
-    min-height: 100vh;
-    border-radius: 24px;
-}
-
-/* Header Styles */
-.dashboard-header {
-    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-    padding: 0;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.2);
-}
-
-.header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 2rem;
-}
-
-.header-brand {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-}
-
-.brand-logo {
-    background: rgba(255,255,255,0.1);
-    padding: 1rem;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.brand-logo i {
-    font-size: 2rem;
-    color: white;
-}
-
-.brand-text h1 {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: white;
-}
-
-.brand-text p {
-    margin: 0;
-    font-size: 0.9rem;
-    opacity: 0.9;
-    color: rgba(255,255,255,0.9);
-}
-
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-}
-
-.user-profile {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    background: rgba(255,255,255,0.05);
-    padding: 0.5rem 1rem;
-    border-radius: 50px;
-    color: white;
-}
-
-.fa-user-circle {
-    font-size: 2.2rem;
-    color: rgba(255,255,255,0.9);
-}
-
-.profile-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.username {
-    font-weight: 500;
-    font-size: 1rem;
-}
-
-.role {
-    font-size: 0.85rem;
-    opacity: 0.8;
-}
-
-.header-nav {
-    background: rgba(0,0,0,0.1);
-    padding: 0.8rem 2rem;
-    display: flex;
-    gap: 2.5rem;
-    border-top: 1px solid rgba(255,255,255,0.1);
-}
-
-.nav-link {
-    color: rgba(255,255,255,0.8);
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-    transition: all 0.3s ease;
-    padding: 0.5rem 0;
-    position: relative;
-}
-
-.nav-link:hover,
-.nav-link.active {
-    color: white;
-    transform: translateY(-2px);
-}
-
-.nav-link.active::after {
-    content: "";
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background: white;
-}
-
-.logout-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: white;
-    text-decoration: none;
-    padding: 0.6rem 1.2rem;
-    border-radius: 8px;
-    background: rgba(255,255,255,0.1);
-    transition: all 0.3s ease;
-}
-
-.logout-btn:hover {
-    background: rgba(255,255,255,0.2);
-    transform: translateY(-1px);
-}
-
-/* Main Content Styles */
-.dashboard-main {
-    padding: 2rem;
-}
-
-.dashboard-title {
-    color: #2c3e50;
-    text-align: center;
-    margin-bottom: 2rem;
-}
-
-.fa-download::before { content: "\f019"; }
-.fa-trash::before { content: "\f2ed"; }
-.fa-users::before { content: "\f0c0"; }
-.fa-eye::before { content: "\f06e"; }
-.fa-edit::before { content: "\f044"; }
-.fa-file-alt::before { content: "\f15c"; }
-.fa-magnifying-glass::before{ content: "\f002"; }
-.fa-sign-out-alt::before { content: "\f2f5"; }
-.fa-user-plus::before { content: "\f234"; }
-.fa-user-edit::before { content: "\f4ff"; }
-.fa-user-check::before { content: "\f4fc"; }
-.fa-user-times::before { content: "\f235"; }
-.fa-user-group::before { content: "\f0c0"; }
-.fa-search::before { content: "\f002"; }
-.fa-upload::before { content: "\f093"; }
-.fa-file-download::before { content: "\f56d"; }
-.fa-home::before { content: "\f015"; }
-.fa-user::before { content: "\f007"; }
-.fa-address-card::before { content: "\f2bb"; }
-.fa-phone::before { content: "\f095"; }
-.fa-save::before { content: "\f0c7"; }
-.fa-times::before { content: "\f00d"; }
-
-/* Responsive Styles */
-@media (max-width: 768px) {
-    .header-content {
-        flex-direction: column;
-        gap: 1.5rem;
-        padding: 1rem;
-    }
-    
-    .header-brand {
-        flex-direction: column;
-        text-align: center;
-    }
-    
-    .header-nav {
-        flex-wrap: wrap;
-        gap: 1.5rem;
-        justify-content: center;
-        padding: 0.8rem 1rem;
-    }
-    
-    .user-profile {
-        padding: 0.5rem;
-    }
-    
-    .profile-info {
         display: none;
     }
 }

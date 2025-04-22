@@ -1,4 +1,4 @@
-/* add_employee.css - Complete standalone version */
+/* add_employee.css - Updated version with Font Awesome definitions removed */
 
 /* Font Definitions */
 @font-face {
@@ -6,89 +6,8 @@
     src: url('fonts/tajawal/Tajawal-Medium.ttf') format('truetype');
     font-weight: 500;
     font-style: normal;
-    font-display: swap; /* Fallback for older browsers */
-    unicode-range: U+0000-00FF; /* Optional: Define supported character range */
-}
-
-@font-face {
-    font-family: 'Font Awesome';
-    src: url('fonts/fontawesome/webfonts/fa-solid-900.woff2') format('woff2'),
-         url('fonts/fontawesome/webfonts/fa-solid-900.woff') format('woff'),
-         url('fonts/fontawesome/webfonts/fa-solid-900.ttf') format('truetype');
-    font-weight: normal;
-    font-display: block; /* Fallback for older browsers */
-    unicode-range: U+0000-00FF; /* Optional: Define supported character range */
-    font-display: block;
-}
-
-/* Base Styles */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Tajawal', sans-serif;
-    font-weight: 500;
-    direction: rtl;
-    background-color: #f5f5f5;
-    line-height: 1.6;
-    color: #333;
-}
-
-.fas {
-    font-family: 'Font Awesome';
-    -moz-osx-font-smoothing: grayscale;
-    -webkit-font-smoothing: antialiased;
-    display: inline-block;
-    font-style: normal;
-    font-variant: normal;
-    text-rendering: auto;
-    line-height: 1;
-}
-
-
-/* Dashboard Structure */
-.dashboard-container {
-    background: #f5f6fa;
-    min-height: 100vh;
-    border-radius: 24px;
-    max-width: 1400px;
-    margin: 0 auto;
-    box-shadow: 0 0 20px rgba(0,0,0,0.1);
-}
-
-.dashboard-main {
-    padding: 2rem;
-}
-
-.dashboard-title {
-    color: #2c3e50;
-    text-align: center;
-    margin-bottom: 2rem;
-    font-size: 1.8rem;
-}
-
-/* Message Styles */
-.error-message {
-    background: #ffebee;
-    color: #c62828;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 2rem;
-    border-right: 4px solid #c62828;
-    text-align: center;
-}
-
-.success-message {
-    background: #e8f5e9;
-    color: #2e7d32;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 2rem;
-    border-right: 4px solid #2e7d32;
-    text-align: center;
+    font-display: swap;
+    unicode-range: U+0000-00FF;
 }
 
 /* Form Styles */
@@ -99,6 +18,12 @@ body {
     padding: 2rem;
     border-radius: 15px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.employee-form input,
+.employee-form select,
+.employee-form textarea {
+    direction: rtl;
 }
 
 .form-section {
@@ -120,17 +45,6 @@ body {
     font-size: 1.3rem;
 }
 
-.input-group {
-    margin-bottom: 1.5rem;
-}
-
-.input-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    color: #2c3e50;
-}
-
 .input-row {
     display: flex;
     gap: 1.5rem;
@@ -138,27 +52,6 @@ body {
 
 .input-row .input-group {
     flex: 1;
-}
-
-.input-group input,
-.input-group select,
-.input-group textarea {
-    width: 100%;
-    padding: 0.8rem 1rem;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
-    font-family: 'Tajawal', sans-serif;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    background: #f8f9fa;
-}
-
-.input-group input:focus,
-.input-group select:focus,
-.input-group textarea:focus {
-    border-color: #3498db;
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-    outline: none;
 }
 
 .input-group textarea {
@@ -177,14 +70,12 @@ body {
     justify-content: center;
 }
 
-
 .check {
     position: static;
     width: auto !important;
-    display: flex
-;
+    display: flex;
 }
-/* Add to your existing styles */
+
 .high-level-section {
     background: #fff8e1;
     border-left: 4px solid #ffc107;
@@ -203,61 +94,14 @@ body {
     border-radius: 5px;
 }
 
-.login-button {
-    padding: 0.8rem 2rem;
-    background: #3498db;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
+.actions {
     display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-family: 'Tajawal', sans-serif;
-}
-
-.login-button:hover {
-    background: #2980b9;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
-}
-
-.cancel-button {
-    padding: 0.8rem 2rem;
-    background: #95a5a6;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-family: 'Tajawal', sans-serif;
-}
-
-.cancel-button:hover {
-    background: #7f8c8d;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(149, 165, 166, 0.3);
+    justify-content: center;
+    gap: 1rem;
 }
 
 /* Responsive Styles */
 @media (max-width: 768px) {
-    .dashboard-container {
-        border-radius: 0;
-    }
-    
-    .dashboard-main {
-        padding: 1rem;
-    }
-    
     .employee-form {
         padding: 1.5rem;
     }
@@ -270,168 +114,4 @@ body {
     .form-actions {
         flex-direction: column;
     }
-    
-    .login-button,
-    .cancel-button {
-        width: 100%;
-        justify-content: center;
-    }
-}
-
-/* Header Styles (copied from header.php for consistency) */
-.dashboard-header {
-    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-    padding: 0;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.2);
-    border-radius: 20px 20px 0 0;
-}
-
-.header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 2rem;
-}
-
-.header-brand {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-}
-
-.brand-logo {
-    background: rgba(255,255,255,0.1);
-    padding: 1rem;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.brand-logo i {
-    font-size: 2rem;
-    color: white;
-}
-
-.brand-text h1 {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: white;
-}
-
-.brand-text p {
-    margin: 0;
-    font-size: 0.9rem;
-    opacity: 0.9;
-    color: rgba(255,255,255,0.9);
-}
-
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-}
-
-.user-profile {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    background: rgba(255,255,255,0.05);
-    padding: 0.5rem 1rem;
-    border-radius: 50px;
-    color: white;
-}
-
-.fa-user-circle {
-    font-size: 2.2rem;
-    color: rgba(255,255,255,0.9);
-}
-
-.profile-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.username {
-    font-weight: 500;
-    font-size: 1rem;
-}
-
-.role {
-    font-size: 0.85rem;
-    opacity: 0.8;
-}
-
-.header-nav {
-    background: rgba(0,0,0,0.1);
-    padding: 0.8rem 2rem;
-    display: flex;
-    gap: 2.5rem;
-    border-top: 1px solid rgba(255,255,255,0.1);
-}
-
-.nav-link {
-    color: rgba(255,255,255,0.8);
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-    transition: all 0.3s ease;
-    padding: 0.5rem 0;
-    position: relative;
-}
-
-.nav-link:hover,
-.nav-link.active {
-    color: white;
-    transform: translateY(-2px);
-}
-
-.nav-link.active::after {
-    content: "";
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background: white;
-}
-
-.logout-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: white;
-    text-decoration: none;
-    padding: 0.6rem 1.2rem;
-    border-radius: 8px;
-    background: rgba(255,255,255,0.1);
-    transition: all 0.3s ease;
-}
-
-.logout-btn:hover {
-    background: rgba(255,255,255,0.2);
-    transform: translateY(-1px);
-}
-.actions{
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-}
-.delete-button{
-    padding: 0.8rem 2rem;
-    background: #ff0000;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex
-;
-    align-items: center;
-    gap: 0.5rem;
-    font-family: 'Tajawal', sans-serif;
 }

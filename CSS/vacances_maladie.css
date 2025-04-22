@@ -1,0 +1,101 @@
+.custom-law-container {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.custom-law-container .form-input {
+    width: 1150px;
+    height: 20px;
+    margin-right: 220px;
+    padding: 0.8rem 1.2rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    background: #fff;
+    font-family: 'Tajawal', sans-serif;
+}
+
+.custom-law-container .form-input:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 8px rgba(52, 152, 219, 0.2);
+    outline: none;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.medical-leave-decision {
+    font-family: 'Amiri', serif;
+    padding: 30px;
+    width: 21cm;
+    min-height: 29.7cm;
+    margin: 20px auto;
+    line-height: 30px;
+    box-sizing: border-box;
+    background: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.medical-leave-decision .header {
+    font-weight: bold;
+    font-size: 22px;
+}
+
+.medical-leave-decision .content {
+    font-size: 20px;
+    text-align: right;
+}
+
+.medical-leave-decision .content p {
+    margin: 5px;
+}
+
+.medical-leave-decision .signature {
+    margin-top: 50px;
+    text-align: left;
+}
+
+.medical-leave-decision h1 {
+    font-size: 26px;
+    font-weight: bold;
+    margin: 50px 0px 50px 61px;
+}
+
+.medical-leave-decision .docnum {
+    text-align: right;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+.medical-leave-decision .decision-title {
+    margin: 30px 300px;
+}
+
+@media print {
+    @page {
+        size: A4;
+        margin: 0;
+    }
+    body {
+        background: none;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    .medical-leave-decision {
+        box-shadow: none;
+        margin: 0 !important;
+        width: auto !important;
+        height: auto !important;
+        page-break-after: always;
+    }
+    .no-print,
+    .dashboard-container,
+    .dashboard-header,
+    header {
+        display: none !important;
+    }
+    .medical-leave-decision {
+        display: block !important;
+    }
+}

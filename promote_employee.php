@@ -7,20 +7,10 @@ if (!isset($_SESSION['user_id'])) {
 
 // Database connection
 include 'config/dbconnect.php';
+require_once 'config/functions.php';
 $pdo = getDBConnection();
 
-// Date validation and conversion
-function convertDate($date) {
-    if (empty($date)) return null;
-    
-    // Handle both formats if needed
-    $dateObj = DateTime::createFromFormat('d/m/Y', $date);
-    if (!$dateObj) {
-        $dateObj = DateTime::createFromFormat('Y-m-d', $date);
-    }
-    
-    return $dateObj ? $dateObj->format('Y-m-d') : null;
-}
+
 
 $employee = null;
 $error = "";
@@ -90,6 +80,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['employee_id']) && isse
                 
                 $pdo->commit();
                 $success = "تم ترقية الموظف بنجاح.";
+                // After successful promotion
+                if ($success) {
+                    logActivity($pdo, $employee_id, 'promotion', 
+                        "تمت الترقية من {$current['position']} إلى $new_position",
+                        'position', $current['position'], $new_position);
+                }
                 $employee = null; // Clear employee data to reset form
             } else {
                 $error = "لم يتم العثور على الموظف.";
@@ -117,7 +113,7 @@ $positions = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>ترقية موظف - GRH Depf</title>
     <link rel="stylesheet" href="CSS/promote_employee.css">
     <link rel="stylesheet" href="CSS/icons.css">
-    <link rel="stylesheet" href="CSS/add_employee.css">
+    <link rel="stylesheet" href="CSS/style.css">
 </head>
 <body>
     <div class="dashboard-container">

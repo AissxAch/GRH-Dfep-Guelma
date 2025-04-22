@@ -1,21 +1,20 @@
-*{
-    text-decoration: none;
-    margin: 5px;
-    padding: 5px;
-}
-.documnts-grid{
+/* extract.css - Updated version with common styles removed */
+
+.documnts-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 1.5rem;
     max-width: 1200px;
     margin: 0 auto;
 }
-.documnts-container{
+
+.documnts-container {
     display: flex;
     flex-direction: column;
     gap: 1rem;
     margin-top: 2rem;
 }
+
 .documnt-card {
     background: white;
     padding: 4rem;
@@ -47,4 +46,11 @@
     text-decoration: none;
     color: white;
     margin: 5px;
+}
+
+/* Ensure no text decoration for links */
+.documnts-grid a,
+.documnt-card a,
+.btn-primary {
+    text-decoration: none;
 }
