@@ -83,12 +83,9 @@ function getFullNameAr($employee) {
                     <i class="fas fa-user-plus"></i> إضافة موظف جديد
                 </a>
                 <div class="search-form">
-                    <div class="input-group2">
+                    <div class="input-group">
                         <input type="text" id="searchInput" placeholder="ابحث بالاسم أو الرقم الوطني" 
                                onkeyup="searchEmployees()">
-                        <button class="search-button">
-                            <i class="fas fa-search"></i>
-                        </button>
                     </div>
                 </div>
             </div>
