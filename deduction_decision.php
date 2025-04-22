@@ -62,6 +62,7 @@ $fullname = $employee['firstname_ar'].' '.$employee['lastname_ar'];
     <title>مقرر خصم - GRH Depf</title>
     <link rel="stylesheet" href="CSS/deduction_decision.css">
     <link rel="stylesheet" href="CSS/icons.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <?php include 'header.php'; ?>
@@ -231,41 +232,6 @@ $fullname = $employee['firstname_ar'].' '.$employee['lastname_ar'];
             to { opacity: 1; transform: translateY(0); }
         }
         </style>
-    <script>
-        function toggleLawInput() {
-            const lawSelect = document.getElementById('lawSelect');
-            const lawCustomContainer = document.getElementById('lawCustomContainer');
-            const lawCustomInput = document.getElementById('lawCustomInput');
-            
-            if (lawSelect.value === 'other') {
-                lawCustomContainer.style.display = 'block';
-                lawCustomInput.focus(); // Auto-focus the input when shown
-            } else {
-                lawCustomContainer.style.display = 'none';
-                lawCustomInput.value = ''; // Clear the input when hiding
-            }
-        }
-
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const lawSelect = document.getElementById('lawSelect');
-            const lawCustomInput = document.getElementById('lawCustomInput');
-            
-            if (lawSelect.value === 'other') {
-                if (!lawCustomInput.value.trim()) {
-                    e.preventDefault();
-                    alert('الرجاء إدخال النص القانوني المطلوب');
-                    lawCustomInput.focus();
-                    return;
-                }
-                
-                // Create hidden input with the custom value
-                const hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.name = 'law';
-                hiddenInput.value = lawCustomInput.value;
-                this.appendChild(hiddenInput);
-            }
-        });
-    </script>
+    <script src="JS/vacances_maladie.js"></script>
 </body>
 </html>

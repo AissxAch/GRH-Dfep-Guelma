@@ -54,6 +54,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>معلومات الموظف - GRH Depf</title>
     <link rel="stylesheet" href="CSS/employee.css">
+    <link rel="stylesheet" href="CSS/style.css">
     <link rel="stylesheet" href="CSS/icons.css">
     <style>
         .position-entry {

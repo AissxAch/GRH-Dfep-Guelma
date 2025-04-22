@@ -267,6 +267,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تعديل موظف - GRH Depf</title>
     <link rel="stylesheet" href="CSS/edit_employee.css">
+    <link rel="stylesheet" href="CSS/style.css">
     <link rel="stylesheet" href="CSS/icons.css">
     <style>
         .delete-position-btn {
@@ -274,7 +275,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
             align-items: flex-end;
             margin-bottom: 10px;
         }
-        
         .delete-position-button {
             background-color: #e74c3c;
             color: white;
@@ -284,78 +284,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
             cursor: pointer;
             transition: background-color 0.3s;
         }
-        
         .delete-position-button:hover {
             background-color: #c0392b;
         }
-        
-        .error-message {
-            color: #dc3545;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #f5c6cb;
-            border-radius: 5px;
-        }
-        
-        .success-message {
-            color: #28a745;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #c3e6cb;
-            border-radius: 5px;
-        }
-        
-        .required {
-            color: red;
-        }
-        
-        .form-section {
-            margin-bottom: 2rem;
-            padding: 1.5rem;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-        
-        .input-group {
-            margin-bottom: 1rem;
-        }
-        
-        .input-row {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-        
-        .input-row .input-group {
-            flex: 1;
-        }
-        
-        .dashboard-container {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        
-        .dashboard-main {
-            flex: 1;
-            padding: 20px;
-        }
-        
-        .form-actions {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-        }
-        
-        .login-button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        
         .cancel-button {
             background-color: #6c757d;
             color: white;
@@ -367,7 +298,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
             display: inline-block;
             text-align: center;
         }
-        
         .delete-all-container {
             margin: 15px 0;
             padding: 10px;
@@ -375,11 +305,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
             border: 1px solid #ffdddd;
             border-radius: 5px;
         }
-        
         .delete-all-checkbox {
             margin-left: 10px;
         }
-        
         .disabled-positions {
             opacity: 0.6;
             pointer-events: none;

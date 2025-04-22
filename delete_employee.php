@@ -10,7 +10,6 @@ if (!isset($_SESSION['user_id'])) {
 
 // Initialize variables
 $error = '';
-$success = '';
 $employee_id = '';
 $employee_data = null;
 
@@ -37,11 +36,24 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
 }
 
 // Handle delete confirmation
+// Handle delete confirmation
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['confirm_delete'])) {
     try {
         $pdo->beginTransaction();
         
-        // Delete related records first (to maintain referential integrity)
+        // Store employee name for activity log
+        $employee_name = $employee_data['firstname_ar'] . ' ' . $employee_data['lastname_ar'];
+        
+        // Log the deletion
+        $log_stmt = $pdo->prepare("INSERT INTO activity_log (employee_id, activity_type, details, changed_by) 
+                                   VALUES (?, 'delete', ?, ?)");
+        $log_stmt->execute([
+            $employee_id,
+            "تم حذف الموظف: " . $employee_name,
+            $_SESSION['user_id']
+        ]);
+        
+        // Delete related records
         $pdo->prepare("DELETE FROM employee_previous_positions WHERE employee_id = ?")->execute([$employee_id]);
         $pdo->prepare("DELETE FROM employee_high_level_history WHERE employee_id = ?")->execute([$employee_id]);
         $pdo->prepare("DELETE FROM employee_documents WHERE employee_id = ?")->execute([$employee_id]);
@@ -84,13 +96,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['confirm_delete'])) {
             padding: 10px;
             margin: 10px 0;
             border: 1px solid #f5c6cb;
-            border-radius: 5px;
-        }
-        .success-message {
-            color: #28a745;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #c3e6cb;
             border-radius: 5px;
         }
         .employee-info {
@@ -136,7 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['confirm_delete'])) {
             <?php elseif ($employee_data): ?>
                 <div class="employee-info">
                     <h3>معلومات الموظف</h3>
-                    <p><strong>الاسم:</strong> <?= htmlspecialchars($employee_data['firstname_ar'] . ' ' . htmlspecialchars($employee_data['lastname_ar'])) ?></p>
+                    <p><strong>الاسم:</strong> <?= htmlspecialchars($employee_data['firstname_ar'] . ' ' . $employee_data['lastname_ar']) ?></p>
                     <p><strong>الرقم الوطني:</strong> <?= htmlspecialchars($employee_data['national_id']) ?></p>
                     <p><strong>المنصب:</strong> <?= htmlspecialchars($employee_data['position']) ?></p>
                     <p><strong>القسم:</strong> 

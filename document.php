@@ -18,7 +18,7 @@ $employee_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
 // Fetch employee details
 try {
-    $stmt = $pdo->prepare("SELECT full_name_ar FROM employees WHERE employee_id = :employee_id");
+    $stmt = $pdo->prepare("SELECT * FROM employees WHERE employee_id = :employee_id");
     $stmt->execute(['employee_id' => $employee_id]);
     $employee = $stmt->fetch(PDO::FETCH_ASSOC);
     
@@ -116,6 +116,7 @@ if (!$error) {
         $error = "خطأ في جلب المستندات: " . $e->getMessage();
     }
 }
+$fullname = $employee['firstname_ar'] . ' ' . $employee['lastname_ar'] ;
 ?>
 
 <!DOCTYPE html>
@@ -125,6 +126,7 @@ if (!$error) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مستندات الموظف - GRH Depf</title>
     <link rel="stylesheet" href="CSS/document.css">
+    <link rel="stylesheet" href="CSS/style.css">
     <link rel="stylesheet" href="CSS/icons.css">
 </head>
 <body>
@@ -143,7 +145,7 @@ if (!$error) {
                     </div>
                 </div>
             <?php else: ?>
-                <h1 class="dashboard-title">مستندات الموظف: <?= htmlspecialchars($employee['full_name_ar']) ?></h1>
+                <h1 class="dashboard-title">مستندات الموظف: <?= htmlspecialchars($fullname) ?></h1>
                 
                 <?php if (isset($error)): ?>
                     <div class="error-message"><?= $error ?></div>

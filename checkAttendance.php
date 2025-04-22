@@ -252,22 +252,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
                 <div class="time-selection">
                     <div class="time-group">
                         <h3>الفترة الصباحية</h3>
-                        <label for="start_time_am"><i class="fas fa-clock"></i> وقت بداية الدوام:</label>
+                        <label for="start_time_am"> وقت بداية الدوام:</label>
                         <input class="times" type="time" id="start_time_am" name="start_time_am" 
                             value="<?= htmlspecialchars($_POST['start_time_am'] ?? '08:00') ?>" required>
                         
-                        <label for="end_time_am"><i class="fas fa-clock"></i> وقت نهاية الدوام:</label>
+                        <label for="end_time_am"> وقت نهاية الدوام:</label>
                         <input class="times" type="time" id="end_time_am" name="end_time_am" 
                             value="<?= htmlspecialchars($_POST['end_time_am'] ?? '12:00') ?>" required>
                     </div>
                     
                     <div class="time-group">
                         <h3>الفترة المسائية</h3>
-                        <label for="start_time_pm"><i class="fas fa-clock"></i> وقت بداية الدوام:</label>
+                        <label for="start_time_pm"> وقت بداية الدوام:</label>
                         <input class="times" type="time" id="start_time_pm" name="start_time_pm" 
                             value="<?= htmlspecialchars($_POST['start_time_pm'] ?? '13:00') ?>" required>
                         
-                        <label for="end_time_pm"><i class="fas fa-clock"></i> وقت نهاية الدوام:</label>
+                        <label for="end_time_pm"> وقت نهاية الدوام:</label>
                         <input class="times" type="time" id="end_time_pm" name="end_time_pm" 
                             value="<?= htmlspecialchars($_POST['end_time_pm'] ?? '16:00') ?>" required>
                     </div>
