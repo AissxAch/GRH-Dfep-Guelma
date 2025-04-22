@@ -57,14 +57,8 @@ function getFullNameAr($employee) {
     <title>قائمة الموظفين - GRH Depf</title>
     <link rel="stylesheet" href="CSS/employee.css">
     <link rel="stylesheet" href="CSS/icons.css">
-    <style>
-        /* Ensure numbers display consistently */
-        body {
-            font-feature-settings: "lnum";
-            -moz-font-feature-settings: "lnum";
-            -webkit-font-feature-settings: "lnum";
-        }
-    </style>
+    <link rel="stylesheet" href="CSS/style.css">
+    
 </head>
 <body>
     <div class="dashboard-container">
@@ -89,7 +83,7 @@ function getFullNameAr($employee) {
                     <i class="fas fa-user-plus"></i> إضافة موظف جديد
                 </a>
                 <div class="search-form">
-                    <div class="input-group">
+                    <div class="input-group2">
                         <input type="text" id="searchInput" placeholder="ابحث بالاسم أو الرقم الوطني" 
                                onkeyup="searchEmployees()">
                         <button class="search-button">
@@ -153,9 +147,7 @@ function getFullNameAr($employee) {
                                                class="documents-btn" title="عرض المستندات">
                                                 <i class="fas fa-file-alt"></i>
                                             </a>
-                                            <a href="list_employees.php?delete=<?= $employee['employee_id'] ?>" 
-                                               class="delete-btn" title="حذف"
-                                               onclick="return confirm('هل أنت متأكد من حذف هذا الموظف؟');">
+                                            <a href="delete_employee.php?id=<?= $employee['employee_id'] ?>"class="delete-btn" title="حذف">
                                                 <i class="fas fa-trash"></i>
                                             </a>
                                         </td>
