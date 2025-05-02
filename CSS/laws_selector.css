@@ -1,0 +1,85 @@
+/* Law Selector Styles */
+.law-select-container {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.law-input-field {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: 'Tajawal', sans-serif;
+}
+
+.law-dropdown {
+    display: none;
+    position: absolute;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.law-option {
+    padding: 8px;
+    cursor: pointer;
+    font-family: 'Tajawal', sans-serif;
+}
+
+.law-option:hover {
+    background-color: #f5f5f5;
+}
+
+.law-option.no-results {
+    color: #999;
+    cursor: default;
+}
+
+.selected-laws {
+    margin-top: 10px;
+}
+
+.selected-law {
+    background: #f5f5f5;
+    padding: 8px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Tajawal', sans-serif;
+}
+
+.selected-law span {
+    flex: 1;
+}
+
+.remove-law-btn {
+    background: none;
+    border: none;
+    color: #ff0000;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0 5px;
+    margin-right: 5px;
+}
+
+.add-law-btn {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 5px;
+    font-family: 'Tajawal', sans-serif;
+}
+
+.add-law-btn:hover {
+    background: #45a049;
+}
