@@ -218,12 +218,18 @@ try {
                 </a>
                 
                 <!-- الرتب Section -->
-                <div class="section-title">إدارة الرتب</div>
+                <div class="section-title">إدارة الرتب و القوانين</div>
                 
                 <a href="add_position.php" class="card btn-primary">
                     <i class="fas fa-plus"></i>
                     <h3>إضافة رتبة</h3>
                     <p>إضافة رتبة جديدة إلى النظام</p>
+                </a>
+                
+                <a href="manage_laws.php" class="card btn-primary">
+                    <i class="fas fa-gavel"></i>
+                    <h3>ادارة القوانين</h3>
+                    <p>إضافة أو تعديل القوانين الخاصة بالموظفين</p>
                 </a>
 
                 <a href="list_positions.php" class="card btn-info">

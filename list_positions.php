@@ -19,6 +19,7 @@ try {
 
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,13 +28,14 @@ try {
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="CSS/list.css">
 </head>
+
 <body>
     <div class="dashboard-container">
         <?php include 'header.php'; ?>
 
         <main class="dashboard-main">
             <h1 class="dashboard-title">قائمة الرتب</h1>
-            
+
             <?php if (isset($error)): ?>
                 <div class="error-message"><?= htmlspecialchars($error) ?></div>
             <?php endif; ?>
@@ -99,6 +101,7 @@ try {
         </div>
     </div>
 
-    <script src="JS/listpositions.js"></script>
+    <script src="JS/lists.js"></script>
 </body>
+
 </html>

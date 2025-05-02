@@ -26,7 +26,6 @@ $decisionmaker = '';
 $employee_id = isset($_GET['id']) ? $_GET['id'] : '';
 
 try {
-    // Check if input is numeric (employee ID) or string (national ID)
     if (is_numeric($employee_id)) {
         $stmt = $pdo->prepare("SELECT * FROM employees WHERE employee_id = ?");
     } else {
@@ -52,15 +51,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error) {
     $leaveDays = $_POST['leaveDays'] ?? '';
     $suggest = $_POST['suggest'] ?? '';
     $decisionmaker = $_POST['decisionmaker'] ?? '';
-    $law = $_POST['law'] ?? '';
-    
-    if (isset($_POST['lawCustom']) && !empty($_POST['lawCustom'])) {
-        $law = $_POST['lawCustom'];
-    }
+    $lawTexts = $_POST['law_texts'] ?? [];
+    $lawText = implode("\n<p>", $lawTexts);
     
     // Validate inputs
     if (empty($docNum) || empty($medicalCertNum) || empty($medicalCertDate) || 
-        empty($medicalCertIssuer) || empty($startDate) || empty($leaveDays)) {
+        empty($medicalCertIssuer) || empty($startDate) || empty($leaveDays) || empty($lawTexts)) {
         $error = "يرجى ملء جميع الحقول المطلوبة.";
     }
 }
@@ -73,6 +69,7 @@ $fullname = $employee['firstname_ar'] . ' ' . $employee['lastname_ar'];
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مقرر عطلة مرضية - GRH Depf</title>
     <link rel="stylesheet" href="CSS/deduction_decision.css">
+    <link rel="stylesheet" href="CSS/laws_selector.css">
     <link rel="stylesheet" href="CSS/style.css">
     <link rel="stylesheet" href="CSS/icons.css">
 </head>
@@ -158,16 +155,12 @@ $fullname = $employee['firstname_ar'] . ' ' . $employee['lastname_ar'];
                         </div>
                         
                         <div class="form-group">
-                            <label for="law">القانـون المنطبق:</label>
-                            <select name="law" id="lawSelect" class="form-select" onchange="toggleLawInput()">
-                                <option value="">اختر القانون المنطبق</option>
-                                <option value="-وبمقتضى المرسوم التنفيذي رقم 09-93 المؤرخ في 22/02/2009، المتضمن القانون الأساسي الخاص بالموظفين المنتمين للأسلاك الخاصة بالتكوين والتعليم المهنيين،">
-                                    -وبمقتضى المرسوم التنفيذي رقم 09-93 المؤرخ في 22/02/2009، المتضمن القانون الأساسي الخاص بالموظفين المنتمين للأسلاك الخاصة بالتكوين والتعليم المهنيين،
-                                </option>
-                                <option value="other">أخرى</option>
-                            </select>
-                            <div id="lawCustomContainer" class="custom-law-container" style="display: none;">
-                                <input type="text" id="lawCustomInput" name="lawCustom" class="form-input" placeholder="أدخل النص القانوني المطلوب">
+                            <label for="laws">القانـون المنطبق:</label>
+                            <div class="law-select-container" data-category="sick_leave">
+                                <input type="text" class="law-input-field" placeholder="ابحث أو اختر من القائمة">
+                                <div class="law-dropdown"></div>
+                                <button type="button" class="add-law-btn">إضافة قانون مخصص</button>
+                                <div class="selected-laws"></div>
                             </div>
                         </div>
 
@@ -219,7 +212,7 @@ $fullname = $employee['firstname_ar'] . ' ' . $employee['lastname_ar'];
             <p>-إن مدير التكوين والتعليم المهنيين،</p>
             <p>-بمقتضى الأمر رقم 06-03 المؤرخ في 15/07/2006، المتضمن القانون الأساسي العام للوظيفة العمومية، المتمم،</p>
             <p>-وبمقتضى المرسوم التنفيذي رقم 90-99 المؤرخ في 27/03/1990 والمتعلق بسلطة التعيين، والتسيير الإداري، بالنسبة للموظفين وأعوان الإدارة المركزية والولايات والبلديات والمؤسسات العمومية ذات الطابع الإداري،</p>
-            <p><?= htmlspecialchars($law) ?></p>
+            <p><?= nl2br(htmlspecialchars($lawText)) ?></p>
             <p>-بناء على الشهادة الطبية رقم <strong><?= htmlspecialchars($medicalCertNum) ?></strong> بتاريخ <strong><?= htmlspecialchars($medicalCertDate) ?></strong> الصادرة عن <strong><?= htmlspecialchars($medicalCertIssuer) ?></strong>، المتضمنة منح السيد(ة) <strong><?= htmlspecialchars($fullname) ?><strong> توقف عن العمل لمدة (<strong><?= htmlspecialchars($leaveDays) ?></strong>) يوم، ابتداء من <strong><?= htmlspecialchars($startDate) ?></strong>،</p>
             <p>-باقتراح من </strong><?= htmlspecialchars($suggest) ?></strong></p>
             <h1 class="decision-title">يقـــــــرر</h1>
@@ -231,86 +224,6 @@ $fullname = $employee['firstname_ar'] . ' ' . $employee['lastname_ar'];
         </div>
     </div>
     <?php endif; ?>
-    
-    <style>
-        
-        
-        .medical-leave-decision {
-            font-family: 'Amiri', serif;
-            padding: 30px;
-            width: 21cm;
-            min-height: 29.7cm;
-            margin: 20px auto;
-            line-height: 30px;
-            box-sizing: border-box;
-            background: white;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        
-        .medical-leave-decision .header {
-            font-weight: bold;
-            font-size: 22px;
-        }
-        
-        .medical-leave-decision .content {
-            font-size: 20px;
-            text-align: right;
-        }
-        
-        .medical-leave-decision .content p {
-            margin: 5px;
-        }
-        
-        .medical-leave-decision .signature {
-            margin-top: 50px;
-            text-align: left;
-        }
-        
-        .medical-leave-decision h1 {
-            font-size: 26px;
-            font-weight: bold;
-            margin: 50px 0px 50px 61px;
-        }
-        
-        .medical-leave-decision .docnum {
-            text-align: right;
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 30px;
-        }
-        
-        .medical-leave-decision .decision-title {
-            margin: 30px 300px;
-        }
-        
-        @media print {
-            @page {
-                size: A4;
-                margin: 0;
-            }
-            body {
-                background: none;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-            .medical-leave-decision {
-                box-shadow: none;
-                margin: 0 !important;
-                width: auto !important;
-                height: auto !important;
-                page-break-after: always;
-            }
-            .no-print,
-            .dashboard-container,
-            .dashboard-header,
-            header {
-                display: none !important;
-            }
-            .medical-leave-decision {
-                display: block !important;
-            }
-        }
-    </style>
-    <script src="JS/vacances_maladie.js"></script>
+    <script src="JS/laws_selector.js"></script>
 </body>
 </html>

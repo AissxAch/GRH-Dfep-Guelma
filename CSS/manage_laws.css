@@ -1,0 +1,217 @@
+/* Enhanced laws management styles that align better with overall site styling */
+
+.laws-container {
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.dashboard-title {
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.laws-form {
+    margin-bottom: 2.5rem;
+    padding: 1.5rem;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    border: 1px solid #eee;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.laws-form textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    resize: vertical;
+    font-family: 'Tajawal', sans-serif;
+    direction: rtl;
+}
+
+.laws-form select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+    font-family: 'Tajawal', sans-serif;
+    direction: rtl;
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.form-check input[type="checkbox"] {
+    margin-left: 0.5rem;
+    width: auto;
+}
+
+.form-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.form-buttons button, 
+.form-buttons .button {
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Tajawal', sans-serif;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-buttons button {
+    background-color: #3498db;
+    color: white;
+}
+
+.form-buttons .secondary {
+    background-color: #95a5a6;
+    color: white;
+    text-decoration: none;
+}
+
+/* Laws table styles */
+.laws-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+}
+
+.laws-table th, 
+.laws-table td {
+    padding: 12px;
+    text-align: right;
+    border-bottom: 1px solid #ddd;
+}
+
+.laws-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.laws-table tr:hover {
+    background-color: #f9f9f9;
+}
+
+.law-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.law-actions a {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-decoration: none;
+}
+
+.edit-law {
+    background-color: #3498db;
+}
+
+.delete-law {
+    background-color: #e74c3c;
+}
+
+.law-category {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: white;
+    text-align: center;
+}
+
+.category-deduction {
+    background-color: #e74c3c;
+}
+
+.category-annual_leave {
+    background-color: #3498db;
+}
+
+.category-sick_leave {
+    background-color: #2ecc71;
+}
+
+.category-multiple {
+    background-color: #9b59b6;
+}
+
+.success-message {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.no-data {
+    text-align: center;
+    color: #7f8c8d;
+    padding: 2rem;
+    font-style: italic;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .laws-container {
+        padding: 1.5rem;
+    }
+    
+    .form-buttons {
+        flex-direction: column;
+    }
+    
+    .laws-table {
+        display: block;
+        overflow-x: auto;
+    }
+}

@@ -60,5 +60,9 @@ if (!isset($_SESSION['user_id'])) {
             <i class="fas fa-building"></i>
             الأقسام
         </a>
+        <a href="manage_laws.php" class="nav-link <?= (basename($_SERVER['PHP_SELF']) == 'manage_laws.php' ? 'active' : '') ?>">
+            <i class="fas fa-gavel"></i>
+            إدارة القوانين
+        </a>
     </nav>
 </header>
