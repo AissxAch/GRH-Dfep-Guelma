@@ -71,13 +71,6 @@ if (isset($_GET['id'])) {
     $errors[] = 'معرف الموظف غير محدد';
 }
 
-// Date validation and conversion function
-function convertDate($date) {
-    if (empty($date)) return null;
-    $date = DateTime::createFromFormat('d/m/Y', $date);
-    return $date ? $date->format('Y-m-d') : null;
-}
-
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
     $employee_id = intval($_POST['employee_id']);
@@ -120,17 +113,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
     if (empty($first_hire_date)) $errors[] = 'تاريخ أول تعيين مطلوب';
     if (empty($vacances_remain_days)) $errors[] = 'الأيام المتبقية للإجازة مطلوبة';
 
-    // Convert dates
-    $birth_date_db = convertDate($birth_date);
-    $hire_date_db = convertDate($hire_date);
-    $first_hire_date_db = convertDate($first_hire_date);
-    $high_level_start_date_db = convertDate($high_level_start_date);
+    // Validate name fields contain only letters
+    if (!preg_match('/^[\p{Arabic}\s]+$/u', $firstname_ar)) $errors[] = 'اللقب العربي يجب أن يحتوي على أحرف عربية فقط';
+    if (!preg_match('/^[\p{Arabic}\s]+$/u', $lastname_ar)) $errors[] = 'الاسم العربي يجب أن يحتوي على أحرف عربية فقط';
+    if (!preg_match('/^[a-zA-Z\s]+$/', $firstname_en)) $errors[] = 'اللقب الفرنسي يجب أن يحتوي على أحرف لاتينية فقط';
+    if (!preg_match('/^[a-zA-Z\s]+$/', $lastname_en)) $errors[] = 'الاسم الفرنسي يجب أن يحتوي على أحرف لاتينية فقط';
 
-    if (!$birth_date_db) $errors[] = 'صيغة تاريخ الميلاد غير صحيحة (dd/mm/yyyy)';
-    if (!$hire_date_db) $errors[] = 'صيغة تاريخ التعيين غير صحيحة (dd/mm/yyyy)';
-    if (!$first_hire_date_db) $errors[] = 'صيغة تاريخ أول تعيين غير صحيحة (dd/mm/yyyy)';
-    if (!empty($high_level_position_id) && !$high_level_start_date_db) $errors[] = 'صيغة تاريخ بداية المنصب العالي غير صحيحة (dd/mm/yyyy)';
+    // Validate numeric fields contain only numbers
+    if (!preg_match('/^\d+$/', $national_id)) $errors[] = 'الرقم الوطني يجب أن يحتوي على أرقام فقط';
+    if (!preg_match('/^\d+$/', $ssn)) $errors[] = 'رقم الضمان الاجتماعي يجب أن يحتوي على أرقام فقط';
+    if (!preg_match('/^\d+$/', $phone)) $errors[] = 'رقم الهاتف يجب أن يحتوي على أرقام فقط';
+    if (!preg_match('/^\d+$/', $vacances_remain_days)) $errors[] = 'أيام الإجازة المتبقية يجب أن تحتوي على أرقام فقط';
 
+    // Validate previous positions
+    $prev_positions = $_POST['prev_positions'] ?? [];
+    $prev_start_dates = $_POST['prev_start_dates'] ?? [];
+    $prev_end_dates = $_POST['prev_end_dates'] ?? [];
+    $prev_departments = $_POST['prev_departments'] ?? [];
+    $prev_ids = $_POST['prev_ids'] ?? [];
+
+    foreach ($prev_positions as $index => $prev_position) {
+        if (!empty($prev_position)) {
+            $start = $prev_start_dates[$index] ?? '';
+            $end = $prev_end_dates[$index] ?? '';
+            $dept_id = $prev_departments[$index] ?? null;
+
+            if (empty($start) || empty($end)) {
+                $errors[] = 'يرجى إدخال تواريخ البدء والانتهاء لكل وظيفة سابقة';
+            } else if (strtotime($start) > strtotime($end)) {
+                $errors[] = 'تاريخ الانتهاء يجب أن يكون بعد تاريخ البدء للوظيفة السابقة: ' . $prev_position;
+            }
+        }
+    }
     if (empty($errors)) {
         try {
             $pdo->beginTransaction();
@@ -146,10 +160,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
             
             $stmt->execute([
                 $firstname_ar, $lastname_ar, $firstname_en, $lastname_en,
-                $birth_date_db, $birth_place, $gender, $bloodtype,
+                $birth_date, $birth_place, $gender, $bloodtype,
                 $vacances_remain_days, $national_id, $ssn, $email ?: null,
                 $phone, $address ?: null, $position, $department_id,
-                $first_hire_date_db, $hire_date_db, $is_active, $employee_id
+                $first_hire_date, $hire_date, $is_active, $employee_id
             ]);
 
             // Handle high level position
@@ -161,7 +175,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                                           WHERE history_id = ?");
                     $stmt->execute([
                         $high_level_position_id,
-                        $high_level_start_date_db,
+                        $high_level_start_date,
                         $current_high_level_position['history_id']
                     ]);
                 } else {
@@ -172,7 +186,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                     $stmt->execute([
                         $employee_id,
                         $high_level_position_id,
-                        $high_level_start_date_db
+                        $high_level_start_date
                     ]);
                 }
             } else {
@@ -217,8 +231,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
 
                 foreach ($prev_positions as $index => $prev_position) {
                     if (!empty($prev_position)) {
-                        $start_db = convertDate($prev_start_dates[$index]);
-                        $end_db = convertDate($prev_end_dates[$index]);
+                        $start_db = $prev_start_dates[$index];
+                        $end_db = $prev_end_dates[$index];
                         $dept_id = $prev_departments[$index] ?? null;
 
                         if ($start_db && $end_db && $dept_id) {
@@ -312,6 +326,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
             opacity: 0.6;
             pointer-events: none;
         }
+        .error-text {
+            color: #dc3545;
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        input.invalid {
+            border-color: #dc3545 !important;
+        }
+        .error-message { color: #dc3545; padding: 10px; margin: 10px 0; border: 1px solid #f5c6cb; border-radius: 5px; }
+        .success-message { color: #28a745; padding: 10px; margin: 10px 0; border: 1px solid #c3e6cb; border-radius: 5px; }
+        .required { color: red; }
+        .form-section { margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; }
+        .input-row { display: flex; gap: 1rem; margin-bottom: 1rem; }
+        .input-row .input-group { flex: 1; }
+        .error-text {
+            color: #dc3545;
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        input.invalid {
+            border-color: #dc3545 !important;
+        }
     </style>
 </head>
 <body>
@@ -343,30 +386,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                     <div class="input-row">
                         <div class="input-group">
                             <label>اللقب (عربي) <span class="required">*</span></label>
-                            <input type="text" name="firstname_ar" value="<?= htmlspecialchars($employee['firstname_ar']) ?>" required>
+                            <input type="text" name="firstname_ar" value="<?= htmlspecialchars($employee['firstname_ar']) ?>" 
+                                   onkeypress="return validateArabicLetter(event, this)" 
+                                   oninput="validateArabicInput(this)" required>
+                            <div class="error-text" id="firstname_ar_error">اللقب العربي يجب أن يحتوي على أحرف عربية فقط</div>
                         </div>
                         <div class="input-group">
                             <label>الاسم (عربي) <span class="required">*</span></label>
-                            <input type="text" name="lastname_ar" value="<?= htmlspecialchars($employee['lastname_ar']) ?>" required>
+                            <input type="text" name="lastname_ar" value="<?= htmlspecialchars($employee['lastname_ar']) ?>" 
+                                   onkeypress="return validateArabicLetter(event, this)" 
+                                   oninput="validateArabicInput(this)" required>
+                            <div class="error-text" id="lastname_ar_error">الاسم العربي يجب أن يحتوي على أحرف عربية فقط</div>
                         </div>
                     </div>
                     
                     <div class="input-row">
                         <div class="input-group">
                             <label>Nom <span class="required">*</span></label>
-                            <input type="text" name="firstname_en" value="<?= htmlspecialchars($employee['firstname_en']) ?>" required>
+                            <input type="text" name="firstname_en" value="<?= htmlspecialchars($employee['firstname_en']) ?>" 
+                                   onkeypress="return validateLatinLetter(event, this)" 
+                                   oninput="validateLatinInput(this)" required>
+                            <div class="error-text" id="firstname_en_error">يجب أن يحتوي على أحرف لاتينية فقط</div>
                         </div>
                         <div class="input-group">
                             <label>Prenom <span class="required">*</span></label>
-                            <input type="text" name="lastname_en" value="<?= htmlspecialchars($employee['lastname_en']) ?>" required>
+                            <input type="text" name="lastname_en" value="<?= htmlspecialchars($employee['lastname_en']) ?>" 
+                                   onkeypress="return validateLatinLetter(event, this)" 
+                                   oninput="validateLatinInput(this)" required>
+                            <div class="error-text" id="lastname_en_error">يجب أن يحتوي على أحرف لاتينية فقط</div>
                         </div>
                     </div>
 
                     <div class="input-row">
                         <div class="input-group">
                             <label>تاريخ الميلاد <span class="required">*</span></label>
-                            <input type="text" name="birth_date" placeholder="dd/mm/yyyy" 
-                                   value="<?= date('d/m/Y', strtotime($employee['birth_date'])) ?>" pattern="\d{2}/\d{2}/\d{4}" required>
+                            <input type="date" name="birth_date" 
+                                   value="<?= htmlspecialchars($employee['birth_date']) ?>" required>
                         </div>
                         
                         <div class="input-group">
@@ -401,16 +456,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                     <div class="input-row">
                         <div class="input-group">
                             <label>الرقم الوطني <span class="required">*</span></label>
-                            <input type="text" name="national_id" value="<?= htmlspecialchars($employee['national_id']) ?>" required>
+                            <input type="text" name="national_id" value="<?= htmlspecialchars($employee['national_id']) ?>" 
+                                   onkeypress="return validateNumber(event, this)"
+                                   oninput="validateNumberInput(this)" required>
+                            <div class="error-text" id="national_id_error">يجب أن يحتوي على أرقام فقط</div>
                         </div>
                         <div class="input-group">
                             <label>رقم الضمان الاجتماعي <span class="required">*</span></label>
-                            <input type="text" name="ssn" value="<?= htmlspecialchars($employee['ssn']) ?>" required>
+                            <input type="text" name="ssn" value="<?= htmlspecialchars($employee['ssn']) ?>" 
+                                   onkeypress="return validateNumber(event, this)"
+                                   oninput="validateNumberInput(this)" required>
+                            <div class="error-text" id="ssn_error">يجب أن يحتوي على أرقام فقط</div>
                         </div>
                     </div>
                     <div class="input-group">
                         <label>الأيام المتبقية للإجازة <span class="required">*</span></label>
-                        <input type="number" name="vacances_remain_days" value="<?= htmlspecialchars($employee['vacances_remain_days']) ?>" required>
+                        <input type="text" name="vacances_remain_days" value="<?= htmlspecialchars($employee['vacances_remain_days']) ?>" 
+                               onkeypress="return validateNumber(event, this)"
+                               oninput="validateNumberInput(this)" required>
+                        <div class="error-text" id="vacances_remain_days_error">يجب أن يحتوي على أرقام فقط</div>
                     </div>
                 </div>
                 
@@ -420,13 +484,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                     <div class="input-row">
                         <div class="input-group">
                             <label>تاريخ التعيين <span class="required">*</span></label>
-                            <input type="text" name="hire_date" placeholder="dd/mm/yyyy" 
-                            value="<?= date('d/m/Y', strtotime($employee['hire_date'])) ?>" pattern="\d{2}/\d{2}/\d{4}" required>
+                            <input type="date" name="hire_date" 
+                                   value="<?= htmlspecialchars($employee['hire_date']) ?>" required>
                         </div>
                         <div class="input-group">
                             <label>تاريخ أول تعيين <span class="required">*</span></label>
-                            <input type="text" name="first_hire_date" placeholder="dd/mm/yyyy" 
-                            value="<?= date('d/m/Y', strtotime($employee['first_hire_date'])) ?>" pattern="\d{2}/\d{2}/\d{4}" required>
+                            <input type="date" name="first_hire_date" 
+                                   value="<?= htmlspecialchars($employee['first_hire_date']) ?>" required>
                         </div>
                     </div>
 
@@ -473,9 +537,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                         </div>
                         <div class="input-group">
                             <label>تاريخ بداية المنصب العالي</label>
-                            <input type="text" name="high_level_start_date" placeholder="dd/mm/yyyy" 
-                                value="<?= $current_high_level_position ? date('d/m/Y', strtotime($current_high_level_position['start_date'])) : '' ?>" 
-                                pattern="\d{2}/\d{2}/\d{4}">
+                            <input type="date" name="high_level_start_date" 
+                                value="<?= $current_high_level_position ? htmlspecialchars($current_high_level_position['start_date']) : '' ?>">
                         </div>
                     </div>
                     
@@ -487,7 +550,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                     </div>
                 </div>
                 
-                <!-- Previous Positions Section -->
+               <!-- Previous Positions Section -->
                 <div class="form-section">
                     <h2><i class="fas fa-history"></i> الوظائف السابقة</h2>
                     
@@ -526,11 +589,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                                     </div>
                                     <div class="input-group">
                                         <label>تاريخ البدء <span class="required">*</span></label>
-                                        <input type="text" name="prev_start_dates[]" placeholder="dd/mm/yyyy" pattern="\d{2}/\d{2}/\d{4}" required>
+                                        <input type="date" name="prev_start_dates[]" required
+                                            onchange="validateDateRange(this, this.closest('.input-row').querySelector('input[name=\'prev_end_dates[]\']'))">
                                     </div>
                                     <div class="input-group">
                                         <label>تاريخ الانتهاء <span class="required">*</span></label>
-                                        <input type="text" name="prev_end_dates[]" placeholder="dd/mm/yyyy" pattern="\d{2}/\d{2}/\d{4}" required>
+                                        <input type="date" name="prev_end_dates[]" required
+                                            onchange="validateDateRange(this.closest('.input-row').querySelector('input[name=\'prev_start_dates[]\']'), this)">
+                                        <div class="error-text">تاريخ الانتهاء يجب أن يكون بعد تاريخ البدء</div>
                                     </div>
                                     <div class="input-group delete-position-btn">
                                         <button type="button" class="delete-position-button">
@@ -568,13 +634,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                                         </div>
                                         <div class="input-group">
                                             <label>تاريخ البدء <span class="required">*</span></label>
-                                            <input type="text" name="prev_start_dates[]" placeholder="dd/mm/yyyy" 
-                                                value="<?= date('d/m/Y', strtotime($pos['start_date'])) ?>" pattern="\d{2}/\d{2}/\d{4}" required>
+                                            <input type="date" name="prev_start_dates[]" 
+                                                value="<?= htmlspecialchars($pos['start_date']) ?>" required
+                                                onchange="validateDateRange(this, this.closest('.input-row').querySelector('input[name=\'prev_end_dates[]\']'))">
                                         </div>
                                         <div class="input-group">
                                             <label>تاريخ الانتهاء <span class="required">*</span></label>
-                                            <input type="text" name="prev_end_dates[]" placeholder="dd/mm/yyyy" 
-                                                value="<?= date('d/m/Y', strtotime($pos['end_date'])) ?>" pattern="\d{2}/\d{2}/\d{4}" required>
+                                            <input type="date" name="prev_end_dates[]" 
+                                                value="<?= htmlspecialchars($pos['end_date']) ?>" required
+                                                onchange="validateDateRange(this.closest('.input-row').querySelector('input[name=\'prev_start_dates[]\']'), this)">
+                                            <div class="error-text">تاريخ الانتهاء يجب أن يكون بعد تاريخ البدء</div>
                                         </div>
                                         <div class="input-group delete-position-btn">
                                             <button type="button" class="delete-position-button">
@@ -602,8 +671,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                     <div class="input-row">
                         <div class="input-group">
                             <label>رقم الهاتف <span class="required">*</span></label>
-                            <input type="tel" name="phone" 
-                                   value="<?= htmlspecialchars($employee['phone']) ?>" required>
+                            <input type="text" name="phone" 
+                                   value="<?= htmlspecialchars($employee['phone']) ?>" 
+                                   onkeypress="return validateNumber(event, this)"
+                                   oninput="validateNumberInput(this)" required>
+                            <div class="error-text" id="phone_error">يجب أن يحتوي على أرقام فقط</div>
                         </div>
                         
                         <div class="input-group">
@@ -650,12 +722,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
             newEntry.querySelectorAll('input').forEach(input => {
                 if (input.type !== 'hidden') {
                     input.value = '';
+                    input.classList.remove('invalid');
                 } else {
-                    input.value = ''; // Clear hidden id as well for new entries
+                    input.value = '';
                 }
             });
             newEntry.querySelectorAll('select').forEach(select => {
                 select.selectedIndex = 0;
+            });
+            
+            // Hide error messages
+            newEntry.querySelectorAll('.error-text').forEach(error => {
+                error.style.display = 'none';
             });
             
             // Make sure the delete button handler is attached
@@ -729,6 +807,135 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                 });
             }
         });
+
+        // Validation functions
+        function validateArabicLetter(e, input) {
+            var charCode = (e.which) ? e.which : e.keyCode;
+            // Allow Arabic letters, space, and backspace
+            if (charCode == 32 || charCode == 8) return true;
+            // Arabic Unicode range
+            if (charCode >= 1536 && charCode <= 1791) return true;
+            
+            // Show error message
+            showError(input, input.name + '_error');
+            return false;
+        }
+
+        function validateLatinLetter(e, input) {
+            var charCode = (e.which) ? e.which : e.keyCode;
+            // Allow space and backspace
+            if (charCode == 32 || charCode == 8) return true;
+            // Latin letters (a-z, A-Z)
+            if ((charCode >= 65 && charCode <= 90) || (charCode >= 97 && charCode <= 122)) return true;
+            
+            // Show error message
+            showError(input, input.name + '_error');
+            return false;
+        }
+
+        function validateNumber(e, input) {
+            var charCode = (e.which) ? e.which : e.keyCode;
+            // Allow numbers and backspace
+            if (charCode == 8) return true;
+            if (charCode >= 48 && charCode <= 57) return true;
+            
+            // Show error message
+            showError(input, input.name + '_error');
+            return false;
+        }
+
+        // Validate Arabic input on paste/change
+        function validateArabicInput(input) {
+            const arabicRegex = /^[\u0600-\u06FF\s]*$/;
+            const errorElement = document.getElementById(input.name + '_error');
+            
+            if (!arabicRegex.test(input.value)) {
+                showError(input, errorElement.id);
+            } else {
+                hideError(errorElement);
+            }
+        }
+
+        // Validate Latin input on paste/change
+        function validateLatinInput(input) {
+            const latinRegex = /^[a-zA-Z\s]*$/;
+            const errorElement = document.getElementById(input.name + '_error');
+            
+            if (!latinRegex.test(input.value)) {
+                showError(input, errorElement.id);
+            } else {
+                hideError(errorElement);
+            }
+        }
+
+        // Validate Number input on paste/change
+        function validateNumberInput(input) {
+            const numberRegex = /^\d*$/;
+            const errorElement = document.getElementById(input.name + '_error');
+            
+            if (!numberRegex.test(input.value)) {
+                showError(input, errorElement.id);
+            } else {
+                hideError(errorElement);
+            }
+        }
+
+        function showError(input, errorId) {
+            const errorElement = document.getElementById(errorId);
+            if (errorElement) {
+                errorElement.style.display = 'block';
+                input.classList.add('invalid');
+            }
+        }
+
+        function hideError(errorElement) {
+            if (errorElement) {
+                errorElement.style.display = 'none';
+                errorElement.previousElementSibling.classList.remove('invalid');
+            }
+        }
+
+        // Initialize validation for all fields on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Arabic name fields
+            const arabicInputs = document.querySelectorAll('input[name="firstname_ar"], input[name="lastname_ar"]');
+            arabicInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    validateArabicInput(this);
+                });
+            });
+
+            // Latin name fields
+            const latinInputs = document.querySelectorAll('input[name="firstname_en"], input[name="lastname_en"]');
+            latinInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    validateLatinInput(this);
+                });
+            });
+
+            // Number fields
+            const numberInputs = document.querySelectorAll('input[name="national_id"], input[name="ssn"], input[name="phone"], input[name="vacances_remain_days"]');
+            numberInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    validateNumberInput(this);
+                });
+            });
+        });
+        function validateDateRange(startDateInput, endDateInput) {
+    const startDate = new Date(startDateInput.value);
+    const endDate = new Date(endDateInput.value);
+    
+    if (startDate && endDate && startDate > endDate) {
+        endDateInput.setCustomValidity('تاريخ الانتهاء يجب أن يكون بعد تاريخ البدء');
+        endDateInput.reportValidity();
+        endDateInput.classList.add('invalid');
+        return false;
+    } else {
+        endDateInput.setCustomValidity('');
+        endDateInput.classList.remove('invalid');
+        return true;
+    }
+}
     </script>
 </body>
 </html>
