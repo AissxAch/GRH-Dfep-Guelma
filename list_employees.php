@@ -9,26 +9,7 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// Handle employee deletion
-if (isset($_GET['delete'])) {
-    try {
-        $employee_id = intval($_GET['delete']);
-        
-        // Delete employee
-        $stmt = $pdo->prepare("DELETE FROM employees WHERE employee_id = ?");
-        $stmt->execute([$employee_id]);
-        
-        // Delete related documents
-        $stmt_docs = $pdo->prepare("DELETE FROM employee_documents WHERE employee_id = ?");
-        $stmt_docs->execute([$employee_id]);
-        
-        $success = "تم حذف الموظف بنجاح";
-    } catch (PDOException $e) {
-        $error = "خطأ في قاعدة البيانات: " . $e->getMessage();
-    }
-}
 
-// Fetch all employees initially
 try {
     $sql = "SELECT * FROM employees ORDER BY employee_id ASC";
     $stmt = $pdo->prepare($sql);
