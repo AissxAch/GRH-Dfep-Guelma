@@ -10,7 +10,6 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 ?>
-
 <!-- header.php -->
 <header class="dashboard-header">
     <div class="header-content">
