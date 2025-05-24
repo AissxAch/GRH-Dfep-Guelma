@@ -164,6 +164,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام متابعة الحضور - GRH Depf</title>
     <link rel="stylesheet" href="CSS/checkAttendance.css">
+    <link rel="stylesheet" href="CSS/style.css">
     <link rel="stylesheet" href="CSS/icons.css">
     <style>
         .absent { background-color: #ffdddd; color: #d32f2f; }
