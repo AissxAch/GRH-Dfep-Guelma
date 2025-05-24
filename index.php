@@ -1,7 +1,7 @@
 <?php
 session_start();
 require 'config/dbconnect.php';
-require 'config/functions.php'; // Include the functions file we created
+require 'config/functions.php'; 
 $pdo = getDBConnection();
 
 if (!isset($_SESSION['user_id'])) {
@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// Fetch statistics
+
 try {
     // Total employees
     $totalEmployees = $pdo->query("SELECT COUNT(*) FROM employees")->fetchColumn();
@@ -210,7 +210,7 @@ try {
                     <h3>إضافة قسم</h3>
                     <p>إضافة قسم جديد إلى النظام</p>
                 </a>
-
+                
                 <a href="list_departments.php" class="card btn-info">
                     <i class="fas fa-list"></i>
                     <h3>قائمة الأقسام</h3>
