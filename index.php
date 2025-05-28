@@ -244,6 +244,13 @@ try {
                     <p>عرض قائمة بجميع المناصب العليا</p>
                 </a>
             </div>
+            <div class="section-title">إدارة النظام</div>
+                <a href="backup.php" class="card btn-primary">
+                    <i class="fas fa-database"></i>
+                    <h3>النسخ الاحتياطي</h3>
+                    <p>إنشاء واستعادة نسخ احتياطية للنظام</p>
+                </a>
+            </div>
         </main>
 
         <footer class="dashboard-footer">

@@ -46,6 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $position = trim($_POST['position'] ?? '');
     $department_id = trim($_POST['department'] ?? '');
     $hire_date = trim($_POST['hire_date'] ?? '');
+    $first_hire_date = trim($_POST['first_hire_date'] ?? '');
     $is_high_level = isset($_POST['is_high_level']) ? 1 : 0;
     $high_level_position = $is_high_level ? trim($_POST['high_level_position'] ?? '') : null;
     $high_level_start_date = $is_high_level ? ($_POST['high_level_start_date'] ?? '') : null;
@@ -62,6 +63,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (empty($position)) $errors[] = 'المنصب مطلوب';
     if (empty($department_id)) $errors[] = 'القسم مطلوب';
     if (empty($hire_date)) $errors[] = 'تاريخ التعيين مطلوب';
+    if (empty($first_hire_date)) $errors[] = 'تاريخ التنصيب مطلوب';
+
     if ($is_high_level) {
         if (empty($high_level_position)) {
             $errors[] = 'يجب اختيار المنصب العالي';
@@ -131,7 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($is_high_level && $high_level_start_date) {
         $highLevelStartDate = new DateTime($high_level_start_date);
         
-        if ($highLevelStartDate < $hireDate) {
+        if ($highLevelStartDate <= $hireDate) {
             $errors[] = 'تاريخ بدء المنصب العالي يجب أن يكون بعد تاريخ التعيين';
         }
     }
@@ -139,29 +142,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (empty($errors)) {
         try {
             $pdo->beginTransaction();
-    
+
             // Insert main employee data
             $stmt = $pdo->prepare("INSERT INTO employees 
                 (firstname_ar, lastname_ar, firstname_en, lastname_en, birth_date, birth_place, gender, bloodtype, vacances_remain_days, 
-                national_id, ssn, email, phone, address, position, department_id, hire_date) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                national_id, ssn, email, phone, address, position, department_id, hire_date, first_hire_date) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             
             $stmt->execute([
                 $firstname_ar, $lastname_ar, $firstname_en, $lastname_en, $birth_date, $birth_place, $gender, $bloodtype, $vacances_remain_days,
                 $national_id, $ssn, $email ?: null, $phone, $address ?: null, 
                 $position,
                 $department_id, 
-                $hire_date
+                $hire_date,
+                $first_hire_date // Set first_hire_date same as hire_date
             ]);
-    
+
             $employee_id = $pdo->lastInsertId();
-    
+
+            // Rest of the code remains the same...
             // Insert previous positions
             if (!empty($prev_positions)) {
                 $prev_stmt = $pdo->prepare("INSERT INTO employee_previous_positions 
                     (employee_id, position, start_date, end_date) 
                     VALUES (?, ?, ?, ?)");
-    
+
                 foreach ($prev_positions as $index => $prev_position) {
                     if (!empty($prev_position) && !empty($prev_start_dates[$index]) && !empty($prev_end_dates[$index])) {
                         $prev_stmt->execute([
@@ -176,11 +181,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             
             if ($is_high_level && $high_level_position && $high_level_start_date) {
                 $stmt = $pdo->prepare("INSERT INTO employee_high_level_history 
-                                      (employee_id, position_id, start_date) 
-                                      VALUES (?, ?, ?)");
+                                    (employee_id, position_id, start_date) 
+                                    VALUES (?, ?, ?)");
                 $stmt->execute([$employee_id, $high_level_position, $high_level_start_date]);
             }
-    
+
             $pdo->commit();
             $success = 'تم إضافة الموظف بنجاح';
         } catch (PDOException $e) {
@@ -366,6 +371,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <input type="date" name="hire_date" id="hire_date"
                                    value="<?= htmlspecialchars($_POST['hire_date'] ?? '') ?>" required>
                             <div class="date-error" id="hire_date_error"></div>
+                        </div>
+                        <div class="input-group">
+                            <label>تاريخ التنصيب <span class="required">*</span></label>
+                            <input type="date" name="first_hire_date" id="first_hire_date"
+                                   value="<?= htmlspecialchars($_POST['first_hire_date'] ?? '') ?>" required>
+                            <div class="date-error" id="first_hire_date_error"></div>
                         </div>
                     </div>
                     

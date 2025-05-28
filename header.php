@@ -63,5 +63,9 @@ if (!isset($_SESSION['user_id'])) {
             <i class="fas fa-gavel"></i>
             إدارة القوانين
         </a>
+        <a href="backup.php" class="nav-link <?= (basename($_SERVER['PHP_SELF']) == 'backup.php' ? 'active' : '') ?>">
+            <i class="fas fa-database"></i>
+            النسخ الاحتياطي
+        </a>
     </nav>
 </header>
