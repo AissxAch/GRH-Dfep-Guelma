@@ -33,11 +33,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $lastname_ar = trim($_POST['lastname_ar'] ?? '');
     $firstname_en = trim($_POST['firstname_en'] ?? '');
     $lastname_en = trim($_POST['lastname_en'] ?? '');
+    $mother_firstname = trim($_POST['mother_firstname'] ?? '');
+    $mother_lastname = trim($_POST['mother_lastname'] ?? '');
+    $father_lastname = trim($_POST['father_lastname'] ?? '');
     $birth_date = trim($_POST['birth_date'] ?? '');
     $birth_place = trim($_POST['birth_place'] ?? '');
     $gender = trim($_POST['gender'] ?? '');
     $bloodtype = trim($_POST['bloodtype'] ?? '');
-    $vacances_remain_days = trim($_POST['vacances_remain_days'] ?? 0);
+    $marital_status = trim($_POST['marital_status'] ?? '');
+    $is_new_employee = isset($_POST['is_new_employee']) ? 1 : 0;
+    $vacances_remain_days = $is_new_employee ? 0 : (trim($_POST['vacances_remain_days'] ?? 0));
     $national_id = trim($_POST['national_id'] ?? '');
     $ssn = trim($_POST['ssn'] ?? '');
     $email = trim($_POST['email'] ?? '');
@@ -47,15 +52,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $department_id = trim($_POST['department'] ?? '');
     $hire_date = trim($_POST['hire_date'] ?? '');
     $first_hire_date = trim($_POST['first_hire_date'] ?? '');
-    $is_high_level = isset($_POST['is_high_level']) ? 1 : 0;
-    $high_level_position = $is_high_level ? trim($_POST['high_level_position'] ?? '') : null;
-    $high_level_start_date = $is_high_level ? ($_POST['high_level_start_date'] ?? '') : null;
 
     // Validate required fields
     if (empty($firstname_ar)) $errors[] = 'اللقب العربي مطلوب';
     if (empty($lastname_ar)) $errors[] = 'الاسم العربي مطلوب';
     if (empty($firstname_en)) $errors[] = 'اللقب الفرنسي مطلوب';
     if (empty($lastname_en)) $errors[] = 'الاسم الفرنسي مطلوب';
+    if (empty($mother_firstname)) $errors[] = 'اسم الأم مطلوب';
+    if (empty($mother_lastname)) $errors[] = 'لقب الأم مطلوب';
+    if (empty($father_lastname)) $errors[] = 'لقب الأب مطلوب';
     if (empty($birth_date)) $errors[] = 'تاريخ الميلاد مطلوب';
     if (empty($birth_place)) $errors[] = 'مكان الميلاد مطلوب';
     if (empty($national_id)) $errors[] = 'الرقم الوطني مطلوب';
@@ -64,19 +69,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (empty($department_id)) $errors[] = 'القسم مطلوب';
     if (empty($hire_date)) $errors[] = 'تاريخ التعيين مطلوب';
     if (empty($first_hire_date)) $errors[] = 'تاريخ التنصيب مطلوب';
+    if (empty($marital_status)) $errors[] = 'الحالة العائلية مطلوبة';
 
-    if ($is_high_level) {
-        if (empty($high_level_position)) {
-            $errors[] = 'يجب اختيار المنصب العالي';
-        }
-        if (empty($high_level_start_date)) {
-            $errors[] = 'تاريخ بدء المنصب العالي مطلوب';
+    // Validate children number if not single
+    $children_number = 0;
+    if ($marital_status !== 'single') {
+        if (empty($_POST['children_number'])) {
+            $errors[] = 'عدد الأطفال مطلوب';
+        } elseif (!is_numeric($_POST['children_number']) || $_POST['children_number'] < 0) {
+            $errors[] = 'عدد الأطفال يجب أن يكون رقمًا صحيحًا موجبًا';
+        } else {
+            $children_number = (int)$_POST['children_number'];
         }
     }
 
     // Validate name fields contain only letters
     if (!preg_match('/^[\p{Arabic}\s]+$/u', $firstname_ar)) $errors[] = 'اللقب العربي يجب أن يحتوي على أحرف عربية فقط';
     if (!preg_match('/^[\p{Arabic}\s]+$/u', $lastname_ar)) $errors[] = 'الاسم العربي يجب أن يحتوي على أحرف عربية فقط';
+    if (!preg_match('/^[\p{Arabic}\s]+$/u', $mother_firstname)) $errors[] = 'اسم الأم يجب أن يحتوي على أحرف عربية فقط';
+    if (!preg_match('/^[\p{Arabic}\s]+$/u', $mother_lastname)) $errors[] = 'لقب الأم يجب أن يحتوي على أحرف عربية فقط';
+    if (!preg_match('/^[\p{Arabic}\s]+$/u', $father_lastname)) $errors[] = 'لقب الأب يجب أن يحتوي على أحرف عربية فقط';
     if (!preg_match('/^[a-zA-Z\s]+$/', $firstname_en)) $errors[] = 'اللقب الفرنسي يجب أن يحتوي على أحرف لاتينية فقط';
     if (!preg_match('/^[a-zA-Z\s]+$/', $lastname_en)) $errors[] = 'الاسم الفرنسي يجب أن يحتوي على أحرف لاتينية فقط';
 
@@ -84,17 +96,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (!preg_match('/^\d+$/', $national_id)) $errors[] = 'الرقم الوطني يجب أن يحتوي على أرقام فقط';
     if (!preg_match('/^\d{10}$/', $ssn)) $errors[] = 'رقم الضمان الاجتماعي يجب أن يحتوي على 10 أرقام';
     if (!preg_match('/^\d+$/', $phone)) $errors[] = 'رقم الهاتف يجب أن يحتوي على أرقام فقط';
-    if (!preg_match('/^\d+$/', $vacances_remain_days)) $errors[] = 'أيام الإجازة المتبقية يجب أن تحتوي على أرقام فقط';
+    if (!$is_new_employee && !preg_match('/^\d+$/', $vacances_remain_days)) $errors[] = 'أيام الإجازة المتبقية يجب أن تحتوي على أرقام فقط';
 
     // Date validations
     $currentDate = new DateTime();
     $birthDate = new DateTime($birth_date);
     $hireDate = new DateTime($hire_date);
-    $minBirthDate = (new DateTime())->modify('-18 years');
+    $minBirthDate = (new DateTime())->modify('-20 years'); // Changed to 20 years
     
-    // Check if employee is at least 18 years old
+    // Check if employee is at least 20 years old
     if ($birthDate > $minBirthDate) {
-        $errors[] = 'يجب أن يكون الموظف عمره 18 سنة على الأقل';
+        $errors[] = 'يجب أن يكون الموظف عمره 20 سنة على الأقل';
     }
     
     // Check hire date is after birth date
@@ -102,40 +114,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $errors[] = 'تاريخ التعيين يجب أن يكون بعد تاريخ الميلاد';
     }
     
-    // Validate previous positions dates
-    $prev_positions = $_POST['prev_positions'] ?? [];
-    $prev_start_dates = $_POST['prev_start_dates'] ?? [];
-    $prev_end_dates = $_POST['prev_end_dates'] ?? [];
-    
-    foreach ($prev_positions as $index => $prev_position) {
-        if (!empty($prev_position)) {
-            $start_date = $prev_start_dates[$index] ?? '';
-            $end_date = $prev_end_dates[$index] ?? '';
-            
-            if (empty($start_date) || empty($end_date)) {
-                $errors[] = 'يجب ملء تاريخي البدء والانتهاء للوظيفة السابقة';
-                continue;
-            }
-            
-            $startDate = new DateTime($start_date);
-            $endDate = new DateTime($end_date);
-            
-            if ($startDate > $endDate) {
-                $errors[] = 'تاريخ البدء للوظيفة السابقة يجب أن يكون قبل تاريخ الانتهاء';
-            }
-            
-            if ($endDate > $hireDate) {
-                $errors[] = 'تاريخ انتهاء الوظيفة السابقة يجب أن يكون قبل تاريخ التعيين الحالي';
-            }
-        }
-    }
-    
-    // Validate high level position dates if applicable
-    if ($is_high_level && $high_level_start_date) {
-        $highLevelStartDate = new DateTime($high_level_start_date);
+    // Validate previous positions dates if employee is not new
+    if (!$is_new_employee) {
+        $prev_positions = $_POST['prev_positions'] ?? [];
+        $prev_start_dates = $_POST['prev_start_dates'] ?? [];
+        $prev_end_dates = $_POST['prev_end_dates'] ?? [];
         
-        if ($highLevelStartDate <= $hireDate) {
-            $errors[] = 'تاريخ بدء المنصب العالي يجب أن يكون بعد تاريخ التعيين';
+        foreach ($prev_positions as $index => $prev_position) {
+            if (!empty($prev_position)) {
+                $start_date = $prev_start_dates[$index] ?? '';
+                $end_date = $prev_end_dates[$index] ?? '';
+                
+                if (empty($start_date) || empty($end_date)) {
+                    $errors[] = 'يجب ملء تاريخي البدء والانتهاء للوظيفة السابقة';
+                    continue;
+                }
+                
+                $startDate = new DateTime($start_date);
+                $endDate = new DateTime($end_date);
+                
+                if ($startDate > $endDate) {
+                    $errors[] = 'تاريخ البدء للوظيفة السابقة يجب أن يكون قبل تاريخ الانتهاء';
+                }
+                
+                if ($endDate > $hireDate) {
+                    $errors[] = 'تاريخ انتهاء الوظيفة السابقة يجب أن يكون قبل تاريخ التعيين الحالي';
+                }
+            }
         }
     }
 
@@ -145,24 +150,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             // Insert main employee data
             $stmt = $pdo->prepare("INSERT INTO employees 
-                (firstname_ar, lastname_ar, firstname_en, lastname_en, birth_date, birth_place, gender, bloodtype, vacances_remain_days, 
-                national_id, ssn, email, phone, address, position, department_id, hire_date, first_hire_date) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                (firstname_ar, lastname_ar, firstname_en, lastname_en, mother_firstname, mother_lastname, father_lastname, 
+                birth_date, birth_place, gender, bloodtype, marital_status, children_number, vacances_remain_days, 
+                national_id, ssn, email, phone, address, position, department_id, hire_date, first_hire_date, is_new_employee) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             
             $stmt->execute([
-                $firstname_ar, $lastname_ar, $firstname_en, $lastname_en, $birth_date, $birth_place, $gender, $bloodtype, $vacances_remain_days,
+                $firstname_ar, $lastname_ar, $firstname_en, $lastname_en, $mother_firstname, $mother_lastname, $father_lastname,
+                $birth_date, $birth_place, $gender, $bloodtype, $marital_status, $children_number, $vacances_remain_days,
                 $national_id, $ssn, $email ?: null, $phone, $address ?: null, 
                 $position,
                 $department_id, 
                 $hire_date,
-                $first_hire_date // Set first_hire_date same as hire_date
+                $first_hire_date,
+                $is_new_employee
             ]);
 
             $employee_id = $pdo->lastInsertId();
 
-            // Rest of the code remains the same...
-            // Insert previous positions
-            if (!empty($prev_positions)) {
+            // Insert previous positions if employee is not new
+            if (!$is_new_employee && !empty($prev_positions)) {
                 $prev_stmt = $pdo->prepare("INSERT INTO employee_previous_positions 
                     (employee_id, position, start_date, end_date) 
                     VALUES (?, ?, ?, ?)");
@@ -177,13 +184,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         ]);
                     }
                 }
-            }
-            
-            if ($is_high_level && $high_level_position && $high_level_start_date) {
-                $stmt = $pdo->prepare("INSERT INTO employee_high_level_history 
-                                    (employee_id, position_id, start_date) 
-                                    VALUES (?, ?, ?)");
-                $stmt->execute([$employee_id, $high_level_position, $high_level_start_date]);
             }
 
             $pdo->commit();
@@ -227,6 +227,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             font-size: 0.8rem;
             margin-top: 0.25rem;
         }
+        .hidden-section {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -252,6 +255,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <!-- Personal Information Section -->
                 <div class="form-section">
                     <h2><i class="fas fa-user"></i> المعلومات الشخصية</h2>
+                    <div class="input-group">
+                        <label>هل الموظف جديد؟</label>
+                        <input type="checkbox" id="is_new_employee" name="is_new_employee" value="1" style="width: auto !important;"
+                            <?= isset($_POST['is_new_employee']) ? 'checked' : '' ?>>
+                        <label for="is_new_employee" style="display: inline; margin-right: 10px;">نعم</label>
+                    </div>
+                    
                     <div class="input-group">
                         <label>اللقب<span class="required">*</span></label>
                         <input type="text" name="firstname_ar" value="<?= htmlspecialchars($_POST['firstname_ar'] ?? '') ?>" 
@@ -280,6 +290,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                onkeypress="return validateLatinLetter(event, this)" 
                                oninput="validateLatinInput(this)" required>
                         <div class="error-text" id="lastname_en_error">يجب أن يحتوي على أحرف لاتينية فقط</div>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>إسم الأب<span class="required">*</span></label>
+                            <input type="text" name="father_lastname" value="<?= htmlspecialchars($_POST['father_lastname'] ?? '') ?>" 
+                                   onkeypress="return validateArabicLetter(event, this)" 
+                                   oninput="validateArabicInput(this)" required>
+                            <div class="error-text" id="father_lastname_error">لقب الأب يجب أن يحتوي على أحرف عربية فقط</div>
+                        </div>
+                        <div class="input-group">
+                            <label>اسم الأم<span class="required">*</span></label>
+                            <input type="text" name="mother_firstname" value="<?= htmlspecialchars($_POST['mother_firstname'] ?? '') ?>" 
+                                   onkeypress="return validateArabicLetter(event, this)" 
+                                   oninput="validateArabicInput(this)" required>
+                            <div class="error-text" id="mother_firstname_error">اسم الأم يجب أن يحتوي على أحرف عربية فقط</div>
+                        </div>
+                        <div class="input-group">
+                            <label>لقب الأم<span class="required">*</span></label>
+                            <input type="text" name="mother_lastname" value="<?= htmlspecialchars($_POST['mother_lastname'] ?? '') ?>" 
+                                   onkeypress="return validateArabicLetter(event, this)" 
+                                   oninput="validateArabicInput(this)" required>
+                            <div class="error-text" id="mother_lastname_error">لقب الأم يجب أن يحتوي على أحرف عربية فقط</div>
+                        </div>
                     </div>
 
                     <div class="input-row">
@@ -340,8 +373,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 ?>
                             </select>
                         </div>
+                        
+                        <div class="input-group">
+                            <label>الحالة العائلية <span class="required">*</span></label>
+                            <select name="marital_status" required>
+                                <option value="">اختر...</option>
+                                <option value="single" <?= ($_POST['marital_status'] ?? '') === 'single' ? 'selected' : '' ?>>أعزب</option>
+                                <option value="married" <?= ($_POST['marital_status'] ?? '') === 'married' ? 'selected' : '' ?>>متزوج</option>
+                                <option value="divorced" <?= ($_POST['marital_status'] ?? '') === 'divorced' ? 'selected' : '' ?>>مطلق</option>
+                                <option value="widowed" <?= ($_POST['marital_status'] ?? '') === 'widowed' ? 'selected' : '' ?>>أرمل</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="input-group">
+                    
+                    <!-- Children number field -->
+                    <div class="input-group" id="children-number-group" style="display: none;">
+                        <label>عدد الأطفال <span class="required">*</span></label>
+                        <input type="number" name="children_number" min="0" 
+                               value="<?= htmlspecialchars($_POST['children_number'] ?? 0) ?>" required>
+                    </div>
+                    
+                    <div class="input-group" id="vacances-days-group">
                         <label>الأيام المتبقية للإجازة</label>
                         <input type="text" name="vacances_remain_days" 
                                value="<?= htmlspecialchars($_POST['vacances_remain_days'] ?? 0) ?>"
@@ -396,7 +448,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
                 
                 <!-- Previous Positions Section -->
-                <div class="form-section">
+                <div class="form-section" id="previous-positions-section">
                     <h2><i class="fas fa-history"></i> الوظائف السابقة</h2>
                     <div id="previous-positions-container">
                         <div class="previous-position-entry">
@@ -433,43 +485,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <button type="button" id="remove-previous-position" class="delete-button">
                             <i class="fas fa-minus"></i> حذف وظيفة سابقة
                         </button>
-                    </div>
-                </div>
-                
-                <!-- High Level Position Section -->
-                <div class="form-section">
-                    <h2><i class="fas fa-star"></i> المناصب العليا</h2>
-                    
-                    <div class="input-group">
-                        <label>هل يشغل منصب عالي حالياً؟</label>
-                        <input type="checkbox" id="is_high_level" name="is_high_level" value="1" style="width: auto !important;"
-                            <?= isset($_POST['is_high_level']) ? 'checked' : '' ?>>
-                        <label for="is_high_level" style="display: inline; margin-right: 10px;">نعم</label>
-                    </div>
-
-                    <div id="high_level_fields" style="<?= isset($_POST['is_high_level']) ? '' : 'display: none;' ?>">
-                        <div class="input-group">
-                            <label>اختر المنصب العالي <span class="required">*</span></label>
-                            <select name="high_level_position" <?= isset($_POST['is_high_level']) ? 'required' : '' ?>>
-                                <option value="">اختر المنصب العالي...</option>
-                                <?php 
-                                $high_positions = $pdo->query("SELECT * FROM high_level_positions ORDER BY name ASC")->fetchAll();
-                                foreach ($high_positions as $pos): ?>
-                                    <option value="<?= $pos['position_id'] ?>" 
-                                        <?= ($_POST['high_level_position'] ?? '') == $pos['position_id'] ? 'selected' : '' ?>>
-                                        <?= htmlspecialchars($pos['name']) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        
-                        <div class="input-group">
-                            <label>تاريخ بدء المنصب العالي <span class="required">*</span></label>
-                            <input type="date" name="high_level_start_date" id="high_level_start_date"
-                                value="<?= htmlspecialchars($_POST['high_level_start_date'] ?? '') ?>" 
-                                <?= isset($_POST['is_high_level']) ? 'required' : '' ?>>
-                            <div class="date-error" id="high_level_start_date_error"></div>
-                        </div>
                     </div>
                 </div>
                 
@@ -533,15 +548,47 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         });
 
-        // Toggle high level position fields
-        document.getElementById('is_high_level').addEventListener('change', function() {
-            const fields = document.getElementById('high_level_fields');
-            fields.style.display = this.checked ? 'block' : 'none';
+        // Toggle new employee fields
+        document.getElementById('is_new_employee').addEventListener('change', function() {
+            const isNew = this.checked;
+            const previousPositionsSection = document.getElementById('previous-positions-section');
+            const vacancesDaysGroup = document.getElementById('vacances-days-group');
             
-            // Toggle required attribute
-            fields.querySelectorAll('[required]').forEach(el => {
-                el.required = this.checked;
-            });
+            if (isNew) {
+                previousPositionsSection.classList.add('hidden-section');
+                vacancesDaysGroup.classList.add('hidden-section');
+            } else {
+                previousPositionsSection.classList.remove('hidden-section');
+                vacancesDaysGroup.classList.remove('hidden-section');
+            }
+        });
+
+        // Toggle children number field
+        function toggleChildrenNumber() {
+            const maritalStatus = document.querySelector('select[name="marital_status"]').value;
+            const childrenGroup = document.getElementById('children-number-group');
+            
+            if (maritalStatus !== 'single') {
+                childrenGroup.style.display = 'block';
+            } else {
+                childrenGroup.style.display = 'none';
+            }
+        }
+
+        // Initialize new employee fields on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const isNewEmployee = document.getElementById('is_new_employee').checked;
+            const previousPositionsSection = document.getElementById('previous-positions-section');
+            const vacancesDaysGroup = document.getElementById('vacances-days-group');
+            
+            if (isNewEmployee) {
+                previousPositionsSection.classList.add('hidden-section');
+                vacancesDaysGroup.classList.add('hidden-section');
+            }
+            
+            // Initialize children number field
+            document.querySelector('select[name="marital_status"]').addEventListener('change', toggleChildrenNumber);
+            toggleChildrenNumber();
         });
 
         // Validation functions
@@ -635,12 +682,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         function validateDates() {
             const birthDate = new Date(document.getElementById('birth_date').value);
             const hireDate = new Date(document.getElementById('hire_date').value);
-            const highLevelStartDate = document.getElementById('high_level_start_date')?.value ? 
-                                     new Date(document.getElementById('high_level_start_date').value) : null;
             
             const birthDateError = document.getElementById('birth_date_error');
             const hireDateError = document.getElementById('hire_date_error');
-            const highLevelStartDateError = document.getElementById('high_level_start_date_error');
             
             let isValid = true;
             
@@ -667,42 +711,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 hireDateError.style.display = 'none';
             }
             
-            // Validate high level start date is after hire date
-            if (highLevelStartDate && hireDate && highLevelStartDate < hireDate) {
-                highLevelStartDateError.textContent = 'تاريخ بدء المنصب العالي يجب أن يكون بعد تاريخ التعيين';
-                highLevelStartDateError.style.display = 'block';
-                isValid = false;
-            } else if (highLevelStartDateError) {
-                highLevelStartDateError.style.display = 'none';
+            // Validate previous positions dates if employee is not new
+            const isNewEmployee = document.getElementById('is_new_employee').checked;
+            
+            if (!isNewEmployee) {
+                const prevStartDates = document.querySelectorAll('.prev-start-date');
+                const prevEndDates = document.querySelectorAll('.prev-end-date');
+                const prevDateErrors = document.querySelectorAll('.prev-date-error');
+                
+                prevStartDates.forEach((startDateInput, index) => {
+                    const startDate = new Date(startDateInput.value);
+                    const endDate = new Date(prevEndDates[index].value);
+                    
+                    if (startDate && endDate && startDate > endDate) {
+                        prevDateErrors[index].style.display = 'block';
+                        isValid = false;
+                    } else {
+                        prevDateErrors[index].style.display = 'none';
+                    }
+                    
+                    // Validate previous positions dates are before hire date
+                    if (hireDate && endDate && endDate > hireDate) {
+                        prevDateErrors[index].textContent = 'تاريخ انتهاء الوظيفة السابقة يجب أن يكون قبل تاريخ التعيين';
+                        prevDateErrors[index].style.display = 'block';
+                        isValid = false;
+                    } else if (startDate && endDate && startDate > endDate) {
+                        prevDateErrors[index].textContent = 'تاريخ البدء يجب أن يكون قبل تاريخ الانتهاء';
+                        prevDateErrors[index].style.display = 'block';
+                        isValid = false;
+                    }
+                });
             }
-            
-            // Validate previous positions dates
-            const prevStartDates = document.querySelectorAll('.prev-start-date');
-            const prevEndDates = document.querySelectorAll('.prev-end-date');
-            const prevDateErrors = document.querySelectorAll('.prev-date-error');
-            
-            prevStartDates.forEach((startDateInput, index) => {
-                const startDate = new Date(startDateInput.value);
-                const endDate = new Date(prevEndDates[index].value);
-                
-                if (startDate && endDate && startDate > endDate) {
-                    prevDateErrors[index].style.display = 'block';
-                    isValid = false;
-                } else {
-                    prevDateErrors[index].style.display = 'none';
-                }
-                
-                // Validate previous positions dates are before hire date
-                if (hireDate && endDate && endDate > hireDate) {
-                    prevDateErrors[index].textContent = 'تاريخ انتهاء الوظيفة السابقة يجب أن يكون قبل تاريخ التعيين';
-                    prevDateErrors[index].style.display = 'block';
-                    isValid = false;
-                } else if (startDate && endDate && startDate > endDate) {
-                    prevDateErrors[index].textContent = 'تاريخ البدء يجب أن يكون قبل تاريخ الانتهاء';
-                    prevDateErrors[index].style.display = 'block';
-                    isValid = false;
-                }
-            });
             
             return isValid;
         }
@@ -741,7 +780,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             });
             
             // Date fields change listeners
-            const dateFields = ['birth_date', 'hire_date', 'high_level_start_date'];
+            const dateFields = ['birth_date', 'hire_date'];
             dateFields.forEach(field => {
                 const el = document.getElementById(field);
                 if (el) {

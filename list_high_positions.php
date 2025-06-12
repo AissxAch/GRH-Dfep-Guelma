@@ -45,7 +45,6 @@ try {
                         <tr>
                             <th width="5%">#</th>
                             <th width="60%">اسم المنصب العالي</th>
-                            <th width="25%">تاريخ الإضافة</th>
                             <th width="10%">إجراءات</th>
                         </tr>
                     </thead>
@@ -59,7 +58,6 @@ try {
                                 <tr>
                                     <td><?= $index + 1 ?></td>
                                     <td><?= htmlspecialchars($position['name']) ?></td>
-                                    <td><?= date('d/m/Y', strtotime($position['created_at'])) ?></td>
                                     <td>
                                         <div class="action-buttons">
                                             <button class="edit-btn" onclick="openEditModal(<?= $position['position_id'] ?>, '<?= htmlspecialchars($position['name'], ENT_QUOTES) ?>')">

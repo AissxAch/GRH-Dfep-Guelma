@@ -184,7 +184,11 @@ try {
                     <h3>قائمة الموظفين</h3>
                     <p>عرض قائمة بجميع الموظفين</p>
                 </a>
-
+                <a href="highpositions.php" class="card btn-info">
+                    <i class="fas fa-users-cog"></i>
+                    <h3>المناصب العليا</h3>
+                    <p>عرض قائمة بالمناصب العليا للموظفين و إدارتها</p>
+                </a>
                 <a href="checkAttendance.php" class="card btn-primary">
                     <i class="fas fa-user-check"></i>
                     <h3>فحص سجل الحضور</h3>

@@ -78,6 +78,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
     $lastname_ar = trim($_POST['lastname_ar'] ?? '');
     $firstname_en = trim($_POST['firstname_en'] ?? '');
     $lastname_en = trim($_POST['lastname_en'] ?? '');
+    $father_lastname = trim($_POST['father_lastname'] ?? '');
+    $mother_firstname = trim($_POST['mother_firstname'] ?? '');
+    $mother_lastname = trim($_POST['mother_lastname'] ?? '');
+    $marital_status = trim($_POST['marital_status'] ?? ''); // Added marital_status
+
     $birth_date = trim($_POST['birth_date'] ?? '');
     $birth_place = trim($_POST['birth_place'] ?? '');
     $gender = trim($_POST['gender'] ?? '');
@@ -119,6 +124,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
     if (!preg_match('/^[a-zA-Z\s]+$/', $firstname_en)) $errors[] = 'اللقب الفرنسي يجب أن يحتوي على أحرف لاتينية فقط';
     if (!preg_match('/^[a-zA-Z\s]+$/', $lastname_en)) $errors[] = 'الاسم الفرنسي يجب أن يحتوي على أحرف لاتينية فقط';
 
+    // Validate father and mother names contain only Arabic letters
+    if (!empty($father_lastname) && !preg_match('/^[\p{Arabic}\s]+$/u', $father_lastname)) $errors[] = 'اسم الأب يجب أن يحتوي على أحرف عربية فقط';
+    if (!empty($mother_firstname) && !preg_match('/^[\p{Arabic}\s]+$/u', $mother_firstname)) $errors[] = 'اسم الأم يجب أن يحتوي على أحرف عربية فقط';
+    if (!empty($mother_lastname) && !preg_match('/^[\p{Arabic}\s]+$/u', $mother_lastname)) $errors[] = 'لقب الأم يجب أن يحتوي على أحرف عربية فقط';
+
     // Validate numeric fields contain only numbers
     if (!preg_match('/^\d+$/', $national_id)) $errors[] = 'الرقم الوطني يجب أن يحتوي على أرقام فقط';
     if (!preg_match('/^\d+$/', $ssn)) $errors[] = 'رقم الضمان الاجتماعي يجب أن يحتوي على أرقام فقط';
@@ -149,9 +159,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
         try {
             $pdo->beginTransaction();
             
-            // Update main employee data
+            // Update main employee data (added marital_status)
             $stmt = $pdo->prepare("UPDATE employees SET 
-                firstname_ar = ?, lastname_ar = ?, firstname_en = ?, lastname_en = ?, 
+                firstname_ar = ?, lastname_ar = ?, firstname_en = ?, lastname_en = ?, father_lastname = ?, mother_firstname = ?, mother_lastname = ?, marital_status = ?,
                 birth_date = ?, birth_place = ?, gender = ?, bloodtype = ?, 
                 vacances_remain_days = ?, national_id = ?, ssn = ?, email = ?, 
                 phone = ?, address = ?, position = ?, department_id = ?, 
@@ -159,7 +169,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                 WHERE employee_id = ?");
             
             $stmt->execute([
-                $firstname_ar, $lastname_ar, $firstname_en, $lastname_en,
+                $firstname_ar, $lastname_ar, $firstname_en, $lastname_en, $father_lastname, $mother_firstname, $mother_lastname, $marital_status,
                 $birth_date, $birth_place, $gender, $bloodtype,
                 $vacances_remain_days, $national_id, $ssn, $email ?: null,
                 $phone, $address ?: null, $position, $department_id,
@@ -379,7 +389,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
             <?php if (!empty($employee)): ?>
             <form class="employee-form" method="POST">
                 <input type="hidden" name="employee_id" value="<?= $employee['employee_id'] ?>">
-                
                 <!-- Personal Information Section -->
                 <div class="form-section">
                     <h2><i class="fas fa-user"></i> المعلومات الشخصية</h2>
@@ -429,8 +438,45 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                             <input type="text" name="birth_place" value="<?= htmlspecialchars($employee['birth_place']) ?>" required>
                         </div>
                     </div>
-
+                    
+                    <div class="input-group">
+                        <label>اسم الأب</label>
+                        <input type="text" name="father_lastname" 
+                               value="<?= htmlspecialchars($employee['father_lastname'] ?? '') ?>"
+                               onkeypress="return validateArabicLetter(event, this)" 
+                               oninput="validateArabicInput(this)">
+                        <div class="error-text" id="father_lastname_error">يجب أن يحتوي على أحرف عربية فقط</div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>اسم الأم</label>
+                        <input type="text" name="mother_firstname" 
+                               value="<?= htmlspecialchars($employee['mother_firstname'] ?? '') ?>"
+                               onkeypress="return validateArabicLetter(event, this)" 
+                               oninput="validateArabicInput(this)">
+                        <div class="error-text" id="mother_firstname_error">يجب أن يحتوي على أحرف عربية فقط</div>
+                    </div>
+    
+                    <div class="input-group">
+                        <label>لقب الأم</label>
+                        <input type="text" name="mother_lastname" 
+                               value="<?= htmlspecialchars($employee['mother_lastname'] ?? '') ?>"
+                               onkeypress="return validateArabicLetter(event, this)" 
+                               oninput="validateArabicInput(this)">
+                        <div class="error-text" id="mother_lastname_error">يجب أن يحتوي على أحرف عربية فقط</div>
+                    </div>
+                    
                     <div class="input-row">
+                        <div class="input-group">
+                            <label>الحالة الاجتماعية</label>
+                            <select name="marital_status">
+                                <option value="single" <?= ($employee['marital_status'] ?? '') === 'single' ? 'selected' : '' ?>>أعزب/عزباء</option>
+                                <option value="married" <?= ($employee['marital_status'] ?? '') === 'married' ? 'selected' : '' ?>>متزوج/متزوجة</option>
+                                <option value="divorced" <?= ($employee['marital_status'] ?? '') === 'divorced' ? 'selected' : '' ?>>مطلق/مطلقة</option>
+                                <option value="widowed" <?= ($employee['marital_status'] ?? '') === 'widowed' ? 'selected' : '' ?>>أرمل/أرملة</option>
+                            </select>
+                        </div>
+                        
                         <div class="input-group">
                             <label>النوع <span class="required">*</span></label>
                             <select name="gender" required>
@@ -438,7 +484,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                                 <option value="female" <?= $employee['gender'] === 'female' ? 'selected' : '' ?>>أنثى</option>
                             </select>
                         </div>
-                        
+                    </div>
+                    
+                    <div class="input-row">
                         <div class="input-group">
                             <label>فصيلة الدم <span class="required">*</span></label>
                             <select name="bloodtype" required>
@@ -452,7 +500,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                                 ?>
                             </select>
                         </div>
+                        
+                        <div class="input-group">
+                            <label>الأيام المتبقية للإجازة <span class="required">*</span></label>
+                            <input type="text" name="vacances_remain_days" value="<?= htmlspecialchars($employee['vacances_remain_days']) ?>" 
+                                   onkeypress="return validateNumber(event, this)"
+                                   oninput="validateNumberInput(this)" required>
+                            <div class="error-text" id="vacances_remain_days_error">يجب أن يحتوي على أرقام فقط</div>
+                        </div>
                     </div>
+                    
                     <div class="input-row">
                         <div class="input-group">
                             <label>الرقم الوطني <span class="required">*</span></label>
@@ -468,13 +525,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
                                    oninput="validateNumberInput(this)" required>
                             <div class="error-text" id="ssn_error">يجب أن يحتوي على أرقام فقط</div>
                         </div>
-                    </div>
-                    <div class="input-group">
-                        <label>الأيام المتبقية للإجازة <span class="required">*</span></label>
-                        <input type="text" name="vacances_remain_days" value="<?= htmlspecialchars($employee['vacances_remain_days']) ?>" 
-                               onkeypress="return validateNumber(event, this)"
-                               oninput="validateNumberInput(this)" required>
-                        <div class="error-text" id="vacances_remain_days_error">يجب أن يحتوي على أرقام فقط</div>
                     </div>
                 </div>
                 
@@ -898,7 +948,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_employee'])) {
         // Initialize validation for all fields on page load
         document.addEventListener('DOMContentLoaded', function() {
             // Arabic name fields
-            const arabicInputs = document.querySelectorAll('input[name="firstname_ar"], input[name="lastname_ar"]');
+            const arabicInputs = document.querySelectorAll('input[name="firstname_ar"], input[name="lastname_ar"], input[name="father_lastname"], input[name="mother_firstname"], input[name="mother_lastname"]');
             arabicInputs.forEach(input => {
                 input.addEventListener('input', function() {
                     validateArabicInput(this);

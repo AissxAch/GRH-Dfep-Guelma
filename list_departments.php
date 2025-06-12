@@ -12,7 +12,7 @@ if (!isset($_SESSION['user_id'])) {
 // Get departments from database
 $departments = [];
 try {
-    $stmt = $pdo->query("SELECT * FROM departments ORDER BY created_at DESC");
+    $stmt = $pdo->query("SELECT * FROM departments ");
     $departments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error = "خطأ في جلب البيانات: " . $e->getMessage();
@@ -47,7 +47,6 @@ try {
                             <tr>
                                 <th>#</th>
                                 <th>الاسم العربي</th>
-                                <th>تاريخ الإضافة</th>
                                 <th>الإجراءات</th>
                             </tr>
                         </thead>
@@ -56,7 +55,6 @@ try {
                             <tr>
                                 <td><?= $index + 1 ?></td>
                                 <td><?= htmlspecialchars($dept['name']) ?></td>
-                                <td><?= date('d/m/Y H:i', strtotime($dept['created_at'])) ?></td>
                                 <td class="actions">
                                     <a href="edit_department.php?id=<?= $dept['department_id'] ?>" class="btn btn-edit">
                                         <i class="fas fa-edit"></i>

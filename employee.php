@@ -132,7 +132,19 @@ try {
                         <span class="value"><?= htmlspecialchars($employee['birth_place'] ?? 'غير محدد') ?></span>
                     </div>
                     <div class="info-row">
-                        <span class="label">النوع:</span>
+                        <span class="label">اسم الأب:</span>
+                        <span class="value"><?= htmlspecialchars($employee['father_lastname'] ?? 'غير محدد') ?></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">لقب الأم:</span>
+                        <span class="value"><?= htmlspecialchars($employee['mother_lastname'] ?? 'غير محدد') ?></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">اسم الأم:</span>
+                        <span class="value"><?= htmlspecialchars($employee['mother_firstname'] ?? 'غير محدد') ?></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">الجنس:</span>
                         <span class="value"><?= $employee['gender'] == 'male' ? 'ذكر' : 'أنثى' ?></span>
                     </div>
                     <div class="info-row">

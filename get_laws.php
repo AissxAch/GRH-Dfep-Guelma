@@ -24,11 +24,11 @@ if (!empty($category)) {
             $categories = explode(',', $category);
             $placeholders = implode(',', array_fill(0, count($categories), '?'));
             
-            $sql = "SELECT * FROM laws WHERE law_category IN ($placeholders) AND is_active = 1 ORDER BY law_category, created_at DESC";
+            $sql = "SELECT * FROM laws WHERE law_category IN ($placeholders) AND is_active = 1 ORDER BY law_category";
             $stmt = $pdo->prepare($sql);
             $stmt->execute($categories);
         } else {
-            $sql = "SELECT * FROM laws WHERE (law_category = ? OR law_category = 'multiple') AND is_active = 1 ORDER BY law_category, created_at DESC";
+            $sql = "SELECT * FROM laws WHERE (law_category = ? OR law_category = 'multiple') AND is_active = 1 ORDER BY law_category";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$category]);
         }

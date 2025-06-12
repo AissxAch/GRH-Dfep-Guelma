@@ -12,7 +12,7 @@ if (!isset($_SESSION['user_id'])) {
 // Initialize variables
 $error = null;
 $employee = null;
-$docDate = date('d/m/Y');
+$docDate = date('Y-m-d'); // Changed to Y-m-d format for date input
 $docNum = '';
 $startDate = '';
 $endDate = '';
@@ -40,10 +40,24 @@ try {
     $error = "خطأ في قاعدة البيانات: " . $e->getMessage();
 }
 
+// Function to convert date from Y-m-d to d/m/Y format for display
+function formatDateForDisplay($date) {
+    if (empty($date)) return '';
+    $dateObj = DateTime::createFromFormat('Y-m-d', $date);
+    return $dateObj ? $dateObj->format('d/m/Y') : $date;
+}
+
+// Function to convert date from d/m/Y to Y-m-d format for database
+function formatDateForDatabase($date) {
+    if (empty($date)) return '';
+    $dateObj = DateTime::createFromFormat('d/m/Y', $date);
+    return $dateObj ? $dateObj->format('Y-m-d') : $date;
+}
+
 // Process form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error) {
     $docNum = $_POST['docNum'] ?? '';
-    $docDate = $_POST['docDate'] ?? date('d/m/Y');
+    $docDate = $_POST['docDate'] ?? date('Y-m-d');
     $startDate = $_POST['startDate'] ?? '';
     $endDate = $_POST['endDate'] ?? '';
     $leaveDays = $_POST['leaveDays'] ?? '';
@@ -51,12 +65,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error) {
     $leaveYear = $_POST['leaveYear'] ?? date('Y');
     $suggest = $_POST['suggest'] ?? '';
     $decisionmaker = $_POST['decisionmaker'] ?? '';
-    $law = $_POST['law'] ?? '';
-    if (isset($_POST['lawCustom']) && !empty($_POST['lawCustom'])) {
-        $law = $_POST['lawCustom'];
-    }
+    $lawTexts = $_POST['law_texts'] ?? [];
+    $lawText = implode("\n", $lawTexts);
+    
     // Validate inputs
-    if (empty($docNum) || empty($startDate) || empty($endDate) || empty($leaveDays)) {
+    if (empty($docNum) || empty($startDate) || empty($endDate) || empty($leaveDays) || empty($lawTexts)) {
         $error = "يرجى ملء جميع الحقول المطلوبة.";
     }
 }
@@ -71,6 +84,7 @@ $fullname = $employee['firstname_ar'].' '.$employee['lastname_ar'];
     <link rel="stylesheet" href="CSS/deduction_decision.css">
     <link rel="stylesheet" href="CSS/style.css">
     <link rel="stylesheet" href="CSS/icons.css">
+    <link rel="stylesheet" href="CSS/laws_selector.css">
 </head>
 <body>
     <?php include 'header.php'; ?>
@@ -125,45 +139,41 @@ $fullname = $employee['firstname_ar'].' '.$employee['lastname_ar'];
                         
                         <div class="form-group">
                             <label for="leaveYear">سنة العطلة:</label>
-                            <input type="text" id="leaveYear" name="leaveYear" 
-                                value="<?= htmlspecialchars($leaveYear) ?>" required placeholder="YYYY">
+                            <input type="number" id="leaveYear" name="leaveYear" min="2020" max="2050"
+                                value="<?= htmlspecialchars($leaveYear) ?>" required>
                         </div>
                         
                         <div class="form-group">
                             <label for="startDate">تاريخ بداية العطلة:</label>
-                            <input type="text" id="startDate" name="startDate" 
-                                value="<?= htmlspecialchars($startDate) ?>" required placeholder="DD/MM/YYYY">
+                            <input type="date" id="startDate" name="startDate" 
+                                value="<?= htmlspecialchars($startDate) ?>" required>
                         </div>
                         
                         <div class="form-group">
                             <label for="endDate">تاريخ نهاية العطلة:</label>
-                            <input type="text" id="endDate" name="endDate" 
-                                value="<?= htmlspecialchars($endDate) ?>" required placeholder="DD/MM/YYYY">
+                            <input type="date" id="endDate" name="endDate" 
+                                value="<?= htmlspecialchars($endDate) ?>" required>
                         </div>
                         
                         <div class="form-group">
                             <label for="leaveDays">عدد أيام العطلة:</label>
-                            <input type="text" id="leaveDays" name="leaveDays" 
+                            <input type="number" id="leaveDays" name="leaveDays" min="1" max="365"
                                 value="<?= htmlspecialchars($leaveDays) ?>" required placeholder="ادخل عدد أيام العطلة">
                         </div>
                         
                         <div class="form-group">
                             <label for="remainingDays">الأيام المتبقية:</label>
-                            <input type="text" id="remainingDays" name="remainingDays" 
+                            <input type="number" id="remainingDays" name="remainingDays" min="0"
                                 value="<?= htmlspecialchars($employee['vacances_remain_days']) ?>" required placeholder="00">
                         </div>
                         
                         <div class="form-group">
                             <label for="law">القانـون المنطبق:</label>
-                            <select name="law" id="lawSelect" class="form-select" onchange="toggleLawInput()">
-                                <option value="">اختر القانون المنطبق</option>
-                                <option value="- وبمقتضى المرسوم التنفيذي رقم 09-241 المؤرخ في 22/07/2009، المتضمن القانون الأساسي الخاص بالموظفين المنتمين للأسلاك التقنية الخاصة بالإدارة المكلفة بالسكن والعمران،">
-                                    - وبمقتضى المرسوم التنفيذي رقم 09-241 المؤرخ في 22/07/2009، المتضمن القانون الأساسي الخاص بالموظفين المنتمين للأسلاك التقنية الخاصة بالإدارة المكلفة بالسكن والعمران،
-                                </option>
-                                <option value="other">أخرى</option>
-                            </select>
-                            <div id="lawCustomContainer" class="custom-law-container" style="display: none;">
-                                <input type="text" id="lawCustomInput" name="lawCustom" class="form-input" placeholder="أدخل النص القانوني المطلوب">
+                            <div class="law-select-container" data-category="annual_leave">
+                                <input type="text" class="law-input-field" placeholder="ابحث أو اختر من القائمة">
+                                <div class="law-dropdown"></div>
+                                <button type="button" class="add-law-btn">إضافة قانون مخصص</button>
+                                <div class="selected-laws"></div>
                             </div>
                         </div>
 
@@ -177,11 +187,12 @@ $fullname = $employee['firstname_ar'].' '.$employee['lastname_ar'];
                             <label for="decisionmaker">المكلف بالتنفيذ:</label>
                             <input type="text" id="decisionmaker" name="decisionmaker" 
                                 value="<?= htmlspecialchars($decisionmaker) ?>" required placeholder="ادخل منصب المكلف بالتنفيذ">
+                        </div>
                         
                         <div class="form-group">
                             <label for="docDate">تاريخ القرار:</label>
-                            <input type="text" id="docDate" name="docDate" 
-                                value="<?= htmlspecialchars($docDate) ?>" required placeholder="DD/MM/YYYY">
+                            <input type="date" id="docDate" name="docDate" 
+                                value="<?= htmlspecialchars($docDate) ?>" required>
                         </div>
                     </div>
                     
@@ -215,15 +226,15 @@ $fullname = $employee['firstname_ar'].' '.$employee['lastname_ar'];
             <p>- بمقتضى الأمر رقم 06-03 المؤرخ في 15/07/2006، المتضمن القانون الأساسي العام للوظيفة العمومية، المتمم،</p>
             <p>- بمقتضى المرسوم التنفيذي رقم 90-99 المؤرخ في 27/03/1990، المتعلق بسلطة التعيين والتسيير الإداري، بالنسبة للموظفين وأعوان الإدارة المركزية والولايات والبلديات والمؤسسات العمومية ذات الطابع الإداري،</p>
             <p>- بمقتضى المرسوم التنفيذي رقم 14-98 المؤرخ في 04/03/2014، المحدد لقواعد تنظيم مديريات التكوين والتعليم المهنيين في الولاية وسيرها،</p>
-            <p><?=htmlspecialchars($law) ?></p>
+            <p><?= nl2br(htmlspecialchars($lawText)) ?></p>
             <p>- وبناء على رزنامة العطل السنوية لسنة <?= htmlspecialchars($leaveYear) ?>،</p>
             <p>- وباقتراح مـن <?= htmlspecialchars($suggest) ?>،</p>
             <h1 class="decision-title">يقـــــــرر</h1>
-            <p>- <strong>المـادة الأولى</strong>: تمنح <strong>للسيد(ة) <?= htmlspecialchars($fullname) ?></strong> <?= htmlspecialchars($employee['position']) ?> عطلة سنوية لمدة <strong><?= htmlspecialchars($leaveDays) ?> يوم</strong> بعنوان سنة <strong><?= htmlspecialchars($leaveYear) ?></strong>، ابتداء من <strong><?= htmlspecialchars($startDate) ?></strong> إلى غاية <strong><?= htmlspecialchars($endDate) ?></strong>.</p>
+            <p>- <strong>المـادة الأولى</strong>: تمنح <strong>للسيد(ة) <?= htmlspecialchars($fullname) ?></strong> <?= htmlspecialchars($employee['position']) ?> عطلة سنوية لمدة <strong><?= htmlspecialchars($leaveDays) ?> يوم</strong> بعنوان سنة <strong><?= htmlspecialchars($leaveYear) ?></strong>، ابتداء من <strong><?= formatDateForDisplay($startDate) ?></strong> إلى غاية <strong><?= formatDateForDisplay($endDate) ?></strong>.</p>
             <p>- يحتفظ المعني(ة) برصيد عطلة سنوية مدته <strong><?= htmlspecialchars($remainingDays) ?> يوم</strong> بعنوان سنة <strong><?= htmlspecialchars($leaveYear) ?></strong>.</p>
             <p>- <strong>المـــــــــادة 2</strong>: يكلف <?= htmlspecialchars($decisionmaker) ?> بتنفيـذ هـذا المقرر.</p>
             <div class="signature">
-                <p>قالمة في: <strong><?= htmlspecialchars($docDate) ?></strong></p>
+                <p>قالمة في: <strong><?= formatDateForDisplay($docDate) ?></strong></p>
             </div>
         </div>
     </div>
@@ -306,6 +317,41 @@ $fullname = $employee['firstname_ar'].' '.$employee['lastname_ar'];
             }
         }
     </style>
-    <script src="JS/vacances_maladie.js"></script>
+    <script src="JS/laws_selector.js"></script>
+    <script>
+        function toggleLawInput() {
+            const select = document.getElementById('lawSelect');
+            const customContainer = document.getElementById('lawCustomContainer');
+            
+            if (select.value === 'other') {
+                customContainer.style.display = 'block';
+            } else {
+                customContainer.style.display = 'none';
+            }
+        }
+
+        // Auto-calculate leave days when dates are selected
+        function calculateLeaveDays() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (startDate && endDate) {
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                
+                if (end >= start) {
+                    const timeDiff = end.getTime() - start.getTime();
+                    const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1; // +1 to include both start and end dates
+                    document.getElementById('leaveDays').value = daysDiff;
+                }
+            }
+        }
+
+        // Add event listeners for automatic calculation
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('startDate').addEventListener('change', calculateLeaveDays);
+            document.getElementById('endDate').addEventListener('change', calculateLeaveDays);
+        });
+    </script>
 </body>
 </html>

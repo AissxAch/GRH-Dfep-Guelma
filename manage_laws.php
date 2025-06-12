@@ -17,7 +17,7 @@ $editLaw = null;
 
 // Get all laws
 try {
-    $stmt = $pdo->query("SELECT * FROM laws ORDER BY law_category, created_at DESC");
+    $stmt = $pdo->query("SELECT * FROM laws ORDER BY law_category ");
     $laws = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error = "خطأ في قاعدة البيانات: " . $e->getMessage();
